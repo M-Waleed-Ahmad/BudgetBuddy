@@ -1,70 +1,140 @@
-.login-page {
-    display: flex;
-    justify-content: center;
-    padding: 40px;
-    font-family: sans-serif;
+/* login.css */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', sans-serif;
   }
   
-  .register-container {
-    background-color: #f3f3f3;
-    padding: 30px;
-    border-radius: 10px;
-    width: 400px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  /* Page wrapper with background */
+  .login-page {
+    position: relative;
+    height: 100vh;
+    width: 228vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    /* Background image from public folder */
+    background: url('../assets/background.png') no-repeat center center fixed;
+    background-size: cover;
+  }
+  
+  /* Optional dark overlay */
+  .login-page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* Adjust darkness */
+    z-index: 0;
+  }
+  
+  /* Login box styling */
+  .login-container {
+    position: relative;
+    z-index: 1;
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px 30px;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+  }
+      
+  h2 {
+    margin-bottom: 10px;
   }
   
   .subheading {
-    font-size: 14px;
     color: #666;
-    margin-bottom: 20px;
-    text-align: center;
+    font-size: 14px;
+    margin-bottom: 30px;
   }
   
-  .register-form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .input-container {
-    background-color: #e0e0e0; /* light grey */
-    padding: 15px;
-    border-radius: 6px;
+  .login-form .input-container {
     margin-bottom: 15px;
   }
   
-  .input-container label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 6px;
-  }
-  
-  .input-container input {
+  .login-form input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #bbb;
-    border-radius: 4px;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+    background-color: #f5f5f5;
   }
   
-  button[type="submit"] {
+  .forgot-password {
+    text-align: right;
+    margin-bottom: 20px;
+  }
+  
+  .forgot-password a {
+    color: #4b7bec;
+    font-size: 13px;
+    text-decoration: none;
+  }
+  
+  .primary-btn {
+    background-color: #4b7bec;
+    color: #fff;
+    width: 100%;
     padding: 12px;
-    background-color: #4caf50;
-    color: white;
-    font-weight: bold;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #45a049;
-  }
-  
-  .alerts-section {
-    margin-top: 25px;
-  }
-  
-  .success {
-    color: green;
+    border-radius: 10px;
+    font-size: 16px;
     font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .or-divider {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #888;
+  }
+  
+  .apple-btn,
+  .google-btn,
+  .facebook-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .apple-btn {
+    background-color: #000;
+    color: white;
+  }
+  
+  .google-btn {
+    background-color: #ea4335;
+    color: white;
+  }
+  
+  .facebook-btn {
+    background-color: #3b5998;
+    color: white;
+  }
+  
+  .signup-prompt {
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  
+  .signup-prompt a {
+    color: #4b7bec;
+    text-decoration: none;
   }
   

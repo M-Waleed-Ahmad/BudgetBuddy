@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/login.css';
 
-const Login = () => {
-  const [expenses, setExpenses] = useState([]);
-  const [budgets, setBudgets] = useState([]);
-  const [alerts, setAlerts] = useState([]);
 
+const Login = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
     password: '',
-    confirmPassword: '',
   });
 
   const handleChange = (e) => {
@@ -19,113 +14,54 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert("❌ Passwords do not match!");
-      return;
-    }
-
-    console.log("✅ Form Submitted:", formData);
+    console.log("✅ Logging in with:", formData);
   };
-
-  useEffect(() => {
-    const dummyExpenses = [
-      { amount: 150, category: 'Food' },
-      { amount: 200, category: 'Transport' },
-      { amount: 100, category: 'Food' },
-    ];
-
-    const dummyBudgets = [
-      { category: 'Food', limit: 200 },
-      { category: 'Transport', limit: 250 },
-    ];
-
-    setExpenses(dummyExpenses);
-    setBudgets(dummyBudgets);
-  }, []);
-
-  useEffect(() => {
-    const totals = {};
-    const newAlerts = [];
-
-    expenses.forEach(exp => {
-      totals[exp.category] = (totals[exp.category] || 0) + exp.amount;
-    });
-
-    budgets.forEach(budget => {
-      const spent = totals[budget.category] || 0;
-      if (spent > budget.limit) {
-        newAlerts.push(
-          `⚠️ Over budget in ${budget.category}: Spent $${spent} / Limit $${budget.limit}`
-        );
-      }
-    });
-
-    setAlerts(newAlerts);
-  }, [expenses, budgets]);
 
   return (
     <div className="login-page">
-      <div className="register-container">
-        <h2>Create an Account</h2>
-        <p className="subheading">Signup to start managing</p>
+      <div className="login-container">
+        <h2>Access your Account</h2>
+        <p className="subheading">Login to manage your Finances</p>
 
-        <form onSubmit={handleSubmit} className="register-form">
+        <form onSubmit={handleSubmit} className="login-form">
           <div className="input-container">
-            <label>Full Name:</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="input-container">
-            <label>Email Address:</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="Your Email Address"
               required
             />
           </div>
 
           <div className="input-container">
-            <label>Password:</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
+              placeholder="Enter your Password"
               required
             />
           </div>
 
-          <div className="input-container">
-            <label>Confirm Password:</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
+          <div className="forgot-password">
+            <a href="#">Forgot your password?</a>
           </div>
 
-          <button type="submit">Register</button>
+          <button type="submit" className="primary-btn">Log in</button>
+
+          <div className="or-divider">or</div>
+
+          <button type="button" className="apple-btn">Log in with Apple</button>
+          <button type="button" className="google-btn">Log in with Google</button>
+          <button type="button" className="facebook-btn">Log in with Facebook</button>
+
+          <div className="signup-prompt">
+            Need to create a free account? <a href="#">Sign Up</a>
+          </div>
         </form>
-
-        <div className="alerts-section">
-          <h3>Budget Alerts</h3>
-          {alerts.length > 0 ? (
-            alerts.map((alert, index) => <p key={index}>{alert}</p>)
-          ) : (
-            <p className="success">✅ All categories are within budget.</p>
-          )}
-        </div>
       </div>
     </div>
   );
