@@ -1,11 +1,33 @@
 import React, { useEffect, useState } from 'react';
+import '../styles/login.css';
 
-const LogicPage = () => {
+const Login = () => {
   const [expenses, setExpenses] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [alerts, setAlerts] = useState([]);
 
-  // Sample dummy data
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("❌ Passwords do not match!");
+      return;
+    }
+
+    console.log("✅ Form Submitted:", formData);
+  };
+
   useEffect(() => {
     const dummyExpenses = [
       { amount: 150, category: 'Food' },
@@ -22,17 +44,14 @@ const LogicPage = () => {
     setBudgets(dummyBudgets);
   }, []);
 
-  // Logic to calculate totals and check budget limits
   useEffect(() => {
     const totals = {};
     const newAlerts = [];
 
-    // Calculate total per category
     expenses.forEach(exp => {
       totals[exp.category] = (totals[exp.category] || 0) + exp.amount;
     });
 
-    // Compare against budgets
     budgets.forEach(budget => {
       const spent = totals[budget.category] || 0;
       if (spent > budget.limit) {
@@ -46,26 +65,70 @@ const LogicPage = () => {
   }, [expenses, budgets]);
 
   return (
-    <div className="p-6 max-w-xl mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h2 className="text-xl font-bold">Logic Page: Budget Analysis</h2>
+    <div className="login-page">
+      <div className="register-container">
+        <h2>Create an Account</h2>
+        <p className="subheading">Signup to start managing</p>
 
-      <div>
-        <h3 className="font-semibold">Expenses:</h3>
-        {expenses.map((exp, index) => (
-          <p key={index}>💸 {exp.category}: ${exp.amount}</p>
-        ))}
-      </div>
+        <form onSubmit={handleSubmit} className="register-form">
+          <div className="input-container">
+            <label>Full Name:</label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      <div>
-        <h3 className="font-semibold">Alerts:</h3>
-        {alerts.length > 0 ? (
-          alerts.map((alert, index) => <p key={index}>{alert}</p>)
-        ) : (
-          <p>✅ All categories are within budget.</p>
-        )}
+          <div className="input-container">
+            <label>Email Address:</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="input-container">
+            <label>Password:</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="input-container">
+            <label>Confirm Password:</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <button type="submit">Register</button>
+        </form>
+
+        <div className="alerts-section">
+          <h3>Budget Alerts</h3>
+          {alerts.length > 0 ? (
+            alerts.map((alert, index) => <p key={index}>{alert}</p>)
+          ) : (
+            <p className="success">✅ All categories are within budget.</p>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default LogicPage;
+export default Login;
