@@ -1,0 +1,185 @@
+/* Reset styles */
+* {
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    box-sizing: border-box;
+  }
+  
+  .navbar {
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1.5rem;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .navbar-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .logo {
+    height: 42px;
+    width: 42px;
+    object-fit: contain;
+    padding: 4px;
+  }
+  
+  /* Nav Links Shared */
+  .nav-links {
+    list-style: none;
+    gap: 1.5rem;
+  }
+  
+  .nav-links li {
+    font-size: 15px;
+    position: relative;
+  }
+  
+  .nav-links li a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-links li a:hover {
+    color: #0070f3;
+  }
+  
+  .nav-links li.active a {
+    font-weight: 600;
+    color: #0070f3;
+  }
+  
+  .nav-links li.active a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background-color: #0070f3;
+    border-radius: 5px;
+  }
+  
+  /* Desktop Links */
+  .nav-links.desktop {
+    display: flex;
+  }
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+  
+  /* Desktop nav links aligned next to logo */
+  .nav-links.desktop {
+    display: flex;
+    gap: 1.5rem;
+    margin-left: 1.5rem;
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  
+  /* Already existing media query hides desktop on mobile */
+  @media (max-width: 768px) {
+    .nav-links.desktop {
+      display: none;
+    }
+  }
+  
+  
+  /* Mobile Links */
+  .nav-links.mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 2rem 1.5rem;
+    background-color: #fff;
+    position: absolute;
+    top: 65px;
+    left: 0;
+    width: 100vw;
+    z-index: 999;
+    border-top: 1px solid #eee;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Hamburger */
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    color: #000;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  
+  /* Right Section */
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  
+  .notification-wrapper {
+    position: relative;
+  }
+  
+  .notification-icon {
+    font-size: 24px;
+    color: #454FFF;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .notification-icon:hover {
+    color: #00E0B7;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+  }
+  
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    transition: transform 0.2s ease;
+  }
+  
+  .avatar:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .nav-links.desktop {
+      display: none;
+    }
+  
+    .hamburger {
+      display: block;
+    }
+  }
+  
