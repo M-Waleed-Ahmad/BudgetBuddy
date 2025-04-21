@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import Login from './pages/login'
 import Navbar from './components/navbar'
 import Dashboard from './pages/users/dashboard'
 function App() {
@@ -16,7 +17,7 @@ function App() {
       <>
         <Login />
 
-        <Dashboard />
+        {/* <Dashboard /> */}
       </>
   )
 }
