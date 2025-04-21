@@ -1,71 +1,70 @@
 import React, { useEffect, useState } from 'react';
+import '../styles/login.css';
 
-const LogicPage = () => {
-  const [expenses, setExpenses] = useState([]);
-  const [budgets, setBudgets] = useState([]);
-  const [alerts, setAlerts] = useState([]);
 
-  // Sample dummy data
-  useEffect(() => {
-    const dummyExpenses = [
-      { amount: 150, category: 'Food' },
-      { amount: 200, category: 'Transport' },
-      { amount: 100, category: 'Food' },
-    ];
+const Login = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
-    const dummyBudgets = [
-      { category: 'Food', limit: 200 },
-      { category: 'Transport', limit: 250 },
-    ];
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    setExpenses(dummyExpenses);
-    setBudgets(dummyBudgets);
-  }, []);
-
-  // Logic to calculate totals and check budget limits
-  useEffect(() => {
-    const totals = {};
-    const newAlerts = [];
-
-    // Calculate total per category
-    expenses.forEach(exp => {
-      totals[exp.category] = (totals[exp.category] || 0) + exp.amount;
-    });
-
-    // Compare against budgets
-    budgets.forEach(budget => {
-      const spent = totals[budget.category] || 0;
-      if (spent > budget.limit) {
-        newAlerts.push(
-          `⚠️ Over budget in ${budget.category}: Spent $${spent} / Limit $${budget.limit}`
-        );
-      }
-    });
-
-    setAlerts(newAlerts);
-  }, [expenses, budgets]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("✅ Logging in with:", formData);
+  };
 
   return (
-    <div className="p-6 max-w-xl mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h2 className="text-xl font-bold">Logic Page: Budget Analysis</h2>
+    <div className="login-page">
+      <div className="login-container">
+        <h2>Access your Account</h2>
+        <p className="subheading">Login to manage your Finances</p>
 
-      <div>
-        <h3 className="font-semibold">Expenses:</h3>
-        {expenses.map((exp, index) => (
-          <p key={index}>💸 {exp.category}: ${exp.amount}</p>
-        ))}
-      </div>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-container">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Your Email Address"
+              required
+            />
+          </div>
 
-      <div>
-        <h3 className="font-semibold">Alerts:</h3>
-        {alerts.length > 0 ? (
-          alerts.map((alert, index) => <p key={index}>{alert}</p>)
-        ) : (
-          <p>✅ All categories are within budget.</p>
-        )}
+          <div className="input-container">
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your Password"
+              required
+            />
+          </div>
+
+          <div className="forgot-password">
+            <a href="#">Forgot your password?</a>
+          </div>
+
+          <button type="submit" className="primary-btn">Log in</button>
+
+          <div className="or-divider">or</div>
+
+          <button type="button" className="apple-btn">Log in with Apple</button>
+          <button type="button" className="google-btn">Log in with Google</button>
+          <button type="button" className="facebook-btn">Log in with Facebook</button>
+
+          <div className="signup-prompt">
+            Need to create a free account? <a href="#">Sign Up</a>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default LogicPage;
+export default Login;
