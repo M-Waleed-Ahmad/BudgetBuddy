@@ -28,19 +28,33 @@ const signup = async (req, res) => {
   }
 };
 
+const jwt = require('jsonwebtoken');
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Find user
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    res.status(200).json({ message: 'Login successful', userId: user._id });
+    // Generate token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      user: {
+        userId: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
