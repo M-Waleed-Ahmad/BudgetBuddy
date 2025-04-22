@@ -2,31 +2,18 @@ import React from "react";
 import { motion } from "framer-motion";
 import CategoryAnalyticsChart from "../../components/ExpenseChart-dash.jsx";
 import Navbar from "../../components/navbar";
-import '../../styles/dashboard.css';
+import "../../styles/dashboard.css";
+import BudgetProgressBars from "../../components/BudgetProgressBar-dash.jsx";
 
 const Dashboard = () => {
-  // Test user
   const user = {
     fullName: "Waleed Ahmad"
   };
 
-  // Sample recent expenses
   const recentExpenses = [
-    {
-      date: "March 12, 2025",
-      title: "Food Store",
-      amount: 2400
-    },
-    {
-      date: "March 10, 2025",
-      title: "Fuel",
-      amount: 3500
-    },
-    {
-      date: "March 05, 2025",
-      title: "Groceries",
-      amount: 1800
-    }
+    { date: "March 12, 2025", title: "Food Store", amount: 2400 },
+    { date: "March 10, 2025", title: "Fuel", amount: 3500 },
+    { date: "March 05, 2025", title: "Groceries", amount: 1800 }
   ];
 
   return (
@@ -73,7 +60,6 @@ const Dashboard = () => {
             ))}
           </motion.div>
 
-          {/* ✅ FIXED: Class name updated to match CSS */}
           <motion.div
             className="chart-container"
             initial={{ opacity: 0, y: 50 }}
@@ -83,6 +69,15 @@ const Dashboard = () => {
             <CategoryAnalyticsChart />
           </motion.div>
         </div>
+
+        <motion.div
+          className="budget-progress-bar"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
+          <BudgetProgressBars totalBudget={10000} spent={5000} />
+        </motion.div>
       </div>
     </>
   );

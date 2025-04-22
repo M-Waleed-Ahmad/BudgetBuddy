@@ -1,10 +1,6 @@
 /* Ensure full height and prevent scrolling */
 body, html {
-  margin: 0;
-  padding: 0;
-  height: 90vh;
-  width: 100vw;
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: 'Segoe UI', sans-serif;
   box-sizing: border-box;
 }

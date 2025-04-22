@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 import Login from './pages/login'
-import Navbar from './components/navbar'
 import Dashboard from './pages/users/dashboard'
 function App() {
   const [count, setCount] = useState(0)
@@ -15,9 +14,9 @@ function App() {
   ];
   return (
       <>
-        <Login />
+        {/* <Login /> */}
 
-        {/* <Dashboard /> */}
+        <Dashboard />
       </>
   )
 }
