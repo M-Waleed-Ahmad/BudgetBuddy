@@ -12,10 +12,36 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("✅ Logging in with:", formData);
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        alert(data.message || 'Login failed');
+        return;
+      }
+  
+      console.log('✅ Login successful:', data);
+      // Optionally store token in localStorage or context
+      localStorage.setItem('token', data.token);
+      alert('Login successful!');
+      // Redirect to dashboard or homepage
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      alert('An error occurred while logging in');
+    }
   };
+  
 
   return (
     <div className="login-page">
