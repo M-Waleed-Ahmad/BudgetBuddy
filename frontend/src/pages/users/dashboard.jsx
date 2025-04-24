@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import CategoryAnalyticsChart from "../../components/ExpenseChart-dash.jsx";
 import Navbar from "../../components/navbar";
 import "../../styles/dashboard.css";
+import Footer from "../../components/Footer.jsx";
 import BudgetProgressBars from "../../components/BudgetProgressBar-dash.jsx";
 
 const Dashboard = () => {
@@ -79,6 +80,7 @@ const Dashboard = () => {
           <BudgetProgressBars totalBudget={10000} spent={5000} />
         </motion.div>
       </div>
+      <Footer />
     </>
   );
 };
