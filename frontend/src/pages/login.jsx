@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/login.css';
+import { loginUser } from '../api/api'; // Adjust the import path as necessary
 
 
 const Login = () => {
@@ -16,31 +17,19 @@ const Login = () => {
     e.preventDefault();
   
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        alert(data.message || 'Login failed');
-        return;
-      }
+      const data = await loginUser(formData);  // This already returns parsed JSON
   
       console.log('✅ Login successful:', data);
-      // Optionally store token in localStorage or context
       localStorage.setItem('token', data.token);
       alert('Login successful!');
-      // Redirect to dashboard or homepage
+  
+      // TODO: Redirect to dashboard or homepage
     } catch (error) {
       console.error('❌ Login error:', error);
-      alert('An error occurred while logging in');
+      alert(error.message || 'An error occurred while logging in');
     }
   };
+cd  
   
 
   return (
