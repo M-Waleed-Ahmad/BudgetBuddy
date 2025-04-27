@@ -125,7 +125,9 @@
     border-radius: 6px;
     border: 1px solid #e0e0e0;
   }
-  
+  .select-field {
+    color: #333;
+  }
   .filter-input,
   .filter-select {
     padding: 8px 12px;
@@ -134,10 +136,9 @@
     border-radius: 4px;
     font-size: 0.9rem;
   }
-  
   .filter-input {
-     flex-grow: 1; /* Allow search input to take more space */
-     min-width: 150px; /* Minimum width */
+     flex-grow: 1;
+     min-width: 150px;
   }
   
   .filter-group {
@@ -168,20 +169,17 @@
      background-color: rgba(0, 123, 255, 0.1);
   }
   .refresh-button span {
-     font-size: 1em; /* Match icon size to text */
+     font-size: 1em;
   }
   
-  
-  /* --- Table and Breakdown Wrapper --- */
   .table-breakdown-wrapper {
     display: flex;
     gap: 30px;
   }
   
-  /* --- Budget Table --- */
   .budget-table-container {
-    flex: 3; /* Table takes more space */
-    overflow-x: auto; /* Make table horizontally scrollable on small screens */
+    flex: 3;
+    overflow-x: auto;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -191,7 +189,7 @@
   .budget-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Minimum width before scrolling */
+    min-width: 600px;
   }
   
   .budget-table th,
@@ -200,7 +198,7 @@
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
     font-size: 0.9rem;
-    white-space: nowrap; /* Prevent wrapping in cells */
+    white-space: nowrap;
   }
   
   .budget-table th {
@@ -228,28 +226,25 @@
   .icon-button {
      background: none;
      border: none;
-     padding: 2px; /* Small padding */
+     padding: 2px;
      cursor: pointer;
      color: #6c757d;
-     line-height: 1; /* Ensure icons align nicely */
+     line-height: 1;
   }
   .icon-button:hover {
      color: #343a40;
   }
-  
-  
-  /* --- Category Breakdown --- */
   .category-breakdown {
-    flex: 1; /* Breakdown takes less space */
+    flex: 1;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid #e0e0e0;
-    align-self: flex-start; /* Align to top */
-    min-width: 250px; /* Prevent it from becoming too narrow */
+    align-self: flex-start;
+    min-width: 250px;
   }
-  
+
   .category-breakdown h4 {
     margin-top: 0;
     margin-bottom: 20px;
@@ -258,14 +253,14 @@
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
   }
-  
+
   .category-item {
     margin-bottom: 18px;
   }
   .category-item:last-child {
-      margin-bottom: 0;
+    margin-bottom: 0;
   }
-  
+
   .category-info {
     display: flex;
     justify-content: space-between;
@@ -274,84 +269,105 @@
     color: #555;
   }
   .category-info span:first-child {
-      font-weight: 500;
+    font-weight: 500;
   }
-  
+
   .progress-bar-container {
     background-color: #e9ecef;
     border-radius: 4px;
-    height: 10px; /* Height of the progress bar */
-    overflow: hidden; /* Clip the filled part */
+    height: 10px;
+    overflow: hidden;
   }
-  
+
   .progress-bar-filled {
-    background-color: #007bff; /* Progress bar color */
+    background-color: #007bff;
     height: 100%;
     border-radius: 4px;
-    width: 0; /* Initial width, animated by Framer Motion */
+    width: 0;
   }
-  
-  /* --- Responsiveness --- */
+
   @media (max-width: 992px) {
     .budget-summary-section {
       flex-direction: column;
-      align-items: stretch; /* Make items full width */
+      align-items: stretch;
     }
     .budget-chart-container {
-       flex-basis: auto; /* Reset flex basis */
-       margin-top: 20px;
+      flex-basis: auto;
+      margin-top: 20px;
     }
     .table-breakdown-wrapper {
       flex-direction: column;
     }
     .category-breakdown {
-       width: 100%; /* Take full width when stacked */
-       box-sizing: border-box;
-       min-width: unset;
+      width: 100%;
+      box-sizing: border-box;
+      min-width: unset;
     }
     .filter-bar {
-       padding: 10px;
+      padding: 10px;
     }
   }
-  
+
   @media (max-width: 768px) {
     .budget-page-container {
-       padding: 15px;
+      padding: 15px;
     }
     .filter-bar {
-        gap: 10px;
+      gap: 10px;
     }
     .filter-input, .filter-select, .filter-group {
-        width: 100%; /* Stack filters */
-        box-sizing: border-box;
+      width: 100%;
+      box-sizing: border-box;
     }
     .filter-group {
-        justify-content: space-between; /* Align label and select nicely */
+      justify-content: space-between;
     }
     .filter-select {
-        flex-grow: 1; /* Allow select to fill space */
+      flex-grow: 1;
     }
     .refresh-button {
-       width: 100%;
-       justify-content: center;
-       padding: 10px;
-       margin-top: 5px;
+      width: 100%;
+      justify-content: center;
+      padding: 10px;
+      margin-top: 5px;
     }
     .budget-details p, .budget-table th, .budget-table td, .category-info {
-        font-size: 0.9rem; /* Adjust font sizes slightly */
+      font-size: 0.9rem;
     }
   }
-  
+
   @media (max-width: 480px) {
-      .budget-page-container {
-          padding: 10px;
-          gap: 20px;
-      }
-      .budget-summary-section, .budget-main-content {
-          padding: 15px;
-      }
-      .budget-details h3 { font-size: 1.1rem; }
-      .add-budget-button { font-size: 1rem; padding: 10px; }
-      .action-cell { gap: 5px; }
-      .budget-table th, .budget-table td { padding: 8px 10px; }
+    .budget-page-container {
+      padding: 10px;
+      gap: 20px;
+    }
+    .budget-summary-section, .budget-main-content {
+      padding: 15px;
+    }
+    .budget-details h3 {
+      font-size: 1.1rem;
+    }
+    .add-budget-button {
+      font-size: 1rem;
+      padding: 10px;
+    }
+    .action-cell {
+      gap: 5px;
+    }
+    .budget-table th, .budget-table td {
+      padding: 8px 10px;
+    }
+  }
+
+  .delete-confirm-button {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+  }
+  .delete-confirm-button:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+  }
+
+  .budget-table .action-cell {
+    white-space: nowrap;
   }
