@@ -177,3 +177,62 @@
   min-width: 200px; /* Minimum width */
   background-color: #fff;
 }
+
+/* --- Add this to FamilyBudgetingPage.css --- */
+
+.danger-button {
+  background-color: #dc3545;
+  color: white;
+  border: none; /* Ensure no border from default button styles */
+}
+.danger-button:hover {
+  background-color: #c82333;
+}
+
+/* Ensure delete confirmation button style exists */
+.delete-confirm-button {
+  background-color: #dc3545 !important; /* Use !important if needed to override other .primary-button styles */
+  border-color: #dc3545 !important;
+}
+.delete-confirm-button:hover {
+  background-color: #c82333 !important;
+  border-color: #bd2130 !important;
+}
+
+/* Ensure select field has a class if not defined globally or in Modal.css */
+.modal-form .select-field {
+width: 100%;
+padding: 10px 12px;
+border: 1px solid #ced4da;
+border-radius: 6px;
+font-size: 1rem;
+box-sizing: border-box;
+background-color: #fff; /* Ensure background */
+cursor: pointer;
+}
+.modal-form .select-field:focus {
+border-color: #80bdff;
+outline: 0;
+box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Ensure inline edit button style exists */
+.inline-edit-button {
+  margin-left: 10px;
+  vertical-align: middle; /* Align icon with text */
+  padding: 4px; /* Adjust padding */
+  border-radius: 50%;
+  background: none; /* remove bg */
+  border: none; /* remove border */
+}
+.inline-edit-button:hover {
+  background-color: #e9ecef; /* Keep hover */
+}
+
+/* Ensure no data message style exists */
+.no-data-message {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
+}

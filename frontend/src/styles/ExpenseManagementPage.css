@@ -440,8 +440,7 @@ transition: background-color 0.2s ease;
 .modal-form .select-field:focus,
 .modal-form .textarea-field:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
 .modal-form .form-actions { margin-top: 25px; padding-top: 15px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 10px; }
-.modal-form .secondary-button { /* Ensure styles exist */ }
-.modal-form .primary-button { /* Ensure styles exist */ }
+
 
 .confirmation-text { font-size: 1.1rem; color: #495057; margin-bottom: 25px; line-height: 1.6; }
 .confirmation-actions { display: flex; justify-content: flex-end; gap: 10px; }

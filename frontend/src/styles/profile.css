@@ -109,10 +109,7 @@ body {
     color: #343a40;
   }
   
-  /* Profile Section Specifics */
-  .profile-section {
-    /* Specific styles if needed */
-  }
+  
   
   .profile-picture-area {
     display: flex;
@@ -166,11 +163,7 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   }
   
-  /* Budget Section Specifics */
-  .budget-section {
-    /* Specific styles if needed */
-  }
-  
+ 
   .setting-row {
     display: flex;
     align-items: center;
@@ -217,12 +210,8 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
   
-  /* The motion.div will handle positioning based on active state */
-  .toggle-switch:not(.active) .toggle-knob {
-     /* Framer Motion handles the layout animation */
-  }
+ 
   .toggle-switch.active .toggle-knob {
-    /* Framer Motion handles the layout animation, but we hint at the end state */
      transform: translateX(22px); /* Approximate end position if no framer-motion */
   }
   
@@ -314,23 +303,6 @@ body {
      line-height: 1;
   }
 
-  /* ... Keep all existing styles from the previous response ... */
-
-/* --- Styles for NEW Sections --- */
-
-/* UI and Appearance Section Specifics */
-.ui-section {
-    /* Use general .settings-section styles */
-    /* Add specific overrides if needed */
-  }
-  
-  /* Pending Invitations Section Specifics */
-  .pending-invitations-section {
-     /* Use general .settings-section styles */
-     /* Remove top border if desired, or keep for consistency */
-     /* border-top: none; */ /* Optional: remove top border */
-  }
-  
   /* Style for section headers without a button */
   .section-header.no-button {
     border-bottom: 1px solid #e9ecef; /* Ensure bottom border */
@@ -454,3 +426,76 @@ body {
 .setting-row .toggle-switch {
     flex-shrink: 0;
 }
+
+/* --- Keep existing styles --- */
+
+/* --- Add/Ensure these styles --- */
+
+/* Make sure modal form styles exist (copied from previous examples) */
+.modal-form .form-group { margin-bottom: 18px; }
+.modal-form label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; color: #495057; }
+.modal-form .input-field,
+.modal-form .select-field, /* Added for consistency */
+.modal-form .textarea-field { width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+.modal-form .textarea-field { min-height: 80px; resize: vertical; }
+.modal-form .input-field:focus,
+.modal-form .select-field:focus,
+.modal-form .textarea-field:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+.modal-form .form-actions { margin-top: 25px; padding-top: 15px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 10px; }
+
+.confirmation-text { font-size: 1.1rem; color: #495057; margin-bottom: 25px; line-height: 1.6; }
+.confirmation-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Ensure delete confirmation button style exists */
+.delete-confirm-button {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+.delete-confirm-button:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+/* Ensure general button styles are available */
+.button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 500; transition: background-color 0.2s ease, transform 0.1s ease; }
+.button-primary { background-color: #6960EC; color: white; }
+.button-primary:hover { background-color: #574fcf; }
+.button-secondary { background-color: #6960EC; color: white; } /* Match primary */
+.button-secondary:hover { background-color: #574fcf; }
+.button-logout { background-color: #6960EC; color: white; }
+.button-logout:hover { background-color: #574fcf; }
+.button-accept { background-color: #28a745; color: white; padding: 6px 16px; font-size: 0.9rem;} /* Green accept */
+.button-accept:hover { background-color: #218838; }
+.button-reject { background-color: #ffffff; color: #dc3545; border: 1px solid #dc3545; padding: 6px 16px; font-size: 0.9rem; } /* Red reject outline */
+.button-reject:hover { background-color: #f8d7da; }
+
+.icon-button { background: none; border: none; padding: 4px; cursor: pointer; color: #6c757d; line-height: 1; border-radius: 50%; }
+.icon-button:hover { background-color: #e9ecef; color: #343a40; }
+
+/* Ensure category list styles are present */
+.expense-categories { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; }
+.categories-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.categories-header h3 { margin: 0; font-size: 1.2rem; color: #495057; }
+.category-list { border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; }
+.category-row { display: flex; align-items: center; border-bottom: 1px solid #e9ecef; background-color: #fff; }
+.category-row:last-child { border-bottom: none; }
+.category-row.header-row { background-color: #f8f9fa; font-weight: 600; color: #495057; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.category-cell { padding: 10px 15px; flex-grow: 1; flex-basis: 0; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+.category-cell.id-cell { flex-grow: 0.5; color: #6c757d;}
+.category-cell.name-cell { flex-grow: 2; }
+.category-cell.action-cell { flex-grow: 0.7; text-align: right; }
+.action-icons { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Ensure invitation list styles are present */
+.invitations-list { display: flex; flex-direction: column; gap: 15px; }
+.invitation-card { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; transition: box-shadow 0.2s ease; flex-wrap: wrap; gap: 10px;}
+.invitation-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+.invitation-details { flex-grow: 1;}
+.invitation-title { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; color: #343a40; }
+.invitation-sender, .invitation-status { margin: 2px 0; font-size: 0.9rem; color: #6c757d; }
+.invitation-actions { display: flex; gap: 10px; flex-shrink: 0; }
+
+/* Ensure no data message style exists */
+.no-data-message { text-align: center; padding: 20px; color: #6c757d; font-style: italic; font-size: 0.95rem; }
+
+ 
