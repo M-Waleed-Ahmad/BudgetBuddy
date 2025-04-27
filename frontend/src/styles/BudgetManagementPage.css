@@ -1,0 +1,357 @@
+/* General Page Styles */
+.budget-page-container {
+    padding: 20px 30px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Space between sections */
+  }
+  
+  /* --- Top Summary Section --- */
+  .budget-summary-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    background-color: #fff;
+    padding: 20px 25px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .budget-details {
+    flex-basis: 50%; /* Adjust basis as needed */
+    flex-shrink: 1;
+  }
+  
+  .budget-details h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .budget-details h3 span { /* Style for edit icon */
+      color: #888;
+      cursor: pointer;
+  }
+  .budget-details h3 span:hover {
+      color: #007bff;
+  }
+  
+  
+  .budget-details p {
+    margin: 8px 0;
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.5;
+  }
+  
+  .budget-chart-container {
+    flex-basis: 45%; /* Adjust basis */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative; /* For side text positioning */
+    min-width: 200px; /* Prevent chart from becoming too small */
+  }
+  
+  .chart-text {
+      text-align: center;
+      margin-bottom: 5px;
+  }
+  
+  .chart-text h4 {
+      margin: 0 0 5px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #444;
+  }
+  .chart-text p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #777;
+  }
+  
+  /* Side text for chart (optional) */
+  .chart-side-text {
+      position: absolute;
+      top: 55%; /* Adjust vertical position */
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: #888;
+      font-weight: 500;
+  }
+  .chart-side-text.left { left: 0px; }
+  .chart-side-text.right { right: 0px; }
+  
+  
+  /* --- Main Content Section --- */
+  .budget-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .add-budget-button {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #6960EC; /* Primary button color from previous examples */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease;
+  }
+  .add-budget-button:hover {
+    background-color: #574fcf;
+  }
+  
+  /* --- Filter Bar --- */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    gap: 15px;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa; /* Light background */
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .filter-input,
+  .filter-select {
+    padding: 8px 12px;
+    background-color: transparent;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .filter-input {
+     flex-grow: 1; /* Allow search input to take more space */
+     min-width: 150px; /* Minimum width */
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-group label {
+    font-size: 0.9rem;
+    color: #555;
+    white-space: nowrap;
+  }
+  
+  .refresh-button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  .refresh-button:hover {
+     background-color: rgba(0, 123, 255, 0.1);
+  }
+  .refresh-button span {
+     font-size: 1em; /* Match icon size to text */
+  }
+  
+  
+  /* --- Table and Breakdown Wrapper --- */
+  .table-breakdown-wrapper {
+    display: flex;
+    gap: 30px;
+  }
+  
+  /* --- Budget Table --- */
+  .budget-table-container {
+    flex: 3; /* Table takes more space */
+    overflow-x: auto; /* Make table horizontally scrollable on small screens */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+  }
+  
+  .budget-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Minimum width before scrolling */
+  }
+  
+  .budget-table th,
+  .budget-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+    white-space: nowrap; /* Prevent wrapping in cells */
+  }
+  
+  .budget-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #444;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .budget-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .budget-table tbody tr:hover {
+    background-color: #f1f3f5;
+  }
+  
+  .action-cell {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .icon-button {
+     background: none;
+     border: none;
+     padding: 2px; /* Small padding */
+     cursor: pointer;
+     color: #6c757d;
+     line-height: 1; /* Ensure icons align nicely */
+  }
+  .icon-button:hover {
+     color: #343a40;
+  }
+  
+  
+  /* --- Category Breakdown --- */
+  .category-breakdown {
+    flex: 1; /* Breakdown takes less space */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    align-self: flex-start; /* Align to top */
+    min-width: 250px; /* Prevent it from becoming too narrow */
+  }
+  
+  .category-breakdown h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  
+  .category-item {
+    margin-bottom: 18px;
+  }
+  .category-item:last-child {
+      margin-bottom: 0;
+  }
+  
+  .category-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  .category-info span:first-child {
+      font-weight: 500;
+  }
+  
+  .progress-bar-container {
+    background-color: #e9ecef;
+    border-radius: 4px;
+    height: 10px; /* Height of the progress bar */
+    overflow: hidden; /* Clip the filled part */
+  }
+  
+  .progress-bar-filled {
+    background-color: #007bff; /* Progress bar color */
+    height: 100%;
+    border-radius: 4px;
+    width: 0; /* Initial width, animated by Framer Motion */
+  }
+  
+  /* --- Responsiveness --- */
+  @media (max-width: 992px) {
+    .budget-summary-section {
+      flex-direction: column;
+      align-items: stretch; /* Make items full width */
+    }
+    .budget-chart-container {
+       flex-basis: auto; /* Reset flex basis */
+       margin-top: 20px;
+    }
+    .table-breakdown-wrapper {
+      flex-direction: column;
+    }
+    .category-breakdown {
+       width: 100%; /* Take full width when stacked */
+       box-sizing: border-box;
+       min-width: unset;
+    }
+    .filter-bar {
+       padding: 10px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .budget-page-container {
+       padding: 15px;
+    }
+    .filter-bar {
+        gap: 10px;
+    }
+    .filter-input, .filter-select, .filter-group {
+        width: 100%; /* Stack filters */
+        box-sizing: border-box;
+    }
+    .filter-group {
+        justify-content: space-between; /* Align label and select nicely */
+    }
+    .filter-select {
+        flex-grow: 1; /* Allow select to fill space */
+    }
+    .refresh-button {
+       width: 100%;
+       justify-content: center;
+       padding: 10px;
+       margin-top: 5px;
+    }
+    .budget-details p, .budget-table th, .budget-table td, .category-info {
+        font-size: 0.9rem; /* Adjust font sizes slightly */
+    }
+  }
+  
+  @media (max-width: 480px) {
+      .budget-page-container {
+          padding: 10px;
+          gap: 20px;
+      }
+      .budget-summary-section, .budget-main-content {
+          padding: 15px;
+      }
+      .budget-details h3 { font-size: 1.1rem; }
+      .add-budget-button { font-size: 1rem; padding: 10px; }
+      .action-cell { gap: 5px; }
+      .budget-table th, .budget-table td { padding: 8px 10px; }
+  }
