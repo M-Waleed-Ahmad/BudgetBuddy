@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   recovery_email: String,
   password_hash: String,
+  profileImage: String,  // new field
   currency_preference: { type: String, default: "USD" },
   created_at: { type: Date, default: Date.now }
 });

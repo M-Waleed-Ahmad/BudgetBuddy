@@ -24,13 +24,12 @@ const Login = () => {
       alert('Login successful!');
   
       // TODO: Redirect to dashboard or homepage
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('❌ Login error:', error);
       alert(error.message || 'An error occurred while logging in');
     }
-  };
-cd  
-  
+  };  
 
   return (
     <div className="login-page">

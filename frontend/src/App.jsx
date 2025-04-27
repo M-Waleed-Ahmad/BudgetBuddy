@@ -1,20 +1,19 @@
 import { useState } from 'react'
-
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './pages/login'
 import Dashboard from './pages/users/dashboard'
 function App() {
-  const [count, setCount] = useState(0)
+  // Removed unused state variables
 
-  const categories=[
-    { name: "Food", allocated: 5000, spent: 4200 },
-    { name: "Transport", allocated: 4000, spent: 3500 },
-    { name: "Entertainment", allocated: 3000, spent: 2000 },
-    { name: "Utilities", allocated: 2500, spent: 1800 },
-    { name: "Shopping", allocated: 4500, spent: 4300 }
-  ];
+  // Removed unused categories array
   return (
       <>
-        <Login />
+        <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+        </Router>
 
         {/* <Dashboard /> */}
       </>
