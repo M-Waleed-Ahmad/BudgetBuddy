@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'; // Added useState, useEffect
 import { motion, AnimatePresence } from 'framer-motion'; // Added AnimatePresence
+import { useNavigate } from 'react-router-dom'; // Added useNavigate
 import Navbar from '../../components/navbar';        // Adjust path if needed
 import Footer from '../../components/Footer.jsx';    // Adjust path if needed
 import Modal from '../../components/Modal';          // Adjust path if needed
 import '../../styles/profile.css';              // Adjust path if needed (or use a SettingsPage specific CSS)
-
+import { logoutUser } from '../../api/api.js'; // Adjust path if needed
 // --- Icons ---
 const EditIcon = ({ size = 16 }) => <span className="icon" style={{fontSize: `${size}px`}} title="Edit">✏️</span>;
 const DeleteIcon = ({ size = 16 }) => <span className="icon" style={{fontSize: `${size}px`}} title="Delete">🗑️</span>;
@@ -32,6 +33,7 @@ const availableLanguages = [ { code: 'en', name: 'English'}, { code: 'es', name:
 const SettingsPage = () => {
     // --- Component State ---
     // Form States
+    const navigate = useNavigate(); // For navigation
     const [profileData, setProfileData] = useState({ fullName: 'Waleed Boom', password: '', email: 'waleed.ahmad@example.com' });
     const [budgetSettings, setBudgetSettings] = useState({ currency: '', approvalSystemEnabled: true });
     const [uiSettings, setUiSettings] = useState({ language: '', darkModeEnabled: false });
@@ -93,7 +95,26 @@ const SettingsPage = () => {
     const handleChangePicture = () => { alert("Change Picture clicked! (Implement file upload logic)"); };
     const handleBudgetSettingsSave = () => { console.log("Saving Budget Settings:", budgetSettings); alert("Budget settings saved! (Simulated)"); /* TODO: API Call */ };
     const handleUiSettingsSave = () => { console.log("Saving UI Settings:", uiSettings); alert("UI settings saved! (Simulated)"); /* TODO: API Call */ };
-    const handleLogout = () => { alert("Logout clicked! (Implement logout)"); /* TODO: Logout Logic */ };
+    const handleLogout = async () => {
+        try {
+            // Optional: Call the backend logout endpoint
+            // Useful for invalidating refresh tokens or logging, though not strictly
+            // required for basic stateless JWT client-side logout.
+            await logoutUser();
+            console.log('Backend logout acknowledged.');
+
+        } catch (error) {
+            // Log the error but proceed with client logout anyway
+            console.error('Backend logout failed:', error);
+            alert('Logout failed on server, but logging out locally.'); // Optional user feedback
+        } finally {
+            // --- ALWAYS perform client-side logout ---
+            localStorage.removeItem('token'); // Remove the token from storage
+            alert("Logged out successfully!"); // Or use a more subtle notification
+            navigate('/login', { replace: true }); // Redirect to login page
+        }
+    };
+
 
     const handleCategorySubmit = (e) => {
         e.preventDefault();

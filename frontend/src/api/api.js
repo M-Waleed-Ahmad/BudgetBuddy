@@ -42,3 +42,21 @@ export const signupUser = async (formData) => {
     throw error;
   }
 };
+export const logoutUser = async () => {
+  const token = localStorage.getItem('token'); 
+
+  const response = await fetch(`${BASE_URL}/auth/logout`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`, // Send the token
+    },
+  });
+
+  if (!response.ok) {
+    console.warn('Backend logout call failed, but proceeding with client-side logout.');
+
+  }
+
+  return { message: 'Logout initiated' }; 
+};
+
