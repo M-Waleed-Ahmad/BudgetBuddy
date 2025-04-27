@@ -1,33 +1,100 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './pages/login'
-import Dashboard from './pages/users/dashboard'
-import BudgetManagementPage from './pages/users/budgetManagement'
+import React from 'react'; // Removed useState as it's not used here
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Login from './pages/login';
+import Dashboard from './pages/users/dashboard';
+import BudgetManagementPage from './pages/users/budgetManagement';
 import ExpenseManagementPage from './pages/users/expenseManagement';
-import SettingsPage from './pages/users/profile'
+import SettingsPage from './pages/users/profile';
 import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
 import NotificationsPage from './pages/users/NotificationsPage';
-function App() {
-  // Removed unused state variables
-  const fetchedUserRoleForThisPlan = 'admin'; // or 'viewer', 'editor'
-  // Removed unused categories array
-  return (
-      <>
-        <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/budget-management" element={<BudgetManagementPage />} /> {/* Redirect to login by default */}
-          <Route path="/expense-management" element={<ExpenseManagementPage />} /> {/* Redirect to login by default */}
-          <Route path="/shared-budgeting" element={<FamilyBudgetingPage userRole={fetchedUserRoleForThisPlan} /> } /> {/* Redirect to login by default */}
-          <Route path="/" element={<Login />} /> {/* Redirect to login by default */}
-          <Route path="/notifications" element={<NotificationsPage />} /> {/* Redirect to login by default */}
-        </Routes>
-        </Router>
+import ProtectedRoute from './components/ProtectedRoute'; // Import the wrapper
 
-        {/* <Dashboard /> */}
+function App() {
+  // This simulation is generally better handled within FamilyBudgetingPage itself
+  const fetchedUserRoleForThisPlan = 'admin';
+
+  return (
+      <> {/* Use Fragment shorthand */}
+        <Router>
+          <Routes>
+            {/* Public Route */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/budget-management"
+              element={
+                <ProtectedRoute>
+                  <BudgetManagementPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/expense-management"
+              element={
+                <ProtectedRoute>
+                  <ExpenseManagementPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/shared-budgeting"
+              element={
+                <ProtectedRoute>
+                  {/* Pass props as needed, role handling is internal now */}
+                  <FamilyBudgetingPage />
+                </ProtectedRoute>
+              }
+            />
+              <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
+              }
+            />
+
+             {/* Default Route */}
+             {/* Option 1: Redirect '/' to '/dashboard' if logged in, else '/login' */}
+             <Route
+                path="/"
+                element={
+                    localStorage.getItem('token')
+                    ? <Navigate to="/dashboard" replace />
+                    : <Navigate to="/login" replace />
+                }
+             />
+
+             {/* Option 2: Always redirect '/' to '/login' (simpler if login handles redirect) */}
+             {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
+
+
+             {/* Catch-all for unmatched routes (Optional) */}
+             <Route path="*" element={<Navigate to="/" replace />} />
+             {/* Or show a 404 page */}
+             {/* <Route path="*" element={<NotFoundPage />} /> */}
+
+          </Routes>
+        </Router>
       </>
-  )
+  );
 }
-export default App
+
+export default App;
