@@ -341,3 +341,120 @@
       .full-width-button, .secondary-button { font-size: 0.95rem; padding: 10px; }
       .data-table th, .data-table td { padding: 10px; font-size: 0.85rem; }
   }
+
+  /* --- Keep existing styles --- */
+
+/* --- Add/Modify these --- */
+
+/* Style for Analyze/Read More links */
+.analyze-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.analyze-link:hover {
+  text-decoration: underline;
+}
+.analyze-link span { /* Edit icon */
+  color: #007bff;
+}
+
+/* Style for "Read More" button in table */
+.read-more-link {
+  display: block; /* Put on new line */
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #007bff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left; /* Align with text */
+}
+.read-more-link:hover {
+  text-decoration: underline;
+}
+
+/* Style for notes in the view notes modal */
+.view-notes-body p {
+  white-space: pre-wrap; /* Preserve whitespace and wrap long lines */
+  line-height: 1.6;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Ensure filter bar refresh button style exists */
+.refresh-button {
+background: none;
+border: none;
+color: #007bff;
+cursor: pointer;
+font-size: 0.9rem;
+display: inline-flex;
+align-items: center;
+gap: 5px;
+padding: 8px 10px;
+border-radius: 4px;
+transition: background-color 0.2s ease;
+}
+.refresh-button:hover {
+ background-color: rgba(0, 123, 255, 0.1);
+}
+.refresh-button span {
+ font-size: 1em; /* Match icon size to text */
+ line-height: 1;
+}
+
+/* Ensure delete button style exists */
+.delete-confirm-button {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+.delete-confirm-button:hover {
+  background-color: #c82333 !important;
+  border-color: #bd2130 !important;
+}
+
+/* General no data message style */
+.no-data-message {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Ensure modal form styles are present (copied from previous CSS if needed) */
+.modal-form .form-group { margin-bottom: 18px; }
+.modal-form label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; color: #495057; }
+.modal-form .input-field,
+.modal-form .select-field,
+.modal-form .textarea-field { width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+.modal-form .textarea-field { min-height: 80px; resize: vertical; }
+.modal-form .input-field:focus,
+.modal-form .select-field:focus,
+.modal-form .textarea-field:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+.modal-form .form-actions { margin-top: 25px; padding-top: 15px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 10px; }
+.modal-form .secondary-button { /* Ensure styles exist */ }
+.modal-form .primary-button { /* Ensure styles exist */ }
+
+.confirmation-text { font-size: 1.1rem; color: #495057; margin-bottom: 25px; line-height: 1.6; }
+.confirmation-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Responsive adjustments for modal forms/actions */
+@media (max-width: 768px) {
+  .modal-form .form-actions,
+  .confirmation-actions {
+      flex-direction: column-reverse; /* Stack buttons */
+      gap: 12px;
+  }
+  .modal-form .form-actions button,
+  .confirmation-actions button {
+      width: 100%; /* Make buttons full width */
+  }
+}
