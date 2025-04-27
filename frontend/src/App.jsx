@@ -9,7 +9,7 @@ import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
 
 function App() {
   // Removed unused state variables
-  const fetchedUserRoleForThisPlan = 'viewer'; // or 'viewer', 'editor'
+  const fetchedUserRoleForThisPlan = 'admin'; // or 'viewer', 'editor'
   // Removed unused categories array
   return (
       <>

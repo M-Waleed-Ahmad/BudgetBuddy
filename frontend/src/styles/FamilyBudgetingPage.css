@@ -147,3 +147,33 @@
     .primary-button, .secondary-button, .small-button { font-size: 0.8rem; padding: 5px 10px;}
     .data-table th, .data-table td { padding: 8px; font-size: 0.8rem; }
 }
+
+/* --- Keep all existing styles --- */
+
+/* --- Add styles for Plan Selector --- */
+.plan-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px; /* Space below the selector */
+  padding: 10px 15px;
+  background-color: #e9ecef; /* Light background for emphasis */
+  border-radius: 6px;
+}
+
+.plan-selector-container label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.plan-select-dropdown {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  color:#333;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  flex-grow: 1; /* Allow dropdown to take available space */
+  min-width: 200px; /* Minimum width */
+  background-color: #fff;
+}
