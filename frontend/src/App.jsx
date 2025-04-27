@@ -6,7 +6,7 @@ import BudgetManagementPage from './pages/users/budgetManagement'
 import ExpenseManagementPage from './pages/users/expenseManagement';
 import SettingsPage from './pages/users/profile'
 import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
-
+import NotificationsPage from './pages/users/NotificationsPage';
 function App() {
   // Removed unused state variables
   const fetchedUserRoleForThisPlan = 'admin'; // or 'viewer', 'editor'
@@ -22,6 +22,7 @@ function App() {
           <Route path="/expense-management" element={<ExpenseManagementPage />} /> {/* Redirect to login by default */}
           <Route path="/shared-budgeting" element={<FamilyBudgetingPage userRole={fetchedUserRoleForThisPlan} /> } /> {/* Redirect to login by default */}
           <Route path="/" element={<Login />} /> {/* Redirect to login by default */}
+          <Route path="/notifications" element={<NotificationsPage />} /> {/* Redirect to login by default */}
         </Routes>
         </Router>
 

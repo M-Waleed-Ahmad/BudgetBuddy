@@ -106,8 +106,10 @@ const Navbar = () => {
       {/* --- Right Side --- */}
       <div className="navbar-right">
         <button className="notification-button icon-button"> {/* Added icon-button class */}
+          <Link to="/notifications" onClick={() => handleLinkClick('/notifications')} className="notification-link"> {/* Optional: Make notification a link */}
           <BellIcon />
           <span className="notification-dot"></span>
+          </Link>
         </button>
         <Link to="/settings" onClick={() => handleLinkClick('/profile')} className="user-avatar-link"> {/* Optional: Make avatar a link */}
             <img src={userAvatar} alt="User Avatar" className="user-avatar" />

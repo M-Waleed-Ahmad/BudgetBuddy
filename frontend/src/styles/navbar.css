@@ -195,6 +195,9 @@
   align-items: center;
   gap: 15px;
 }
+.notification-link{
+  color: #333;
+}
 
 .icon-button {
   background: none;

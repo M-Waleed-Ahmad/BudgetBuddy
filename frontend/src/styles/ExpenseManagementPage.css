@@ -91,8 +91,8 @@
   }
   
   .budget-progress-bar-filled .progress-percentage {
-      /* Hide percentage if inside blue bar - optional */
-      /* display: none; */
+    color:white; 
+    /* display: none; */
   }
   
   .progress-labels {
