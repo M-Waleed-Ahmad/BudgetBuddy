@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './pages/login'
 import Dashboard from './pages/users/dashboard'
 import BudgetManagementPage from './pages/users/budgetManagement'
+import ExpenseManagementPage from './pages/users/expenseManagement';
 import SettingsPage from './pages/users/profile'
 function App() {
   // Removed unused state variables
@@ -16,6 +17,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/budget-management" element={<BudgetManagementPage />} /> {/* Redirect to login by default */}
+          <Route path="/expense-management" element={<ExpenseManagementPage />} /> {/* Redirect to login by default */}
           {/* Add more routes as needed */}
         </Routes>
         </Router>
