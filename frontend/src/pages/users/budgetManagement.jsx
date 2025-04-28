@@ -6,11 +6,19 @@ import Footer from '../../components/Footer';
 import Modal from '../../components/Modal';
 import '../../styles/BudgetManagementPage.css';
 import {
+    // Overall Monthly Budget API
     getCurrentMonthBudget,
     createMonthlyBudget,
     updateMonthlyBudget,
-    getCategories, // Assuming getCategories fetches user's categories [{_id: '...', name: '...'}]
-    
+    // Categories API
+    getCategories,
+    // Category Limit Item API
+    getBudgetsForMonth, // Fetches category limits for a specific month
+    addBudgetItem,      // Adds a new category limit
+    updateBudgetItem,   // Updates an existing category limit
+    deleteBudgetItem,   // Deletes a category limit
+    // TODO: Import function to fetch expenses when implementing usage tracking
+    // getExpensesForMonth,
 } from '../../api/api'; // Adjust path if needed
 
 // --- Icons ---
@@ -29,7 +37,7 @@ const getCurrentYearMonth = () => {
 const formatDate = (dateString) => {
     if (!dateString) return 'Not Set';
     if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        dateString += 'T00:00:00';
+        dateString += 'T00:00:00Z'; // Add Z for UTC context
     }
     try {
         const date = new Date(dateString);
@@ -41,50 +49,41 @@ const formatDate = (dateString) => {
     }
 };
 
-// Initial state for the overall monthly budget
+// --- Initial States ---
 const initialMonthlyBudgetState = {
-    _id: null,
-    total_budget_amount: 0,
-    start_date: '',
-    end_date: '',
-    month_year: getCurrentYearMonth(),
+    _id: null, total_budget_amount: 0, start_date: '', end_date: '', month_year: getCurrentYearMonth(),
 };
+const initialCategoryItemFormState = { category_id: '', limit_amount: '', description: '' };
 
-// Initial state for the category budget item form
-const initialCategoryItemFormState = {
-    category_id: '', // Use ID
-    limit_amount: '', // Use correct field name
-    description: '',
-};
-
+// ==========================================================================
+// BudgetManagementPage Component
+// ==========================================================================
 const BudgetManagementPage = () => {
     // --- State ---
-    // Overall Monthly Budget (MonthlyBudget Collection)
     const [monthlyBudgetData, setMonthlyBudgetData] = useState(initialMonthlyBudgetState);
     const [isLoadingMonthlyBudget, setIsLoadingMonthlyBudget] = useState(true);
     const [monthlyBudgetError, setMonthlyBudgetError] = useState(null);
     const [isMonthlyBudgetModalOpen, setIsMonthlyBudgetModalOpen] = useState(false);
     const [monthlyBudgetFormData, setMonthlyBudgetFormData] = useState({ total_budget_amount: '', start_date: '', end_date: '' });
 
-    // Categories (User's available categories)
-    const [availableCategories, setAvailableCategories] = useState([]); // Fetched from API
-    const [categoryMap, setCategoryMap] = useState({}); // For mapping ID to Name: { 'catId1': 'Food', ... }
+    const [availableCategories, setAvailableCategories] = useState([]);
+    const [categoryMap, setCategoryMap] = useState({});
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [categoriesError, setCategoriesError] = useState(null);
 
-    // Category-Specific Budget Items (Budget Collection)
-    // TODO: Replace dummy logic with actual API integration
-    const [budgetItems, setBudgetItems] = useState([]); // Fetched from API - start empty
-    const [isLoadingBudgetItems, setIsLoadingBudgetItems] = useState(false); // Set true when fetching
+    const [budgetItems, setBudgetItems] = useState([]); // Holds category limits for the selected month
+    const [isLoadingBudgetItems, setIsLoadingBudgetItems] = useState(false);
     const [budgetItemsError, setBudgetItemsError] = useState(null);
     const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [editingBudgetItem, setEditingBudgetItem] = useState(null); // The item being edited (needs _id)
-    const [deletingBudgetItemId, setDeletingBudgetItemId] = useState(null); // The ID of item to delete
+    const [editingBudgetItem, setEditingBudgetItem] = useState(null); // Holds the full budget item object being edited
+    const [deletingBudgetItemId, setDeletingBudgetItemId] = useState(null);
     const [categoryItemFormData, setCategoryItemFormData] = useState(initialCategoryItemFormState);
 
+    const selectedMonthYear = useMemo(() => getCurrentYearMonth(), []); // Currently fixed to current month
 
-    // --- Data Fetching ---
+
+    // --- Data Fetching Callbacks ---
     const fetchMonthlyBudget = useCallback(async () => {
         setIsLoadingMonthlyBudget(true);
         setMonthlyBudgetError(null);
@@ -115,131 +114,142 @@ const BudgetManagementPage = () => {
         setCategoriesError(null);
         try {
             const categories = await getCategories();
-            setAvailableCategories(categories || []);
-            // Create a map for easy name lookup
-            const catMap = (categories || []).reduce((acc, cat) => {
-                acc[cat._id] = cat.name;
-                return acc;
-            }, {});
+            const validCategories = categories || [];
+            setAvailableCategories(validCategories);
+            const catMap = validCategories.reduce((acc, cat) => { acc[cat._id] = cat.name; return acc; }, {});
             setCategoryMap(catMap);
-            // Set default category in form if not already set and categories exist
-            if (categories && categories.length > 0 && !categoryItemFormData.category_id) {
-                setCategoryItemFormData(prev => ({ ...prev, category_id: categories[0]._id }));
+            if (validCategories.length > 0 && !categoryItemFormData.category_id) {
+                setCategoryItemFormData(prev => ({ ...prev, category_id: validCategories[0]._id }));
             }
         } catch (error) {
             console.error("Error fetching categories:", error);
             setCategoriesError("Could not fetch categories.");
-            setAvailableCategories([]);
-            setCategoryMap({});
+            setAvailableCategories([]); setCategoryMap({});
         } finally {
             setIsLoadingCategories(false);
         }
-    }, [categoryItemFormData.category_id]); // Refetch if default needs setting, maybe remove dependency
+    }, [categoryItemFormData.category_id]);
 
-    // TODO: Implement fetch function for category budget items
     const fetchCategoryBudgetItems = useCallback(async (monthYear) => {
+        if (!monthYear) return;
         setIsLoadingBudgetItems(true);
         setBudgetItemsError(null);
-        setBudgetItems([]); // Clear previous items
-        console.log(`TODO: Implement API call to fetch budget items for ${monthYear}`);
+        setBudgetItems([]);
         try {
-            // const items = await getBudgetsForMonth(monthYear); // API Call Placeholder
-            // setBudgetItems(items || []);
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-            // setBudgetItems(generateDummyItems(5)); // Replace with real data
-            console.warn("Using placeholder logic for fetching category budget items.");
+            const items = await getBudgetsForMonth(monthYear);
+            setBudgetItems(items || []); // Assuming backend sends populated/correct data
         } catch (error) {
             console.error(`Error fetching category budget items for ${monthYear}:`, error);
-            setBudgetItemsError("Could not fetch category budget items.");
+            setBudgetItemsError(error.message || "Could not fetch category budget items.");
             setBudgetItems([]);
         } finally {
             setIsLoadingBudgetItems(false);
         }
-    }, []); // Add dependencies if monthYear changes
+    }, []); // Removed categoryMap dependency here, rely on backend population or map later
 
+
+    // --- Initial Data Load Effect ---
     useEffect(() => {
+        // Fetch categories first, then budget items which might rely on categoryMap
+        fetchCategories().then(() => {
+             fetchCategoryBudgetItems(selectedMonthYear);
+        });
         fetchMonthlyBudget();
-        fetchCategories();
-        fetchCategoryBudgetItems(getCurrentYearMonth()); // Fetch for current month initially
-    }, [fetchMonthlyBudget, fetchCategories, fetchCategoryBudgetItems]);
+        // Order matters if one fetch depends on data from another (like categoryMap for display)
+    }, [fetchMonthlyBudget, fetchCategories, fetchCategoryBudgetItems, selectedMonthYear]);
 
 
     // --- Derived State & Calculations ---
-    // Calculation based on category-specific budget items (Budget Collection)
-    // TODO: Update when API for budgetItems is integrated
     const totalCategoryLimitsSet = useMemo(() => {
-        // return budgetItems.reduce((sum, item) => sum + (item.limit_amount || 0), 0);
-        return 0; // Placeholder until API is integrated
+        return budgetItems.reduce((sum, item) => sum + (Number(item.limit_amount) || 0), 0);
     }, [budgetItems]);
 
-    // Category breakdown based on category-specific budget items
-    // TODO: Update when API for budgetItems is integrated
+    // Category breakdown: Shows Limit vs. Used (simulated) for each category with a limit set
     const categoryDataForBreakdown = useMemo(() => {
-        // Placeholder logic - needs real budgetItems and expense data
-        return availableCategories.map(cat => {
-            // Find budget limit set for this category (replace with real data structure)
-            // const limit = budgetItems.find(item => item.category_id === cat._id)?.limit_amount || 1;
-            const limit = (Math.random() * 500) + 50; // Dummy limit
-            // Find expenses for this category (needs another fetch)
-            const used = limit * (Math.random() * 0.7); // Dummy usage
-            return { name: cat.name, used: Math.round(used), total: Math.round(limit) };
-        }).filter(cat => cat.total > 0);
-    }, [availableCategories, budgetItems]); // Depends on fetched categories and budget items
+        const categoryMapWithSums = budgetItems.reduce((acc, item) => {
+            const categoryId = item.category_id?._id || item.category_id || 'Unknown';
+            const categoryName = item.category_id?.name || categoryMap[categoryId] || 'Unknown';
+            const limit = Number(item.limit_amount) || 0;
+            // Initialize or update the category data
+            if (!acc[categoryId]) {
+                acc[categoryId] = { name: categoryName, used: 0, total: 0 };
+            }
+            acc[categoryId].total += limit;
+            // Simulate usage (replace with actual fetched expense sum for this category/month)
+            acc[categoryId].used += limit * (Math.random() * 0.7);
+            return acc;
+        }, {});
+
+        // Convert the map to an array and round values
+        return Object.values(categoryMapWithSums).map(cat => ({
+            ...cat,
+            used: Math.round(cat.used),
+            total: Math.round(cat.total),
+        })).filter(cat => cat.total > 0); // Only show categories where a limit > 0 is set
+    }, [budgetItems, categoryMap]); // Depends on fetched budget items and category map
 
 
-    // --- ECharts Options (Overall Monthly Budget Target) ---
+    // --- ECharts Options (Overall Target vs. Sum of Category Limits) ---
     const budgetChartOptions = useMemo(() => {
-        // TODO: Fetch actual expense data to show real usage vs target
         const targetAmount = monthlyBudgetData.total_budget_amount || 0;
-        const simulatedUsed = targetAmount * 0.6; // Simulate usage
-        const remaining = Math.max(0, targetAmount - simulatedUsed);
+        const totalLimits = totalCategoryLimitsSet; // Use the memoized calculation
+        const remainingUnallocatedTarget = Math.max(0, targetAmount - totalLimits);
+
+        // console.log("Chart - Limits:", totalLimits, "Target:", targetAmount, "Unallocated:", remainingUnallocatedTarget);
+
         return {
-            tooltip: { trigger: 'item', formatter: '{b}: Rs {c} ({d}%)' },
+            tooltip: {
+                trigger: 'item',
+                formatter: (params) => `${params.name}: Rs ${params.value.toLocaleString()} (${params.percent}%)`
+            },
             legend: { show: false },
             series: [{
-                name: 'Overall Budget Usage', type: 'pie', radius: ['65%', '85%'], avoidLabelOverlap: false,
+                name: 'Budget Allocation Status',
+                type: 'pie',
+                radius: ['65%', '85%'],
+                avoidLabelOverlap: false,
                 label: { show: false }, emphasis: { label: { show: false } }, labelLine: { show: false },
-                data: [
-                    { value: Math.round(simulatedUsed), name: 'Used (Simulated)', itemStyle: { color: '#ff3b30' } },
-                    { value: Math.round(remaining), name: 'Remaining', itemStyle: { color: '#34c759' } }
-                ],
+                // Prevent chart from showing only one segment if target is 0 or limits perfectly match target
+                data: (totalLimits === 0 && remainingUnallocatedTarget === 0)
+                    ? [{ value: 1, name: 'No Budget Set', itemStyle: { color: '#cccccc' } }] // Placeholder if empty
+                    : [
+                        { value: Math.round(totalLimits), name: 'Allocated to Categories', itemStyle: { color: '#34c759' } }, // Sum of limits
+                        { value: Math.round(remainingUnallocatedTarget), name: 'Unallocated Target', itemStyle: { color: '#ff9500' } } // Target - Sum of limits
+                    ].filter(d => d.value > 0), // Only include segments with value > 0
                 animationType: 'scale', animationEasing: 'elasticOut',
             }]
         };
-    }, [monthlyBudgetData.total_budget_amount]);
+    }, [monthlyBudgetData.total_budget_amount, totalCategoryLimitsSet]); // Depend on target and calculated sum
+
 
     // --- Animation Variants ---
     const sectionVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.1 } } };
     const itemVariants = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } } };
 
-    // --- Modal Control ---
+    // --- Modal Control Handlers ---
     const openAddBudgetItemModal = () => {
         setEditingBudgetItem(null);
-        setCategoryItemFormData({
-            ...initialCategoryItemFormState,
-            // Set default category if available
-            category_id: availableCategories.length > 0 ? availableCategories[0]._id : ''
-        });
+        setBudgetItemsError(null);
+        setCategoryItemFormData({ ...initialCategoryItemFormState, category_id: availableCategories.length > 0 ? availableCategories[0]._id : '' });
         setIsAddEditModalOpen(true);
     };
-
     const openEditBudgetItemModal = (item) => {
         setEditingBudgetItem(item);
+        setBudgetItemsError(null);
         setCategoryItemFormData({
-            // Ensure fields match the expected structure from your API
-            category_id: item.category_id || '', // Use category_id
-            limit_amount: item.limit_amount?.toString() || '', // Use limit_amount
+            category_id: item.category_id?._id || item.category_id || '',
+            limit_amount: item.limit_amount?.toString() || '',
             description: item.description || ''
         });
         setIsAddEditModalOpen(true);
     };
-
     const openDeleteBudgetItemModal = (id) => {
+        setBudgetItemsError(null);
         setDeletingBudgetItemId(id);
         setIsDeleteModalOpen(true);
     };
-
     const openMonthlyBudgetModal = () => {
+        setMonthlyBudgetError(null);
         setMonthlyBudgetFormData({
             total_budget_amount: monthlyBudgetData.total_budget_amount.toString(),
             start_date: monthlyBudgetData.start_date || '',
@@ -247,95 +257,60 @@ const BudgetManagementPage = () => {
         });
         setIsMonthlyBudgetModalOpen(true);
     };
-
     const closeModal = () => {
-        setIsAddEditModalOpen(false);
-        setIsDeleteModalOpen(false);
-        setIsMonthlyBudgetModalOpen(false);
-        setMonthlyBudgetError(null);
-        setBudgetItemsError(null);
-        setCategoriesError(null);
-        setTimeout(() => {
-            setEditingBudgetItem(null);
-            setDeletingBudgetItemId(null);
-        }, 300);
+        setIsAddEditModalOpen(false); setIsDeleteModalOpen(false); setIsMonthlyBudgetModalOpen(false);
+        setMonthlyBudgetError(null); setBudgetItemsError(null); setCategoriesError(null);
+        setTimeout(() => { setEditingBudgetItem(null); setDeletingBudgetItemId(null); }, 300);
     };
 
-    // --- Form Handling ---
+    // --- Form Input Handlers ---
     const handleCategoryItemFormChange = (e) => {
         const { name, value } = e.target;
         setCategoryItemFormData(prev => ({ ...prev, [name]: value }));
     };
-
     const handleMonthlyBudgetFormChange = (e) => {
         const { name, value } = e.target;
         setMonthlyBudgetFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // --- Form Submission ---
-    // Submit handler for Category Budget Items (Budget Collection)
-    // TODO: Implement API calls (addBudgetItem, updateBudgetItem)
+    // --- Form Submission Handlers ---
     const handleCategoryItemFormSubmit = async (e) => {
         e.preventDefault();
         setBudgetItemsError(null);
-
         const numericAmount = parseFloat(categoryItemFormData.limit_amount);
-        if (isNaN(numericAmount) || numericAmount <= 0) {
-            setBudgetItemsError("Limit amount must be a positive number.");
-            return;
-        }
-        if (!categoryItemFormData.category_id) {
-            setBudgetItemsError("Please select a category.");
-            return;
-        }
+        if (isNaN(numericAmount) || numericAmount <= 0) { setBudgetItemsError("Limit amount must be a positive number."); return; }
+        if (!categoryItemFormData.category_id) { setBudgetItemsError("Please select a category."); return; }
 
-        const payload = {
-            category_id: categoryItemFormData.category_id,
-            limit_amount: numericAmount,
-            description: categoryItemFormData.description || null,
-            month_year: getCurrentYearMonth(), // Or selected month if applicable
-        };
-
+        const commonPayload = { category_id: categoryItemFormData.category_id, limit_amount: numericAmount, description: categoryItemFormData.description || null };
         setIsLoadingBudgetItems(true);
-        console.log("TODO: Implement API call for category budget item save/update");
         try {
-            if (editingBudgetItem) {
-                console.log('Updating category budget item:', editingBudgetItem._id, payload);
-                // await updateBudgetItem(editingBudgetItem._id, payload); // API Call Placeholder
-                alert(`Category limit updated! (Simulated)`);
+            if (editingBudgetItem && editingBudgetItem._id) {
+                await updateBudgetItem(editingBudgetItem._id, commonPayload);
+                alert(`Category limit updated successfully!`);
             } else {
-                console.log('Adding new category budget item:', payload);
-                // const newItem = await addBudgetItem(payload); // API Call Placeholder
-                alert(`Category limit added! (Simulated)`);
+                const createPayload = { ...commonPayload, month_year: selectedMonthYear };
+                await addBudgetItem(createPayload);
+                alert(`Category limit added successfully!`);
             }
-            // Refetch items after successful save/update
-            // await fetchCategoryBudgetItems(getCurrentYearMonth()); // Refetch Placeholder
+            await fetchCategoryBudgetItems(selectedMonthYear);
             closeModal();
         } catch (error) {
             console.error("Error saving category budget item:", error);
-            setBudgetItemsError(error.message || "Failed to save category limit.");
+            setBudgetItemsError(error.message || (editingBudgetItem ? "Failed to update." : "Failed to add."));
         } finally {
             setIsLoadingBudgetItems(false);
         }
     };
 
-    // Submit handler for Overall Monthly Budget (MonthlyBudget Collection)
     const handleMonthlyBudgetFormSubmit = async (e) => {
         e.preventDefault();
         setMonthlyBudgetError(null);
-
         const numericTotal = parseFloat(monthlyBudgetFormData.total_budget_amount) || 0;
         const { start_date, end_date } = monthlyBudgetFormData;
-
         if (numericTotal < 0) { setMonthlyBudgetError("Total amount cannot be negative."); return; }
         if (!start_date || !end_date) { setMonthlyBudgetError("Start and End dates are required."); return; }
         if (new Date(start_date) >= new Date(end_date)) { setMonthlyBudgetError("End date must be after start date."); return; }
-
-        const payload = {
-            total_budget_amount: numericTotal,
-            start_date: start_date,
-            end_date: end_date,
-        };
+        const payload = { total_budget_amount: numericTotal, start_date, end_date };
 
         setIsLoadingMonthlyBudget(true);
         try {
@@ -347,9 +322,8 @@ const BudgetManagementPage = () => {
                 updatedData = await createMonthlyBudget(payload);
                 alert('Monthly budget settings created!');
             }
-
             if (updatedData && updatedData._id) {
-                 setMonthlyBudgetData({ // Update state with response
+                 setMonthlyBudgetData({
                     _id: updatedData._id,
                     total_budget_amount: updatedData.total_budget_amount || 0,
                     start_date: updatedData.start_date ? new Date(updatedData.start_date).toISOString().split('T')[0] : '',
@@ -360,55 +334,48 @@ const BudgetManagementPage = () => {
             closeModal();
         } catch (error) {
             console.error("Error saving monthly budget settings:", error);
-            setMonthlyBudgetError(error.message || (monthlyBudgetData._id ? "Failed to update budget." : "Failed to create budget."));
+            setMonthlyBudgetError(error.message || (monthlyBudgetData._id ? "Update failed." : "Create failed."));
         } finally {
              setIsLoadingMonthlyBudget(false);
         }
     };
 
-    // --- Delete Confirmation ---
-    // TODO: Implement API call (deleteBudgetItem)
+    // --- Delete Handler ---
     const confirmDeleteItem = async () => {
-        if (deletingBudgetItemId) {
-            setBudgetItemsError(null);
-            setIsLoadingBudgetItems(true); // Indicate activity
-            console.log("TODO: Implement API call for deleting item:", deletingBudgetItemId);
-            try {
-                // await deleteBudgetItem(deletingBudgetItemId); // API Call Placeholder
-                alert(`Category limit deleted! (Simulated)`);
-                // Refetch items after successful delete
-                // await fetchCategoryBudgetItems(getCurrentYearMonth()); // Refetch Placeholder
-                closeModal();
-            } catch (error) {
-                 console.error("Error deleting category budget item:", error);
-                 setBudgetItemsError(error.message || "Failed to delete category limit.");
-            } finally {
-                 setIsLoadingBudgetItems(false);
-            }
+        if (!deletingBudgetItemId) { setBudgetItemsError("No item selected."); return; }
+        setBudgetItemsError(null);
+        setIsLoadingBudgetItems(true);
+        try {
+            await deleteBudgetItem(deletingBudgetItemId);
+            alert(`Category limit deleted successfully!`);
+            await fetchCategoryBudgetItems(selectedMonthYear);
+            closeModal();
+        } catch (error) {
+            console.error("Error deleting category budget item:", error);
+            setBudgetItemsError(error.message || "Failed to delete category limit.");
+        } finally {
+            setIsLoadingBudgetItems(false);
         }
     };
 
     // --- Refresh Handler ---
     const handleRefresh = () => {
-        console.log("Refreshing data...");
-        setMonthlyBudgetError(null);
-        setBudgetItemsError(null);
-        setCategoriesError(null);
+        setMonthlyBudgetError(null); setBudgetItemsError(null); setCategoriesError(null);
         fetchMonthlyBudget();
-        fetchCategories();
-        fetchCategoryBudgetItems(getCurrentYearMonth()); // Or selected month
+        fetchCategories().then(() => fetchCategoryBudgetItems(selectedMonthYear)); // Ensure categories load before items if needed
         alert("Data refresh initiated!");
     };
 
-    // --- Render Logic ---
+    // --- Combined Loading State ---
     const isLoading = isLoadingMonthlyBudget || isLoadingCategories || isLoadingBudgetItems;
 
+    // --- Render ---
     return (
       <>
         <Navbar />
         <div className="budget-page-container">
 
-            {/* --- Top Summary Section (Overall Monthly Budget) --- */}
+            {/* Overall Monthly Budget Section */}
             <motion.section className="budget-summary-section" initial="hidden" animate="visible" variants={sectionVariants}>
                  <div className="budget-details">
                     <h3>Budget For This Month
@@ -429,26 +396,29 @@ const BudgetManagementPage = () => {
                 </div>
                 <div className="budget-chart-container">
                     <div className="chart-text">
-                        <h4>Overall Budget (Simulated Usage)</h4>
-                        <p>Usage ({Math.round((monthlyBudgetData.total_budget_amount || 0) * 0.6).toLocaleString()} / {(monthlyBudgetData.total_budget_amount || 0).toLocaleString()})</p>
+                        {/* Changed title to reflect chart content */}
+                        <h4>Budget Allocation Status</h4>
+                        <p>Target: Rs {monthlyBudgetData.total_budget_amount.toLocaleString()}</p>
+                        <p>Allocated: Rs {totalCategoryLimitsSet.toLocaleString()}</p>
                     </div>
-                     {isLoadingMonthlyBudget ? <p>Loading chart...</p> :
-                         <ReactECharts option={budgetChartOptions} style={{ height: '150px', width: '100%' }} notMerge={true} lazyUpdate={true} key={monthlyBudgetData.total_budget_amount} />
+                     {isLoadingMonthlyBudget || isLoadingBudgetItems ? <p>Loading chart...</p> :
+                         <ReactECharts
+                            option={budgetChartOptions}
+                            style={{ height: '150px', width: '100%' }}
+                            notMerge={true} // Re-renders chart completely when options change
+                            lazyUpdate={true}
+                            // Key changes when relevant data changes to help force re-render if needed
+                            key={`${monthlyBudgetData.total_budget_amount}-${totalCategoryLimitsSet}`}
+                        />
                      }
                     <span className="chart-side-text left">0%</span> <span className="chart-side-text right">100%</span>
                 </div>
             </motion.section>
 
-            {/* --- Main Content Section (Category Budget Items List) --- */}
+            {/* Category Budget Limits Section */}
             <motion.section className="budget-main-content" initial="hidden" animate="visible" variants={sectionVariants}>
-                <motion.button
-                    className="add-budget-button"
-                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    variants={itemVariants}
-                    onClick={openAddBudgetItemModal}
-                    disabled={isLoadingCategories} // Disable if categories haven't loaded
-                >
-                    Add Category Budget Item
+                <motion.button className="add-budget-button" variants={itemVariants} onClick={openAddBudgetItemModal} disabled={isLoadingCategories}>
+                    Add Category Budget Limit
                 </motion.button>
 
                 {/* Filters */}
@@ -466,107 +436,85 @@ const BudgetManagementPage = () => {
                     </button>
                 </motion.div>
 
-                 {/* Error display for category items or categories fetch */}
+                 {/* Error Displays */}
                  {budgetItemsError ? <p className="error-message">{budgetItemsError}</p> : null}
                  {categoriesError ? <p className="error-message">{categoriesError}</p> : null}
 
                 {/* Table & Breakdown */}
                 <div className="table-breakdown-wrapper">
                     <motion.div className="budget-table-container" variants={itemVariants}>
-                         <h4 style={{ textAlign: 'center', marginBottom: '10px' }}>Category Budget Limits</h4>
+                         <h4 style={{ textAlign: 'center', marginBottom: '10px' }}>Category Budget Limits for {getCurrentYearMonth()}</h4>
                          {isLoadingBudgetItems ? <p>Loading category limits...</p> : (
                             <table className="budget-table" aria-label="Category Budget Limits List">
                                 <thead><tr><th scope="col">Category</th><th scope="col">Limit Amount</th><th scope="col">Description</th><th scope="col">Action</th></tr></thead>
                                 <tbody>
                                     {budgetItems.length > 0 ? (
                                         budgetItems.map((item) => (
-                                            // TODO: Update key and data access when API provides real items
-                                            <tr key={item._id || item.id}>
-                                                {/* Use categoryMap to display name based on category_id */}
-                                                <td>{categoryMap[item.category_id] || 'Unknown Category'}</td>
+                                            <tr key={item._id}>
+                                                <td>{item.category_id?.name || categoryMap[item.category_id] || 'Unknown'}</td>
                                                 <td>Rs.{item.limit_amount?.toLocaleString() || 0}</td>
                                                 <td>{item.description || '-'}</td>
                                                 <td className="action-cell">
-                                                    <motion.button whileTap={{ scale: 0.9 }} className="icon-button" title={`Edit Item`} onClick={() => openEditBudgetItemModal(item)}><EditIcon size={16} /></motion.button>
-                                                    <motion.button whileTap={{ scale: 0.9 }} className="icon-button" title={`Delete Item`} onClick={() => openDeleteBudgetItemModal(item._id || item.id)}><DeleteIcon size={16} /></motion.button>
+                                                    <motion.button whileTap={{ scale: 0.9 }} className="icon-button" title={`Edit Item`} onClick={() => openEditBudgetItemModal(item)} disabled={isLoadingBudgetItems}> <EditIcon size={16} /> </motion.button>
+                                                    <motion.button whileTap={{ scale: 0.9 }} className="icon-button" title={`Delete Item`} onClick={() => openDeleteBudgetItemModal(item._id)} disabled={isLoadingBudgetItems}> <DeleteIcon size={16} /> </motion.button>
                                                 </td>
                                             </tr>
                                         ))
-                                    ) : ( <tr><td colSpan="4" className="no-data-message">No category budget items found.</td></tr> )}
+                                    ) : ( <tr><td colSpan="4" className="no-data-message">No category budget limits found for this month.</td></tr> )}
                                 </tbody>
-                                {/* Optional Footer */}
                                 {budgetItems.length > 0 && (
-                                    <tfoot><tr><th scope="row">Total Set:</th><td><strong>Rs.{totalCategoryLimitsSet.toLocaleString()}</strong></td><td colSpan="2"></td></tr></tfoot>
+                                    <tfoot><tr><th scope="row">Total Limits Set:</th><td><strong>Rs.{totalCategoryLimitsSet.toLocaleString()}</strong></td><td colSpan="2"></td></tr></tfoot>
                                 )}
                             </table>
                          )}
                     </motion.div>
+                    {/* Category Breakdown */}
                     <motion.div className="category-breakdown" variants={itemVariants}>
-                        <h4>Category Breakdown (Simulated)</h4>
+                        {/* TODO: Update title when using real expense data */}
+                        <h4>Category Usage (Simulated)</h4>
                         {isLoadingCategories || isLoadingBudgetItems ? <p>Loading breakdown...</p> : null}
                          {categoryDataForBreakdown.length > 0 ? (
-                            categoryDataForBreakdown.map((cat, index) => (
-                                <div className="category-item" key={cat.name || index}>
-                                    <div className="category-info"><span>{cat.name}:</span><span>{cat.used.toLocaleString()} / {cat.total.toLocaleString()}</span></div>
+                            categoryDataForBreakdown.map((cat) => (
+                                <div className="category-item" key={cat.name}>
+                                    <div className="category-info"><span>{cat.name}:</span><span>Rs {cat.used.toLocaleString()} / {cat.total.toLocaleString()}</span></div>
                                     <div className="progress-bar-container" title={`Simulated Usage: ${(cat.total > 0 ? (cat.used / cat.total) * 100 : 0).toFixed(1)}%`}>
                                         <motion.div className="progress-bar-filled" initial={{ width: 0 }} animate={{ width: cat.total > 0 ? `${(cat.used / cat.total) * 100}%` : '0%' }} transition={{ duration: 0.8, ease: "easeOut" }}></motion.div>
                                     </div>
                                 </div>
                             ))
-                         ) : (!isLoadingCategories && !isLoadingBudgetItems ? <p className="no-data-message">No category data.</p> : null)}
+                         ) : (!isLoadingCategories && !isLoadingBudgetItems ? <p className="no-data-message">No category limits set.</p> : null)}
                     </motion.div>
                 </div>
             </motion.section>
 
-            {/* --- MODALS --- */}
-
-            {/* Modal for Adding/Editing CATEGORY Items */}
+            {/* --- Modals --- */}
+            {/* Add/Edit Category Limit Modal */}
             <Modal isOpen={isAddEditModalOpen} onClose={closeModal} title={editingBudgetItem ? "Edit Category Budget Limit" : "Add New Category Budget Limit"}>
                 <form onSubmit={handleCategoryItemFormSubmit} className="modal-form">
                     {budgetItemsError && <p className="error-message modal-error">{budgetItemsError}</p>}
                     <div className="form-group">
                         <label htmlFor="category_id">Category</label>
-                        <select
-                            id="category_id" name="category_id"
-                            className="select-field" required
-                            value={categoryItemFormData.category_id}
-                            onChange={handleCategoryItemFormChange}
-                            disabled={isLoadingCategories}
-                        >
-                             {isLoadingCategories ? <option>Loading...</option> : <option value="" disabled>-- Select Category --</option>}
+                        <select id="category_id" name="category_id" className="select-field" required value={categoryItemFormData.category_id} onChange={handleCategoryItemFormChange} disabled={isLoadingCategories}>
+                             {isLoadingCategories ? <option>Loading...</option> : <option value="" disabled>-- Select --</option>}
                              {availableCategories.map(cat => (<option key={cat._id} value={cat._id}>{cat.name}</option>))}
                         </select>
                     </div>
                     <div className="form-group">
                         <label htmlFor="limit_amount">Limit Amount (Rs)</label>
-                        <input
-                            type="number" id="limit_amount" name="limit_amount"
-                            className="input-field" required min="0.01" step="any"
-                            value={categoryItemFormData.limit_amount}
-                            onChange={handleCategoryItemFormChange}
-                            placeholder="e.g., 500"
-                         />
+                        <input type="number" id="limit_amount" name="limit_amount" className="input-field" required min="0.01" step="any" value={categoryItemFormData.limit_amount} onChange={handleCategoryItemFormChange} placeholder="e.g., 500" />
                     </div>
                     <div className="form-group">
                         <label htmlFor="description">Description (Optional)</label>
-                        <textarea
-                            id="description" name="description"
-                            className="textarea-field"
-                            value={categoryItemFormData.description}
-                            onChange={handleCategoryItemFormChange}
-                            placeholder="e.g., Monthly grocery limit"
-                         />
+                        <textarea id="description" name="description" className="textarea-field" value={categoryItemFormData.description} onChange={handleCategoryItemFormChange} placeholder="e.g., Monthly grocery limit" />
                     </div>
                     <div className="form-actions">
                         <motion.button type="button" className="secondary-button" onClick={closeModal} disabled={isLoadingBudgetItems}>Cancel</motion.button>
-                        <motion.button type="submit" className="primary-button" disabled={isLoadingBudgetItems}>
-                             {isLoadingBudgetItems ? "Saving..." : (editingBudgetItem ? "Save Changes" : "Add Limit")}
-                        </motion.button>
+                        <motion.button type="submit" className="primary-button" disabled={isLoadingBudgetItems}> {isLoadingBudgetItems ? "Saving..." : (editingBudgetItem ? "Save Changes" : "Add Limit")} </motion.button>
                     </div>
                 </form>
             </Modal>
 
-            {/* Modal for Editing/Creating OVERALL Monthly Budget */}
+            {/* Edit/Create Overall Monthly Budget Modal */}
             <Modal isOpen={isMonthlyBudgetModalOpen} onClose={closeModal} title={monthlyBudgetData._id ? "Edit Monthly Budget Settings" : "Create Monthly Budget Settings"}>
                 <form onSubmit={handleMonthlyBudgetFormSubmit} className="modal-form">
                     {monthlyBudgetError && <p className="error-message modal-error">{monthlyBudgetError}</p>}
@@ -584,22 +532,18 @@ const BudgetManagementPage = () => {
                     </div>
                     <div className="form-actions">
                         <motion.button type="button" className="secondary-button" onClick={closeModal} disabled={isLoadingMonthlyBudget}>Cancel</motion.button>
-                        <motion.button type="submit" className="primary-button" disabled={isLoadingMonthlyBudget}>
-                            {isLoadingMonthlyBudget ? "Saving..." : (monthlyBudgetData._id ? "Save Settings" : "Create Budget")}
-                        </motion.button>
+                        <motion.button type="submit" className="primary-button" disabled={isLoadingMonthlyBudget}> {isLoadingMonthlyBudget ? "Saving..." : (monthlyBudgetData._id ? "Save Settings" : "Create Budget")} </motion.button>
                     </div>
                 </form>
             </Modal>
 
-            {/* Modal for Deleting CATEGORY Items */}
+            {/* Delete Category Limit Modal */}
             <Modal isOpen={isDeleteModalOpen} onClose={closeModal} title="Confirm Deletion">
                  {budgetItemsError && <p className="error-message modal-error">{budgetItemsError}</p>}
                  <div className="confirmation-text">Are you sure you want to delete this category budget limit? This action cannot be undone.</div>
                  <div className="confirmation-actions">
                      <motion.button type="button" className="secondary-button" onClick={closeModal} disabled={isLoadingBudgetItems}>Cancel</motion.button>
-                     <motion.button type="button" className="primary-button delete-confirm-button" onClick={confirmDeleteItem} disabled={isLoadingBudgetItems}>
-                          {isLoadingBudgetItems ? "Deleting..." : "Confirm Delete"}
-                     </motion.button>
+                     <motion.button type="button" className="primary-button delete-confirm-button" onClick={confirmDeleteItem} disabled={isLoadingBudgetItems}> {isLoadingBudgetItems ? "Deleting..." : "Confirm Delete"} </motion.button>
                  </div>
             </Modal>
 

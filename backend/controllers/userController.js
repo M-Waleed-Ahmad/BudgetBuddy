@@ -9,7 +9,6 @@ const getUserProfile = async (req, res) => {
     try {
         // req.user is attached by verifyToken middleware and contains { userId: '...' }
         const user = await User.findById(req.user.userId).select('-password_hash'); // Exclude password hash
-        console.log("User Profile:", user); // Debugging line
         if (user) {
             res.json({
                 _id: user._id, // Use _id for consistency with MongoDB
@@ -85,15 +84,11 @@ const updateUserProfile = async (req, res) => {
 
 const updateCurrencyPreference = async (req, res) => {
     try {
-      console.log("Request body for currency preference update:", req.body); // Debugging line
         const user = await User.findById(req.user.userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         const { currency_preference, expenseApproval } = req.body; // Destructure the request body
-        console.log("User before update:", user); // Debugging line
-        console.log("Currency preference to update:", currency_preference); // Debugging line
-        console.log("Expense approval to update:", expenseApproval); // Debugging line
         user.currency_preference = req.body.currency_preference || user.currency_preference;
         user.expenseApproval = expenseApproval; // Update expense approval if provided
         await user.save();
@@ -112,9 +107,6 @@ const updateUI = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         const { darkMode, language } = req.body; // Destructure the request body
-        console.log("User before update:", user); // Debugging line
-        console.log("Dark mode to update:", darkMode); // Debugging line
-        console.log("Language to update:", language); // Debugging line
         user.darkMode = darkMode; // Update dark mode if provided
         user.language = language; // Update language if provided
         await user.save();

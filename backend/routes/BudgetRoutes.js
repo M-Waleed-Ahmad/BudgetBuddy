@@ -6,12 +6,13 @@ const {
     createBudget,
     updateBudget,
     deleteBudget,
+    getUserBudgetsForMonth,
 } = require('../controllers/BudgetController');
 
 const router = express.Router();
 
 // Get all budgets
-router.get('/', verifyToken, getAllBudgets);
+router.get('/', verifyToken, getUserBudgetsForMonth);
 
 // Create a new budget
 router.post('/', verifyToken, createBudget);

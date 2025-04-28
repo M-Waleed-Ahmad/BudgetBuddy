@@ -26,18 +26,14 @@ const getMonthlyBudgetById = async (req, res) => {
 // Create a new monthly budget
 const createMonthlyBudget = async (req, res) => {
     try {
-        console.log("Creating budget with data:", req.body); // Debugging line
         // Validate start and end dates
         const start_date = req.body.start_date || new Date(); // Default to current date if not provided
         const end_date = req.body.end_date || new Date(); // Default to current date if not provided
         const user_id = req.user.userId; // Assuming you have user ID from the token
         const month_year = start_date.substring(0, 7); // Extract 'YYYY-MM' from start_date
         const total_budget_amount = req.body.totalAmount || 0; // Default to 0 if not provided
-        console.log("Month year:", month_year); // Debugging line
-        console.log("User ID:", user_id); // Debugging line
 
         if (new Date(start_date) > new Date(end_date)) {
-            console.log("Start date is after end date"); // Debugging line
             return res.status(400).json({ message: 'Start date cannot be after end date' });
         }
         const newBudget = new MonthlyBudget({
@@ -84,12 +80,10 @@ const deleteMonthlyBudget = async (req, res) => {
 const getCurrentMonthBudget = async (req, res) => {
     try {
         const currentDate = new Date();
-        console.log("Current date:", currentDate); // Debugging line
         const budget = await MonthlyBudget.findOne({
             user_id: req.user.userId,
             month_year: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
         });
-        console.log("Current month budget:", budget); // Debugging line
         if (!budget) {
             return res.status(200).json({ message: 'Budget for the current month not found' });
         }

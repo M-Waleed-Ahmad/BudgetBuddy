@@ -298,7 +298,7 @@ export const updateMonthlyBudget = async (budgetId, budgetData) => {
 }
 
 // --- Budget Item APIs ---
-export const addBudgetItem = async (budgetId, itemData) => {
+export const addBudgetItem = async (itemData) => {
   try {
     console.log("Adding budget item with data:", itemData); // Debugging line
     const response = await fetch(`${BASE_URL}/budgets/`, {
@@ -318,41 +318,93 @@ export const addBudgetItem = async (budgetId, itemData) => {
     throw error;
   }
 }
-export const updateBudgetItem = async (budgetId, itemId, itemData) => {
+export const updateBudgetItem = async (itemId, itemData) => { // Takes the specific item's ID and the data
+  if (!itemId) {
+    console.error("Item ID is required for update");
+    throw new Error("Item ID is required");
+  }
   try {
-    const response = await fetch(`${BASE_URL}/monthly-budgets/${budgetId}/items/${itemId}`, {
+    // Correct endpoint: PUT /api/budgets/:id
+    const response = await fetch(`${BASE_URL}/budgets/${itemId}`, { // Use itemId directly
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify(itemData),
+      body: JSON.stringify(itemData), // Send only the fields to be updated
     });
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to update budget item');
+      // Use the error message from the backend if available
+      throw new Error(data.message || `Failed to update budget item (ID: ${itemId})`);
     }
 
-    return data; // Return the updated budget item data
+    // Return the updated budget item data (backend sends it due to {new: true})
+    return data;
   } catch (error) {
-    console.error('❌ Error updating budget item:', error);
-    throw error;
+    console.error(`❌ Error updating budget item ${itemId}:`, error);
+    throw error; // Re-throw the error for the component to catch
   }
 }
-export const deleteBudgetItem = async (budgetId, itemId) => {
+
+
+export const deleteBudgetItem = async (itemId) => { // Takes the specific item's ID
+  if (!itemId) {
+      console.error("Item ID is required for delete");
+      throw new Error("Item ID is required");
+  }
   try {
-    const response = await fetch(`${BASE_URL}/monthly-budgets/${budgetId}/items/${itemId}`, {
-      method: 'DELETE',
+      // Correct endpoint: DELETE /api/budgets/:id
+      const response = await fetch(`${BASE_URL}/budgets/${itemId}`, { // Use itemId directly
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+          // No body needed for DELETE
+      });
+
+      // Check for successful deletion (status 200 OK with message, or 204 No Content)
+      if (response.status === 204) {
+          return { message: 'Budget item deleted successfully' }; // Simulate a success message if backend sends 204
+      }
+
+      const data = await response.json(); // Try to parse JSON for potential error messages or success message
+      if (!response.ok) {
+          // Use the error message from the backend if available
+          throw new Error(data.message || `Failed to delete budget item (ID: ${itemId})`);
+      }
+
+      // Return success data/message from backend if status was 200
+      return data;
+  } catch (error) {
+      console.error(`❌ Error deleting budget item ${itemId}:`, error);
+      throw error; // Re-throw the error for the component to catch
+  }
+}
+
+
+export const getBudgetsForMonth = async (monthYear) => { // Accepts YYYY-MM format
+  if (!monthYear) {
+    console.error("MonthYear is required for getBudgetsForMonth");
+    throw new Error("MonthYear is required");
+  }
+  try {
+    // Call the GET endpoint with monthYear as a query parameter
+    const response = await fetch(`${BASE_URL}/budgets?monthYear=${monthYear}`, { // Note the query param
+      method: 'GET',
       headers: getAuthHeaders(),
     });
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to delete budget item');
+      throw new Error(data.message || 'Failed to fetch budget items for the month');
     }
 
-    return data; // Return the response message or deleted item data
+    // Expecting an array of budget items like:
+    // [{ _id: '...', user_id: '...', month_year: '...', limit_amount: ..., category_id: { _id: 'cat1', name: 'Food'}, description: '...' }, ...]
+    return data;
   } catch (error) {
-    console.error('❌ Error deleting budget item:', error);
+    console.error(`❌ Error fetching budget items for ${monthYear}:`, error);
     throw error;
   }
 }
+
+
+
 
