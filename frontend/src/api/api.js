@@ -585,6 +585,28 @@ export const deleteExpense = async (expenseId) => {
   }
 };
 
+export const getCategoryWiseSpendingForCurrentMonth = async () => {
+  const endpoint = `${BASE_URL}/expenses/current-month/category-wise`;
+  console.log(`API Call: GET ${endpoint}`); // Debug log
+  try {
+      const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: getAuthHeaders(),
+      });
+
+      const data = await response.json(); // Always try to parse JSON
+
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to fetch category-wise spending (Status: ${response.status})`);
+      }
+
+      return data; // Returns the category-wise spending data
+  } catch (error) {
+      console.error('❌ Network/Fetch Error in getCategoryWiseSpendingForCurrentMonth:', error);
+      throw new Error(error.message || 'Network error while fetching category-wise spending.');
+  }
+};
 // --- Other existing API functions can remain here ---
 // ... getCurrentMonthBudget, createMonthlyBudget, updateMonthlyBudget ...
 // ... getCategories ...

@@ -183,11 +183,80 @@ const  deleteExpense = async (req, res) => {
         res.status(500).json({ message: 'Server error while deleting expense', error: error.message });
     }
 };
+// --- Get Amounts Spent Per Category for Current Month ---
+const getCategoryWiseSpendingForCurrentMonth = async (req, res) => {
+    try {
+        const userId = req.user.userId; // Assuming JWT middleware adds userId to req.user
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
 
+        const currentMonthYear = getCurrentYearMonth();
+
+        // Find the current monthly budget plan to get the date range
+        const currentPlan = await MonthlyBudget.findOne({
+            user_id: userId,
+            month_year: currentMonthYear
+        });
+
+        if (!currentPlan) {
+            console.log(`No monthly budget plan found for user ${userId} for month ${currentMonthYear}`);
+            return res.status(200).json({ categoryWiseSpending: [] });
+        }
+
+        const startDate = currentPlan.start_date;
+        const endDate = currentPlan.end_date;
+
+        console.log(`Fetching category-wise spending for user ${userId} between ${startDate} and ${endDate}`);
+
+        // Aggregate expenses to calculate total amount spent per category
+        const categoryWiseSpending = await Expense.aggregate([
+            {
+                $match: {
+                    user_id: mongoose.Types.ObjectId(userId),
+                    expense_date: {
+                        $gte: new Date(startDate),
+                        $lte: new Date(endDate)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$category_id",
+                    totalSpent: { $sum: "$amount" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "categories", // Assuming the collection name for categories is 'categories'
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            {
+                $unwind: "$category"
+            },
+            {
+                $project: {
+                    categoryName: "$category.name",
+                    totalSpent: 1
+                }
+            }
+        ]);
+
+        res.status(200).json({ categoryWiseSpending });
+
+    } catch (error) {
+        console.error('Error fetching category-wise spending for current month:', error);
+        res.status(500).json({ message: 'Server error while fetching category-wise spending', error: error.message });
+    }
+};
 
 module.exports = {
     getExpensesForCurrentMonthPlan,
     addExpense,
     updateExpense,
-    deleteExpense
+    deleteExpense,
+    getCategoryWiseSpendingForCurrentMonth
 };

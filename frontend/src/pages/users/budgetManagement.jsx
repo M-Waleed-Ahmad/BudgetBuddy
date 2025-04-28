@@ -19,6 +19,7 @@ import {
     deleteBudgetItem,   // Deletes a category limit
     // TODO: Import function to fetch expenses when implementing usage tracking
     // getExpensesForMonth,
+    fetchExpensesForCurrentMonth, // Placeholder for future use
 } from '../../api/api'; // Adjust path if needed
 
 // --- Icons ---
@@ -82,6 +83,40 @@ const BudgetManagementPage = () => {
 
     const selectedMonthYear = useMemo(() => getCurrentYearMonth(), []); // Currently fixed to current month
 
+    const [categoryWiseSpending, setCategoryWiseSpending] = useState([]); // Placeholder for future use
+    
+    const fetchExpensesForCurrent = useCallback(async () => {
+        try {
+            const data = await fetchExpensesForCurrentMonth(); // Placeholder for future use
+            console.log("Fetched expenses for current month:", data);
+    
+            const categorys = calculateCategoryWiseSpending(data.expenses); // Calculating from fetched expenses
+            setCategoryWiseSpending(categorys);
+    
+            console.log("Category-wise spending:", categorys); // log 'categorys', not 'categoryWiseSpending'
+    
+        } catch (error) {
+            console.error("Error fetching expenses for current month:", error);
+            setCategoryWiseSpending([]);
+        }
+    }, []);
+    
+    const calculateCategoryWiseSpending = (expenses) => {
+        const categoryTotals = {};
+    
+        expenses.forEach(expense => {
+            const categoryName = expense.category_id.name; // assuming category_id has a 'name' field
+            if (categoryTotals[categoryName]) {
+                categoryTotals[categoryName] += expense.amount;
+            } else {
+                categoryTotals[categoryName] = expense.amount;
+            }
+        });
+        console.log("Category totals:", categoryTotals);
+        return categoryTotals;
+    };
+    
+    
 
     // --- Data Fetching Callbacks ---
     const fetchMonthlyBudget = useCallback(async () => {
@@ -90,7 +125,7 @@ const BudgetManagementPage = () => {
         try {
             const data = await getCurrentMonthBudget();
             if (data && data._id) {
-                setMonthlyBudgetData({
+               setMonthlyBudgetData({
                     _id: data._id,
                     total_budget_amount: data.total_budget_amount || 0,
                     start_date: data.start_date ? new Date(data.start_date).toISOString().split('T')[0] : '',
@@ -155,8 +190,9 @@ const BudgetManagementPage = () => {
              fetchCategoryBudgetItems(selectedMonthYear);
         });
         fetchMonthlyBudget();
+        fetchExpensesForCurrent(); // Placeholder for future use
         // Order matters if one fetch depends on data from another (like categoryMap for display)
-    }, [fetchMonthlyBudget, fetchCategories, fetchCategoryBudgetItems, selectedMonthYear]);
+    }, [fetchMonthlyBudget, fetchCategories, fetchCategoryBudgetItems, selectedMonthYear]); // Removed fetchExpensesForCurrentMonth from dependencies
 
 
     // --- Derived State & Calculations ---
@@ -175,8 +211,10 @@ const BudgetManagementPage = () => {
                 acc[categoryId] = { name: categoryName, used: 0, total: 0 };
             }
             acc[categoryId].total += limit;
-            // Simulate usage (replace with actual fetched expense sum for this category/month)
-            acc[categoryId].used += limit * (Math.random() * 0.7);
+            // Using CategoryWiseSpending fetched from the backend 
+            const usedAmount = categoryWiseSpending[categoryName] || 0; // Placeholder for actual used amount
+            acc[categoryId].used += usedAmount; // Simulated usage for now
+            
             return acc;
         }, {});
 

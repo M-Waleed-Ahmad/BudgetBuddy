@@ -12,6 +12,12 @@ router.get(
     expenseController.getExpensesForCurrentMonthPlan
 );
 
+router.get(
+    '/current-month/category-wise',
+    verifyToken  ,
+    expenseController.getCategoryWiseSpendingForCurrentMonth
+);
+
 // POST /api/expenses - Add a new expense
 router.post('/', verifyToken  , expenseController.addExpense);
 

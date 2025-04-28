@@ -223,10 +223,7 @@ const ExpenseManagementPage = () => {
 
 
     // --- Derived State & Calculations ---
-    const totalCategoryLimitsSet = useMemo(() => {
-        return budgetItems.reduce((sum, item) => sum + (Number(item.limit_amount) || 0), 0);
-    }, [budgetItems]);
-
+  
     const budgetRemaining = useMemo(() => Math.max(0, (monthlyBudgetData.total_budget_amount || 0) - totalSpent), [monthlyBudgetData.total_budget_amount, totalSpent]);
     const budgetSpentPercentage = useMemo(() => {
         const target = monthlyBudgetData.total_budget_amount || 0;
@@ -244,28 +241,7 @@ const ExpenseManagementPage = () => {
     }, [budgetedCategoryMap]);
 
 
-    // --- ECharts Options (Overall Target vs. Sum of Category Limits) ---
-    const budgetChartOptions = useMemo(() => {
-        const targetAmount = monthlyBudgetData.total_budget_amount || 0;
-        const totalLimits = totalCategoryLimitsSet;
-        const remainingUnallocatedTarget = Math.max(0, targetAmount - totalLimits);
-        const chartData = [];
-
-        if (totalLimits > 0) chartData.push({ value: Math.round(totalLimits), name: 'Allocated', itemStyle: { color: '#34c759' } });
-        if (remainingUnallocatedTarget > 0) chartData.push({ value: Math.round(remainingUnallocatedTarget), name: 'Unallocated', itemStyle: { color: '#ff9500' } });
-        if (chartData.length === 0) chartData.push({ value: 1, name: 'No Budget/Limits', itemStyle: { color: '#cccccc' } }); // Placeholder
-
-        return {
-            tooltip: { trigger: 'item', formatter: (p) => `${p.name}: Rs ${p.value.toLocaleString()} (${p.percent}%)` },
-            legend: { show: false },
-            series: [{
-                name: 'Target Allocation', type: 'pie', radius: ['65%', '85%'], avoidLabelOverlap: false,
-                label: { show: false }, emphasis: { label: { show: false } }, labelLine: { show: false },
-                data: chartData, animationType: 'scale', animationEasing: 'elasticOut',
-            }]
-        };
-    }, [monthlyBudgetData.total_budget_amount, totalCategoryLimitsSet]);
-
+ 
     // --- Animation Variants ---
     const itemVariants = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } } };
     const pageVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
