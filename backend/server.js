@@ -5,8 +5,8 @@ const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes'); // <-- Import category routes
 const userRoutes = require('./routes/userRoutes');
 const inviteRoutes = require('./routes/inviteRoutes'); // <-- Import invite routes
-
-
+const MonthlyBudgetRoutes = require('./routes/MonthlyBudgetRoutes'); // <-- Import budget routes
+const BudgetRoutes = require('./routes/BudgetRoutes'); // <-- Import budget routes
 const cors = require('cors');
 dotenv.config();
 const app = express();
@@ -26,6 +26,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/categories', categoryRoutes); // <-- Use category routes
+app.use('/api/monthly-budgets', MonthlyBudgetRoutes); // <-- Use budget routes
+app.use('/api/budgets', BudgetRoutes); // <-- Use budget routes
 
 app.use('/api/invites', inviteRoutes); // <-- Use invite routes
 

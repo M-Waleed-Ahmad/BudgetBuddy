@@ -232,3 +232,127 @@ export const rejectInvitation = async (inviteId) => {
   if (!response.ok) throw new Error(data.message || 'Failed to reject invitation');
   return data;
 };
+
+
+
+export const getCurrentMonthBudget = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/monthly-budgets/current`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { message: 'Budget for the current month not found' };
+      }
+      throw new Error(data.message || 'Failed to fetch current month budget');
+    }
+
+    return data; // Return the budget data if found
+  } catch (error) {
+    console.error('❌ Error fetching current month budget:', error);
+    throw error;
+  }
+};
+
+export const createMonthlyBudget = async (budgetData) => {
+  try {
+    console.log("Creating monthly budget with data:", budgetData); // Debugging line
+    const response = await fetch(`${BASE_URL}/monthly-budgets`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(budgetData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create monthly budget');
+    }
+
+    return data; // Return the created budget data
+  } catch (error) {
+    console.error('❌ Error creating monthly budget:', error);
+    throw error;
+  }
+}
+export const updateMonthlyBudget = async (budgetId, budgetData) => {
+  try {
+    const response = await fetch(`${BASE_URL}/monthly-budgets/${budgetId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(budgetData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update monthly budget');
+    }
+
+    return data; // Return the updated budget data
+  } catch (error) {
+    console.error('❌ Error updating monthly budget:', error);
+    throw error;
+  }
+}
+
+// --- Budget Item APIs ---
+export const addBudgetItem = async (budgetId, itemData) => {
+  try {
+    console.log("Adding budget item with data:", itemData); // Debugging line
+    const response = await fetch(`${BASE_URL}/budgets/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(itemData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add budget item');
+    }
+
+    return data; // Return the added budget item data
+  } catch (error) {
+    console.error('❌ Error adding budget item:', error);
+    throw error;
+  }
+}
+export const updateBudgetItem = async (budgetId, itemId, itemData) => {
+  try {
+    const response = await fetch(`${BASE_URL}/monthly-budgets/${budgetId}/items/${itemId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(itemData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update budget item');
+    }
+
+    return data; // Return the updated budget item data
+  } catch (error) {
+    console.error('❌ Error updating budget item:', error);
+    throw error;
+  }
+}
+export const deleteBudgetItem = async (budgetId, itemId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/monthly-budgets/${budgetId}/items/${itemId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to delete budget item');
+    }
+
+    return data; // Return the response message or deleted item data
+  } catch (error) {
+    console.error('❌ Error deleting budget item:', error);
+    throw error;
+  }
+}
+
