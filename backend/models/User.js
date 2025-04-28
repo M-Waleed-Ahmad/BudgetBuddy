@@ -7,7 +7,10 @@ const userSchema = new mongoose.Schema({
   password_hash: String,
   profileImage: String,  // new field
   currency_preference: { type: String, default: "USD" },
-  created_at: { type: Date, default: Date.now }
+  expenseApproval: { type: Boolean, default: false }, // new field
+  created_at: { type: Date, default: Date.now },
+  language: { type: String, default: "en" }, // new field
+  darkMode: { type: Boolean, default: false }, // new field
 });
 
 module.exports = mongoose.model("User", userSchema);
