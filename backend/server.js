@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const inviteRoutes = require('./routes/inviteRoutes'); // <-- Import invite routes
 const MonthlyBudgetRoutes = require('./routes/MonthlyBudgetRoutes'); // <-- Import budget routes
 const BudgetRoutes = require('./routes/BudgetRoutes'); // <-- Import budget routes
+const ExpenseRoutes = require('./routes/expenseRoutes'); // <-- Import expense routes
 const cors = require('cors');
 dotenv.config();
 const app = express();
@@ -30,7 +31,7 @@ app.use('/api/monthly-budgets', MonthlyBudgetRoutes); // <-- Use budget routes
 app.use('/api/budgets', BudgetRoutes); // <-- Use budget routes
 
 app.use('/api/invites', inviteRoutes); // <-- Use invite routes
-
+app.use('/api/expenses', ExpenseRoutes); // <-- Use expense routes
 
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGO_URI)

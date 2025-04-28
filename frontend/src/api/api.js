@@ -408,3 +408,184 @@ export const getBudgetsForMonth = async (monthYear) => { // Accepts YYYY-MM form
 
 
 
+
+
+// api/api.js
+
+// Assume BASE_URL and getAuthHeaders() are defined elsewhere in this file or imported
+// Example:
+// const BASE_URL = '/api'; // Or e.g., 'http://localhost:5001/api'
+// const getAuthHeaders = () => {
+//     const token = localStorage.getItem('authToken'); // Or however you store your token
+//     return {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${token}`
+//     };
+// };
+
+
+// ==========================================================================
+// Expense APIs
+// ==========================================================================
+
+/**
+ * Fetches expenses for the current user within the date range defined
+ * by their active MonthlyBudget plan for the current calendar month.
+ * @async
+ * @returns {Promise<{expenses: Array<object>, totalSpent: number}>} Object containing the list of expenses and the total amount spent.
+ * @throws {Error} If the fetch fails or the response is not ok.
+ */
+export const fetchExpensesForCurrentMonth = async () => {
+  const endpoint = `${BASE_URL}/expenses/current-month-plan`;
+  console.log(`API Call: GET ${endpoint}`); // Debug log
+  try {
+      const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: getAuthHeaders(),
+      });
+
+      const data = await response.json(); // Always try to parse JSON
+
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to fetch expenses (Status: ${response.status})`);
+      }
+
+      // Ensure the returned object has the expected structure
+      return {
+          expenses: data.expenses || [],
+          totalSpent: data.totalSpent || 0
+      };
+  } catch (error) {
+      console.error('❌ Network/Fetch Error in fetchExpensesForCurrentMonth:', error);
+      // Re-throw the specific error message or a generic one
+      throw new Error(error.message || 'Network error while fetching current month expenses.');
+  }
+};
+
+/**
+* Adds a new expense record for the logged-in user.
+* @async
+* @param {object} expenseData - The expense data.
+* @param {string} expenseData.category_id - The ID of the category.
+* @param {number} expenseData.amount - The expense amount (positive number).
+* @param {string} expenseData.expense_date - The date of the expense (YYYY-MM-DD or ISO string).
+* @param {string} [expenseData.description] - Optional description.
+* @returns {Promise<object>} The newly created expense object (potentially populated by the backend).
+* @throws {Error} If the fetch fails or the response is not ok.
+*/
+export const addExpense = async (expenseData) => {
+  const endpoint = `${BASE_URL}/expenses`;
+  console.log(`API Call: POST ${endpoint} with data:`, expenseData); // Debug log
+  try {
+      const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(expenseData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to add expense (Status: ${response.status})`);
+      }
+
+      return data; // Returns the saved expense object
+  } catch (error) {
+      console.error('❌ Network/Fetch Error in addExpense:', error);
+      throw new Error(error.message || 'Network error while adding expense.');
+  }
+};
+
+/**
+* Updates an existing expense record.
+* @async
+* @param {string} expenseId - The ID (_id) of the expense to update.
+* @param {object} expenseData - An object containing the fields to update.
+* @param {string} [expenseData.category_id] - Optional new category ID.
+* @param {number} [expenseData.amount] - Optional new amount (positive number).
+* @param {string} [expenseData.expense_date] - Optional new date (YYYY-MM-DD or ISO string).
+* @param {string} [expenseData.description] - Optional new description.
+* @returns {Promise<object>} The updated expense object (potentially populated by the backend).
+* @throws {Error} If expenseId is missing, fetch fails, or response is not ok.
+*/
+export const updateExpense = async (expenseId, expenseData) => {
+  if (!expenseId) {
+      console.error("Update Expense Error: expenseId is required.");
+      throw new Error("Expense ID is required for update");
+  }
+  const endpoint = `${BASE_URL}/expenses/${expenseId}`;
+  console.log(`API Call: PUT ${endpoint} with data:`, expenseData); // Debug log
+  try {
+      const response = await fetch(endpoint, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(expenseData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to update expense (Status: ${response.status})`);
+      }
+
+      return data; // Returns the updated expense object
+  } catch (error) {
+      console.error(`❌ Network/Fetch Error in updateExpense (ID: ${expenseId}):`, error);
+      throw new Error(error.message || 'Network error while updating expense.');
+  }
+};
+
+/**
+* Deletes an expense record.
+* @async
+* @param {string} expenseId - The ID (_id) of the expense to delete.
+* @returns {Promise<object>} Success message object (e.g., { message: '...' }) or empty for 204.
+* @throws {Error} If expenseId is missing, fetch fails, or response indicates an error.
+*/
+export const deleteExpense = async (expenseId) => {
+  if (!expenseId) {
+      console.error("Delete Expense Error: expenseId is required.");
+      throw new Error("Expense ID is required for delete");
+  }
+  const endpoint = `${BASE_URL}/expenses/${expenseId}`;
+  console.log(`API Call: DELETE ${endpoint}`); // Debug log
+  try {
+      const response = await fetch(endpoint, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+      });
+
+      // Handle 204 No Content specifically - success, but no body to parse
+      if (response.status === 204) {
+          console.log(`API Success (204) from ${endpoint}`);
+          return { message: 'Expense deleted successfully' }; // Provide consistent success feedback
+      }
+
+      const data = await response.json(); // Only parse if not 204
+
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to delete expense (Status: ${response.status})`);
+      }
+
+      console.log(`API Success (${response.status}) from ${endpoint}:`, data);
+      return data; // Return success message from backend if status 200/OK
+  } catch (error) {
+      console.error(`❌ Network/Fetch Error in deleteExpense (ID: ${expenseId}):`, error);
+      // Check if the error is due to trying to parse JSON from an empty 204 response
+      if (error instanceof SyntaxError && error.message.includes('Unexpected end of JSON input')) {
+           // This can happen if the server sends 204 but fetch still tries parsing. Treat as success.
+           console.warn("Caught SyntaxError likely due to 204 No Content response. Treating as success.");
+           return { message: 'Expense deleted successfully' };
+      }
+      throw new Error(error.message || 'Network error while deleting expense.');
+  }
+};
+
+// --- Other existing API functions can remain here ---
+// ... getCurrentMonthBudget, createMonthlyBudget, updateMonthlyBudget ...
+// ... getCategories ...
+// ... getBudgetsForMonth, addBudgetItem, updateBudgetItem, deleteBudgetItem ...
