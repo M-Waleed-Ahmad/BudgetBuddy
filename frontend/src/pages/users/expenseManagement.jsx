@@ -376,7 +376,7 @@ const ExpenseManagementPage = () => {
                                 <p><WalletIcon size={14} /> Spent: Rs {totalSpent.toLocaleString()}</p>
                                 <p><WalletIcon size={14} /> Remaining: Rs {budgetRemaining.toLocaleString()}</p>
                                 <div className="budget-progress-bar-container" title={`Spent ${budgetSpentPercentage}% of target`}>
-                                     <motion.div className="budget-progress-bar-filled" style={{backgroundColor: budgetSpentPercentage > 100 ? '#ff3b30' : '#34c759'}} initial={{ width: 0 }} animate={{ width: `${Math.min(100, budgetSpentPercentage)}%` }} transition={{ duration: 0.8, ease: "easeOut" }}>
+                                     <motion.div className="budget-progress-bar-filled" style={{backgroundColor: budgetSpentPercentage > 100 ? '#ff3b30' : 'ff3b30'}} initial={{ width: 0 }} animate={{ width: `${Math.min(100, budgetSpentPercentage)}%` }} transition={{ duration: 0.8, ease: "easeOut" }}>
                                         <span className="progress-percentage">{budgetSpentPercentage}%</span>
                                     </motion.div>
                                 </div>
