@@ -1,0 +1,234 @@
+/* General Page Structure */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa; /* Light page background */
+  }
+  
+  .notifications-content {
+    flex-grow: 1;
+    padding: 25px 40px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #333;
+    max-width: 900px; /* Limit content width for readability */
+    margin: 0 auto; /* Center content */
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .page-title {
+    font-size: 2rem; /* Larger title */
+    font-weight: 600;
+    color: #2c3e50; /* Darker title */
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    /* Optional: Add a border below title */
+    /* border-bottom: 1px solid #e0e0e0; */
+  }
+  
+  /* Notifications List Container */
+  .notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between notification items */
+  }
+  
+  /* Individual Notification Item */
+  .notification-item {
+    background-color: #ffffff;
+    padding: 18px 22px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease-in-out;
+  }
+  
+  .notification-item:hover {
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); /* Slightly raise on hover */
+  }
+  
+  .notification-date {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #34495e; /* Dark grey */
+    margin: 0 0 8px 0;
+  }
+  
+  .notification-text {
+    font-size: 0.95rem;
+    color: #555; /* Standard text color */
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+    /* Prevent overflow if text is extremely long without spaces */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .notification-time {
+    font-size: 0.85rem;
+    color: #888; /* Lighter grey for timestamp */
+    display: block; /* Put time on its own line visually */
+  }
+  
+  /* Responsiveness */
+  @media (max-width: 768px) {
+    .notifications-content {
+      padding: 20px;
+    }
+    .page-title {
+      font-size: 1.7rem;
+      margin-bottom: 20px;
+    }
+    .notification-item {
+        padding: 15px 18px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+      .notifications-content {
+          padding: 15px;
+      }
+      .page-title {
+          font-size: 1.5rem;
+      }
+      .notification-date { font-size: 1rem; }
+      .notification-text { font-size: 0.9rem; }
+      .notification-time { font-size: 0.8rem; }
+  }
+
+/* --- Keep previous styles for .page-container, .notifications-content, .page-title --- */
+
+/* Notifications List Container */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Individual Notification Item */
+  .notification-item {
+    background-color: #ffffff;
+    padding: 18px 22px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease-in-out, background-color 0.2s ease, opacity 0.2s ease;
+    display: flex; /* Use flexbox to align content and actions */
+    justify-content: space-between; /* Push content and actions apart */
+    align-items: flex-start; /* Align items to the top */
+    gap: 15px; /* Gap between content and actions */
+  }
+  
+  .notification-item:hover {
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Styles for Read Notifications */
+  .notification-item.read {
+      background-color: #f8f9fa; /* Slightly grey background */
+      opacity: 0.85; /* Slightly faded */
+      /* border-left: 4px solid #adb5bd; */ /* Optional: add a side border */
+  }
+  .notification-item.read:hover {
+       opacity: 1; /* Become fully visible on hover */
+       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); /* Less pronounced hover shadow */
+  }
+  
+  /* Main content area within the item */
+  .notification-main-content {
+      flex-grow: 1; /* Allow content to take available space */
+  }
+  
+  .notification-date {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #34495e;
+    margin: 0 0 8px 0;
+  }
+  /* Dim date if read */
+  .notification-item.read .notification-date {
+      color: #6c757d;
+  }
+  
+  
+  .notification-text {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  /* Dim text if read */
+  .notification-item.read .notification-text {
+      color: #6c757d;
+  }
+  
+  
+  .notification-time {
+    font-size: 0.85rem;
+    color: #888;
+    display: block;
+  }
+  
+  /* Actions container */
+  .notification-actions {
+    display: flex;
+    gap: 8px; /* Space between action buttons */
+    flex-shrink: 0; /* Prevent actions container from shrinking */
+    margin-left: 10px; /* Ensure some space from text */
+  }
+  
+  /* Action Buttons */
+  .action-button {
+    background: none;
+    border: none;
+    padding: 5px; /* Clickable area */
+    cursor: pointer;
+    border-radius: 50%; /* Circular background on hover/focus */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease;
+    color: #6c757d; /* Default icon color */
+  }
+  
+  .action-button:hover {
+    background-color: #e9ecef; /* Light grey background on hover */
+    color: #343a40; /* Darker icon color on hover */
+  }
+  
+  .action-button.mark-read-button:hover {
+      color: #28a745; /* Green hover for mark read */
+  }
+  .action-button.delete-button:hover {
+      color: #dc3545; /* Red hover for delete */
+  }
+  
+  /* Message for no notifications */
+  .no-notifications-message {
+      text-align: center;
+      color: #6c757d;
+      margin-top: 30px;
+      font-style: italic;
+  }
+  
+  
+  /* --- Keep Responsiveness rules --- */
+  @media (max-width: 768px) {
+    .notifications-content { padding: 20px; }
+    .page-title { font-size: 1.7rem; margin-bottom: 20px; }
+    .notification-item { padding: 15px 18px; flex-direction: column; align-items: flex-start;} /* Stack content and actions */
+    .notification-actions { margin-left: 0; margin-top: 10px; width: 100%; justify-content: flex-end;} /* Align actions right */
+  }
+  
+  @media (max-width: 480px) {
+      .notifications-content { padding: 15px; }
+      .page-title { font-size: 1.5rem; }
+      .notification-date { font-size: 1rem; }
+      .notification-text { font-size: 0.9rem; }
+      .notification-time { font-size: 0.8rem; }
+      .action-button { padding: 4px; }
+  }

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import { useNavigate, useLocation } from 'react-router-dom'; // Import hooks
 import '../styles/login.css';
-
+import { loginUser } from '../api/api'; // Adjust the import path as necessary
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,40 +9,52 @@ const Login = () => {
     password: '',
   });
 
+  // --- React Router Hooks ---
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine where to redirect after login
+  // Defaults to '/dashboard' if no previous location was passed in state
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  // --- Redirect if already logged in ---
+   useEffect(() => {
+       const token = localStorage.getItem('token');
+       if (token) {
+           // Already logged in, redirect away from login page
+           console.log("Already logged in, redirecting to:", from); // Log for debugging
+           navigate(from || '/dashboard', { replace: true });
+       }
+       // Add navigate and from to dependency array if your linter suggests it,
+       // though often not strictly necessary for this redirect logic.
+   }, [navigate, from]); // Rerun if navigation function or target changes
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        alert(data.message || 'Login failed');
-        return;
-      }
-  
+      // Assuming loginUser handles the API call and returns { token: "..." } on success
+      const data = await loginUser(formData);
+
       console.log('✅ Login successful:', data);
-      // Optionally store token in localStorage or context
-      localStorage.setItem('token', data.token);
-      alert('Login successful!');
-      // Redirect to dashboard or homepage
+      localStorage.setItem('token', data.token); // Store the token
+      // alert('Login successful!'); // Optional: Remove alert for smoother UX
+
+      // --- Redirect using navigate ---
+      // Navigate to the intended page ('from') or default to '/dashboard'
+      // 'replace: true' prevents the login page from being in the browser history
+      navigate(from, { replace: true });
+
     } catch (error) {
       console.error('❌ Login error:', error);
-      alert('An error occurred while logging in');
+      // Provide more specific feedback if possible from the error object
+      alert(error.message || 'Login failed. Please check your credentials.');
     }
   };
-  
 
   return (
     <div className="login-page">
@@ -58,6 +71,7 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Your Email Address"
               required
+              aria-label="Email Address"
             />
           </div>
 
@@ -69,9 +83,11 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Enter your Password"
               required
+              aria-label="Password"
             />
           </div>
 
+          {/* Implement Forgot Password functionality separately */}
           <div className="forgot-password">
             <a href="#">Forgot your password?</a>
           </div>
@@ -80,12 +96,14 @@ const Login = () => {
 
           <div className="or-divider">or</div>
 
+          {/* Implement Social Logins separately */}
           <button type="button" className="apple-btn">Log in with Apple</button>
           <button type="button" className="google-btn">Log in with Google</button>
           <button type="button" className="facebook-btn">Log in with Facebook</button>
 
+          {/* Link to your Sign Up page */}
           <div className="signup-prompt">
-            Need to create a free account? <a href="#">Sign Up</a>
+            Need to create a free account? <a href="#">Sign Up</a> {/* Update link if using React Router */}
           </div>
         </form>
       </div>

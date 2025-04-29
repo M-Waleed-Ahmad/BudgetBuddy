@@ -1,0 +1,459 @@
+/* General Page Structure */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure footer is pushed down */
+    background-color: #f8f9fa; /* Light page background */
+  }
+  
+  .expense-page-content {
+    flex-grow: 1; /* Allow content to take available space */
+    padding: 20px 30px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  /* --- Top Summary Section --- */
+  .expense-summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
+    gap: 20px;
+  }
+  
+  .summary-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+  }
+  
+  .summary-card h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #495057;
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .summary-card p {
+    margin: 8px 0;
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  /* Budget Summary Specific */
+  .budget-summary-card p span { /* Icon styling */
+    color: #6c757d;
+  }
+  
+  .budget-progress-bar-container {
+    background-color: #e9ecef;
+    border-radius: 15px; /* Pill shape */
+    height: 22px; /* Bar height */
+    overflow: hidden;
+    margin-top: 15px;
+    position: relative; /* For percentage text */
+  }
+  
+  .budget-progress-bar-filled {
+    background-color: #6960EC; /* Use primary color */
+    height: 100%;
+    border-radius: 15px;
+    width: 0; /* Initial width */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Position percentage text */
+    position: relative;
+  }
+  
+  .progress-percentage {
+      position: absolute; /* Position relative to the grey bar */
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #555; /* Dark grey text */
+      font-size: 0.8rem;
+      font-weight: 500;
+      z-index: 1; /* Ensure text is above blue bar */
+  }
+  
+  .budget-progress-bar-filled .progress-percentage {
+    color:white; 
+    /* display: none; */
+  }
+  
+  .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-top: 5px;
+      padding: 0 5px;
+  }
+  
+  /* Insight Specific */
+  .insight-card h4 span { /* Lightbulb */
+      color: #ffc107; /* Yellow */
+  }
+  .analyze-link {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+  }
+  .analyze-link:hover {
+      text-decoration: underline;
+  }
+  .analyze-link span { /* Edit icon */
+      color: #007bff;
+  }
+  
+  /* Category Breakdown Specific */
+  .category-breakdown-card .category-item { /* Re-use styles from previous example if available */
+    margin-bottom: 15px;
+  }
+  .category-breakdown-card .category-item:last-child { margin-bottom: 0; }
+  .category-breakdown-card .category-info {
+    display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; color: #555;
+  }
+  .category-breakdown-card .category-info span:first-child { font-weight: 500; }
+  .category-breakdown-card .breakdown-progress-bar-container {
+    background-color: #e9ecef; border-radius: 4px; height: 8px; overflow: hidden;
+  }
+  .category-breakdown-card .breakdown-progress-bar-filled {
+    background-color: #007bff; height: 100%; border-radius: 4px; width: 0;
+  }
+  
+  
+  /* --- Buttons --- */
+  .full-width-button {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #6960EC; /* Primary */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease;
+  }
+  .full-width-button:hover {
+    background-color: #574fcf;
+  }
+  
+  .secondary-button {
+    padding: 8px 18px;
+    background-color: #6c757d; /* Secondary color (grey) */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .secondary-button.export-button { /* Specific style for export */
+       background-color: #6960EC; /* Match Add button color */
+  }
+  .secondary-button.export-button:hover {
+       background-color: #574fcf;
+  }
+  
+  .icon-text-button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  .icon-text-button:hover {
+     background-color: rgba(0, 123, 255, 0.1);
+  }
+  .icon-text-button span { /* Icon */
+     line-height: 1;
+  }
+  
+  
+  /* --- Filter and Export Bar --- */
+  .filter-export-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    flex-grow: 1; /* Allow controls to take space */
+  }
+  
+  .filter-input,
+  .filter-select {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .filter-input {
+     min-width: 180px;
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-group label {
+    font-size: 0.9rem;
+    color: #555;
+    white-space: nowrap;
+  }
+  
+  
+  /* --- Expense Table --- */
+  .expense-table-container {
+    overflow-x: auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+  }
+  
+  .data-table { /* General table styles */
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Min width before scroll */
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+  
+  .data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  
+  .data-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .data-table tbody tr:hover {
+    background-color: #f1f3f5;
+  }
+  
+  .notes-column {
+      white-space: normal; /* Allow notes to wrap */
+      min-width: 200px; /* Give notes column reasonable width */
+      max-width: 350px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: #6c757d;
+  }
+  .read-more-link {
+      display: block; /* Put on new line */
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: #007bff;
+      text-decoration: none;
+  }
+  .read-more-link:hover {
+      text-decoration: underline;
+  }
+  
+  .action-cell {
+    display: flex;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  
+  .icon-button {
+     background: none; border: none; padding: 2px; cursor: pointer; color: #6c757d; line-height: 1;
+  }
+  .icon-button:hover { color: #343a40; }
+  
+  
+  /* --- Responsiveness --- */
+  @media (max-width: 992px) {
+    .expense-page-content { padding: 15px; gap: 20px;}
+    .filter-export-bar { flex-direction: column; align-items: stretch; }
+    .filter-controls { width: 100%; }
+    .export-button { align-self: flex-end; margin-top: 10px; }
+  }
+  
+  @media (max-width: 768px) {
+    .expense-summary-section { grid-template-columns: 1fr; } /* Stack cards */
+    .filter-controls { flex-direction: column; align-items: stretch; }
+    .filter-input, .filter-group, .filter-select { width: 100%; box-sizing: border-box; }
+    .filter-group { justify-content: space-between; }
+    .icon-text-button.refresh-button { justify-content: center; }
+  }
+  
+  @media (max-width: 480px) {
+      .expense-page-content { padding: 10px; }
+      .summary-card { padding: 15px; }
+      .summary-card h4 { font-size: 1rem; margin-bottom: 10px; }
+      .summary-card p, .category-breakdown-card .category-info { font-size: 0.9rem; }
+      .full-width-button, .secondary-button { font-size: 0.95rem; padding: 10px; }
+      .data-table th, .data-table td { padding: 10px; font-size: 0.85rem; }
+  }
+
+  /* --- Keep existing styles --- */
+
+/* --- Add/Modify these --- */
+
+/* Style for Analyze/Read More links */
+.analyze-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.analyze-link:hover {
+  text-decoration: underline;
+}
+.analyze-link span { /* Edit icon */
+  color: #007bff;
+}
+
+/* Style for "Read More" button in table */
+.read-more-link {
+  display: block; /* Put on new line */
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #007bff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left; /* Align with text */
+}
+.read-more-link:hover {
+  text-decoration: underline;
+}
+
+/* Style for notes in the view notes modal */
+.view-notes-body p {
+  white-space: pre-wrap; /* Preserve whitespace and wrap long lines */
+  line-height: 1.6;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Ensure filter bar refresh button style exists */
+.refresh-button {
+background: none;
+border: none;
+color: #007bff;
+cursor: pointer;
+font-size: 0.9rem;
+display: inline-flex;
+align-items: center;
+gap: 5px;
+padding: 8px 10px;
+border-radius: 4px;
+transition: background-color 0.2s ease;
+}
+.refresh-button:hover {
+ background-color: rgba(0, 123, 255, 0.1);
+}
+.refresh-button span {
+ font-size: 1em; /* Match icon size to text */
+ line-height: 1;
+}
+
+/* Ensure delete button style exists */
+.delete-confirm-button {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+.delete-confirm-button:hover {
+  background-color: #c82333 !important;
+  border-color: #bd2130 !important;
+}
+
+/* General no data message style */
+.no-data-message {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Ensure modal form styles are present (copied from previous CSS if needed) */
+.modal-form .form-group { margin-bottom: 18px; }
+.modal-form label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; color: #495057; }
+.modal-form .input-field,
+.modal-form .select-field,
+.modal-form .textarea-field { width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+.modal-form .textarea-field { min-height: 80px; resize: vertical; }
+.modal-form .input-field:focus,
+.modal-form .select-field:focus,
+.modal-form .textarea-field:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+.modal-form .form-actions { margin-top: 25px; padding-top: 15px; border-top: 1px solid #e9ecef; display: flex; justify-content: flex-end; gap: 10px; }
+
+
+.confirmation-text { font-size: 1.1rem; color: #495057; margin-bottom: 25px; line-height: 1.6; }
+.confirmation-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Responsive adjustments for modal forms/actions */
+@media (max-width: 768px) {
+  .modal-form .form-actions,
+  .confirmation-actions {
+      flex-direction: column-reverse; /* Stack buttons */
+      gap: 12px;
+  }
+  .modal-form .form-actions button,
+  .confirmation-actions button {
+      width: 100%; /* Make buttons full width */
+  }
+}

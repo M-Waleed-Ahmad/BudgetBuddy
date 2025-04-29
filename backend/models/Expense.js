@@ -5,6 +5,7 @@ const expenseSchema = new mongoose.Schema({
   category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   amount: Number,
   description: String,
+  notes: String,
   expense_date: Date,
   created_at: { type: Date, default: Date.now }
 });
