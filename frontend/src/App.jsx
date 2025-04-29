@@ -2,6 +2,9 @@ import { useState } from 'react'
 
 import Login from './pages/login'
 import Dashboard from './pages/users/dashboard'
+import Navbar from './components/navbar1';
+import Footer from './components/footer1';
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -14,10 +17,15 @@ function App() {
   ];
   return (
       <>
-        {/* <Login /> */}
+      {/* <Login /> */}
+      <div>
+      <Navbar />
+      <Footer />
+      </div>
 
-        <Dashboard />
+      {/* <Dashboard /> */}
       </>
+      
   )
 }
 export default App
