@@ -607,7 +607,191 @@ export const getCategoryWiseSpendingForCurrentMonth = async () => {
       throw new Error(error.message || 'Network error while fetching category-wise spending.');
   }
 };
-// --- Other existing API functions can remain here ---
-// ... getCurrentMonthBudget, createMonthlyBudget, updateMonthlyBudget ...
-// ... getCategories ...
-// ... getBudgetsForMonth, addBudgetItem, updateBudgetItem, deleteBudgetItem ...
+
+
+// api/api.js or api/familyApi.js
+
+// Assume BASE_URL and getAuthHeaders() are defined elsewhere
+// Example:
+// const BASE_URL = '/api';
+// const getAuthHeaders = () => { /* ... returns headers with Authorization ... */ };
+
+// ==========================================================================
+// Family Plan API Functions
+// ==========================================================================
+
+/**
+ * Fetches all family plans the logged-in user is a member of.
+ * @async
+ * @returns {Promise<Array<object>>} Array of plan objects [{ _id, planId, name, userRole }, ...]
+ * @throws {Error} If fetch fails or response is not ok.
+ */
+export const getUserFamilyPlans = async () => {
+  const endpoint = `${BASE_URL}/family-plans`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: getAuthHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to fetch family plans (Status: ${response.status})`);
+      }
+      return data || []; // Return fetched plans or empty array
+  } catch (error) {
+      console.error('❌ Network/Fetch Error in getUserFamilyPlans:', error);
+      throw new Error(error.message || 'Network error while fetching family plans.');
+  }
+};
+
+/**
+* Creates a new family plan.
+* @async
+* @param {object} planData - Data for the new plan.
+* @param {string} planData.plan_name - The name of the plan.
+* @param {number} [planData.total_budget_amount] - Optional overall budget target.
+* @param {string} [planData.start_date] - Optional start date (YYYY-MM-DD).
+* @param {string} [planData.end_date] - Optional end date (YYYY-MM-DD).
+* @param {string} [planData.currency] - Optional currency code (e.g., 'USD').
+* @returns {Promise<object>} The newly created family plan object.
+* @throws {Error} If fetch fails or response is not ok.
+*/
+export const addFamilyPlan = async (planData) => {
+  const endpoint = `${BASE_URL}/family-plans`;
+  console.log(`API Call: POST ${endpoint} with data:`, planData);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: getAuthHeaders(), // Includes 'Content-Type': 'application/json'
+          body: JSON.stringify(planData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to create family plan (Status: ${response.status})`);
+      }
+      return data; // Return the created plan object
+  } catch (error) {
+      console.error('❌ Network/Fetch Error in addFamilyPlan:', error);
+      throw new Error(error.message || 'Network error while creating family plan.');
+  }
+};
+
+/**
+* Updates the settings of a specific family plan.
+* User must be an admin of the plan.
+* @async
+* @param {string} planId - The ID (_id) of the plan to update.
+* @param {object} settingsData - Data containing the fields to update.
+* @param {string} [settingsData.plan_name] - New plan name.
+* @param {number} [settingsData.total_budget_amount] - New overall budget target.
+* @param {string} [settingsData.start_date] - New start date (YYYY-MM-DD).
+* @param {string} [settingsData.end_date] - New end date (YYYY-MM-DD).
+* @param {string} [settingsData.currency] - New currency code.
+* @returns {Promise<object>} The updated family plan object.
+* @throws {Error} If planId is missing, fetch fails, or response is not ok.
+*/
+export const updatePlanSettings = async (planId, settingsData) => {
+  if (!planId) {
+      console.error("Update Plan Error: planId is required.");
+      throw new Error("Plan ID is required for update");
+  }
+  const endpoint = `${BASE_URL}/family-plans/${planId}`;
+  console.log(`API Call: PUT ${endpoint} with data:`, settingsData);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(settingsData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to update plan settings (Status: ${response.status})`);
+      }
+      return data; // Return the updated plan object
+  } catch (error) {
+      console.error(`❌ Network/Fetch Error in updatePlanSettings (ID: ${planId}):`, error);
+      throw new Error(error.message || 'Network error while updating plan settings.');
+  }
+};
+
+/**
+* Deletes an entire family plan and all associated data.
+* User must be an admin of the plan.
+* @async
+* @param {string} planId - The ID (_id) of the plan to delete.
+* @returns {Promise<object>} Success message object (e.g., { message: '...' }).
+* @throws {Error} If planId is missing, fetch fails, or response indicates an error.
+*/
+export const deleteFamilyPlan = async (planId) => {
+  if (!planId) {
+      console.error("Delete Plan Error: planId is required.");
+      throw new Error("Plan ID is required for delete");
+  }
+  const endpoint = `${BASE_URL}/family-plans/${planId}`;
+  console.log(`API Call: DELETE ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'DELETE',
+          headers: getAuthHeaders(), // Auth header is usually sufficient
+      });
+
+      // Handle 204 No Content specifically
+      if (response.status === 204) {
+          console.log(`API Success (204) from ${endpoint}`);
+          return { message: 'Plan deleted successfully' };
+      }
+
+      const data = await response.json(); // Only parse if not 204
+
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to delete plan (Status: ${response.status})`);
+      }
+
+      console.log(`API Success (${response.status}) from ${endpoint}:`, data);
+      return data; // Return success message from backend if status 200/OK
+  } catch (error) {
+      console.error(`❌ Network/Fetch Error in deleteFamilyPlan (ID: ${planId}):`, error);
+      // Handle potential JSON parsing error for 204 response defensively
+      if (error instanceof SyntaxError && error.message.includes('Unexpected end of JSON input')) {
+           console.warn("Caught SyntaxError likely due to 204 No Content. Treating as success.");
+           return { message: 'Plan deleted successfully' };
+      }
+      throw new Error(error.message || 'Network error while deleting plan.');
+  }
+};
+
+/**
+* Fetches details of a specific family plan.
+* @async
+* @param {string} planId - The ID (_id) of the plan to fetch.
+* @returns {Promise<object>} The family plan object with all details.
+* @throws {Error} If planId is missing, fetch fails, or response is not ok.
+*/
+export const getPlanDetails = async (planId) => {
+  if (!planId) {
+      console.error("Get Plan Details Error: planId is required.");
+      throw new Error("Plan ID is required to fetch details");
+  }
+  const endpoint = `${BASE_URL}/family-plans/${planId}`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: getAuthHeaders(),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+          console.error(`API Error (${response.status}) from ${endpoint}:`, data);
+          throw new Error(data.message || `Failed to fetch plan details (Status: ${response.status})`);
+      }
+      return data; // Return the fetched plan object
+  } catch (error) {
+      console.error(`❌ Network/Fetch Error in getFamilyPlanDetails (ID: ${planId}):`, error);
+      throw new Error(error.message || 'Network error while fetching plan details.');
+  }
+};
