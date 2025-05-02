@@ -78,6 +78,7 @@ const Modal = ({ isOpen, onClose, children, title }) => {
                 </motion.div>
             )}
         </AnimatePresence>
+        
     );
 };
 

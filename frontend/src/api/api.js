@@ -795,3 +795,118 @@ export const getPlanDetails = async (planId) => {
       throw new Error(error.message || 'Network error while fetching plan details.');
   }
 };
+
+
+
+// api/api.js or api/familyApi.js
+// Assuming BASE_URL and getAuthHeaders are defined
+
+// --- Family Member APIs ---
+
+/**
+ * Fetches the list of members for a specific family plan.
+ * @async
+ * @param {string} planId - The ID of the family plan.
+ * @returns {Promise<Array<object>>} Array of member objects [{ _id, user: { _id, name, email, avatar }, role, planId }, ...]
+ * @throws {Error} If planId is missing, fetch fails, or response is not ok.
+ */
+export const getPlanMembers = async (planId) => {
+  if (!planId) throw new Error("Plan ID is required to fetch members.");
+  const endpoint = `${BASE_URL}/family-members/${planId}/members`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      console.log(`API Call: GET ${endpoint}`); // Debug log
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Failed to fetch members (Status: ${response.status})`);
+      return data || [];
+  } catch (error) { console.error(`❌ Error fetching members for plan ${planId}:`, error); throw error; }
+};
+
+/**
+* Invites a user to join a family plan by email.
+* @async
+* @param {string} planId - The ID of the plan to invite to.
+* @param {object} inviteData - Invitation details.
+* @param {string} inviteData.invitee_email - Email of the user to invite.
+* @param {'viewer' | 'editor'} inviteData.role_assigned - Role to assign upon acceptance.
+* @returns {Promise<object>} Object containing success message and invite details.
+* @throws {Error} If planId/data is missing, fetch fails, or response is not ok.
+*/
+export const inviteMember = async (planId, inviteData) => {
+  if (!planId || !inviteData?.invitee_email || !inviteData?.role_assigned) {
+      throw new Error("Plan ID, invitee email, and role are required.");
+  }
+  const endpoint = `${BASE_URL}/family-members/${planId}/invites`;
+  console.log(`API Call: POST ${endpoint} with data:`, inviteData);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: getAuthHeaders(), // Includes Content-Type
+          body: JSON.stringify(inviteData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Failed to send invitation (Status: ${response.status})`);
+      return data; // { message: '...', invite: {...} }
+  } catch (error) { console.error(`❌ Error inviting member to plan ${planId}:`, error); throw error; }
+};
+
+/**
+* Updates the role of a member within a family plan.
+* Requires admin privileges on the plan.
+* @async
+* @param {string} planId - The ID of the family plan.
+* @param {string} memberUserId - The user ID (_id) of the member whose role is being changed.
+* @param {{role: 'viewer' | 'editor' | 'admin'}} roleData - Object containing the new role.
+* @returns {Promise<object>} Object containing success message and updated membership details.
+* @throws {Error} If IDs/data are missing, fetch fails, or response is not ok.
+*/
+export const updateMemberRole = async (planId, memberUserId, roleData) => {
+  if (!planId || !memberUserId || !roleData?.role) {
+      throw new Error("Plan ID, Member User ID, and new Role are required.");
+  }
+  const endpoint = `${BASE_URL}/family-members/${planId}/members/${memberUserId}`;
+  console.log(`API Call: PUT ${endpoint} with data:`, roleData);
+  try {
+      const response = await fetch(endpoint, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(roleData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Failed to update role (Status: ${response.status})`);
+      return data; // { message: '...', membership: {...} }
+  } catch (error) { console.error(`❌ Error updating role for member ${memberUserId} in plan ${planId}:`, error); throw error; }
+};
+
+/**
+* Removes a member from a family plan.
+* Requires admin privileges on the plan.
+* @async
+* @param {string} planId - The ID of the family plan.
+* @param {string} memberUserId - The user ID (_id) of the member to remove.
+* @returns {Promise<object>} Success message object.
+* @throws {Error} If IDs are missing, fetch fails, or response is not ok.
+*/
+export const removeMember = async (planId, memberUserId) => {
+  if (!planId || !memberUserId) throw new Error("Plan ID and Member User ID are required.");
+  const endpoint = `${BASE_URL}/family-members/${planId}/members/${memberUserId}`;
+  console.log(`API Call: DELETE ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'DELETE', headers: getAuthHeaders() });
+      if (response.status === 204) return { message: 'Member removed successfully.' }; // Handle No Content
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Failed to remove member (Status: ${response.status})`);
+      return data; // { message: '...' }
+  } catch (error) {
+       if (error instanceof SyntaxError && error.message.includes('Unexpected end of JSON input')) {
+            console.warn("Caught SyntaxError likely due to 204 No Content. Treating as success.");
+            return { message: 'Member removed successfully.' };
+       }
+      console.error(`❌ Error removing member ${memberUserId} from plan ${planId}:`, error);
+      throw error;
+  }
+};
+
+// --- Other API Functions ---
+// ... (Keep existing functions for getUserFamilyPlans, addFamilyPlan, etc.)
