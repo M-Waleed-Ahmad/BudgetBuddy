@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Modal from '../../components/Modal';
 import '../../styles/BudgetManagementPage.css';
+import { toast } from 'react-hot-toast'; // Import toast for notifications
 import {
     // Overall Monthly Budget API
     getCurrentMonthBudget,
@@ -324,11 +325,11 @@ const BudgetManagementPage = () => {
         try {
             if (editingBudgetItem && editingBudgetItem._id) {
                 await updateBudgetItem(editingBudgetItem._id, commonPayload);
-                alert(`Category limit updated successfully!`);
+                toast.success(`Category limit updated successfully!`);
             } else {
                 const createPayload = { ...commonPayload, month_year: selectedMonthYear };
                 await addBudgetItem(createPayload);
-                alert(`Category limit added successfully!`);
+                toast.success(`Category limit added successfully!`);
             }
             await fetchCategoryBudgetItems(selectedMonthYear);
             closeModal();
@@ -355,10 +356,10 @@ const BudgetManagementPage = () => {
             let updatedData;
             if (monthlyBudgetData._id) {
                 updatedData = await updateMonthlyBudget(monthlyBudgetData._id, payload);
-                alert('Monthly budget settings updated!');
+                toast.success('Monthly budget settings updated!');
             } else {
                 updatedData = await createMonthlyBudget(payload);
-                alert('Monthly budget settings created!');
+                toast.success('Monthly budget settings created!');
             }
             if (updatedData && updatedData._id) {
                  setMonthlyBudgetData({
@@ -385,7 +386,7 @@ const BudgetManagementPage = () => {
         setIsLoadingBudgetItems(true);
         try {
             await deleteBudgetItem(deletingBudgetItemId);
-            alert(`Category limit deleted successfully!`);
+            toast.success(`Category limit deleted successfully!`);
             await fetchCategoryBudgetItems(selectedMonthYear);
             closeModal();
         } catch (error) {
@@ -401,7 +402,7 @@ const BudgetManagementPage = () => {
         setMonthlyBudgetError(null); setBudgetItemsError(null); setCategoriesError(null);
         fetchMonthlyBudget();
         fetchCategories().then(() => fetchCategoryBudgetItems(selectedMonthYear)); // Ensure categories load before items if needed
-        alert("Data refresh initiated!");
+        toast.success("Data refreshed successfully!");
     };
 
     // --- Combined Loading State ---

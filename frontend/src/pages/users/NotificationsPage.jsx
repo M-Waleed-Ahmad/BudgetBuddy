@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from '../../components/navbar';
-import Footer from '../../components/footer';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 import '../../styles/NotificationsPage.css';
-import { Toaster, toast } from 'react-hot-toast';
+import {  toast } from 'react-hot-toast';
 import {
     getNotifications,
     markNotificationAsRead,
@@ -77,7 +77,6 @@ const NotificationsPage = () => {
     return (
         <div className="page-container">
             <Navbar />
-            <Toaster position="top-center" reverseOrder={false} />
             <motion.main
                 className="notifications-content"
                 variants={pageVariants}

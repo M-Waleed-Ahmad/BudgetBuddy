@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'; // Added useEffect
 import { useNavigate, useLocation } from 'react-router-dom'; // Import hooks
 import '../styles/login.css';
 import { loginUser } from '../api/api'; // Adjust the import path as necessary
+import { toast } from 'react-hot-toast'; // Import toast for notifications
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -42,17 +43,12 @@ const Login = () => {
 
       console.log('✅ Login successful:', data);
       localStorage.setItem('token', data.token); // Store the token
-      // alert('Login successful!'); // Optional: Remove alert for smoother UX
-
-      // --- Redirect using navigate ---
-      // Navigate to the intended page ('from') or default to '/dashboard'
-      // 'replace: true' prevents the login page from being in the browser history
+      toast.success('Login successful!');
       navigate(from, { replace: true });
 
     } catch (error) {
       console.error('❌ Login error:', error);
-      // Provide more specific feedback if possible from the error object
-      alert(error.message || 'Login failed. Please check your credentials.');
+      toast.error(error.message || 'Login failed. Please check your credentials.');
     }
   };
 

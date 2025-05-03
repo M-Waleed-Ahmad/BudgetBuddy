@@ -6,6 +6,7 @@ import Footer from '../../components/Footer';        // Adjust path if needed
 import Modal from '../../components/Modal';        // Adjust path if needed
 import '../../styles/FamilyBudgetingPage.css';   // Adjust path if needed
 import userAvatarPlaceholder from '../../assets/avatar.png'; // Adjust path if needed
+import { toast } from 'react-hot-toast'; // Import toast for notifications
 
 // API Imports
 import {
@@ -509,7 +510,7 @@ const FamilyBudgetingPage = () => {
         }
         try {
             const newPlan = await addFamilyPlan({ plan_name: addPlanFormData.plan_name });
-            alert("Plan added successfully!");
+             toast.success("Plan added successfully!");
             await fetchUserPlans();
       
             closeModal();
@@ -560,7 +561,7 @@ const FamilyBudgetingPage = () => {
         try {
             if (!selectedPlanId) throw new Error("No plan selected to update.");
             const updatedPlan = await updatePlanSettings(selectedPlanId, payload); // API Call
-            alert("Settings saved successfully!");
+             toast.success("Settings saved successfully!");
 
             // Update current details state optimistically or with response
             setCurrentPlanDetails(prev => ({ ...prev, ...updatedPlan }));
@@ -605,7 +606,7 @@ const FamilyBudgetingPage = () => {
             const role_assigned = addMemberFormData.role || 'viewer'; // Default to 'viewer' if not set
             const addMemberPayload = {  invitee_email,  role_assigned };
             await inviteMember(selectedPlanId, addMemberPayload); // API Call
-            alert("Member invited successfully!");
+             toast.success("Member invited successfully!");
             // TODO: Optionally, update member list immediately if API returns the pending member,
             // or just rely on the next full refresh/fetchPlanData. For simplicity, rely on next refresh.
             // Consider adding a visual indicator for pending invites if needed.
@@ -618,7 +619,7 @@ const FamilyBudgetingPage = () => {
             setIsSubmitting(false);
         }
     };
-    const handleExportSubmit = (e) => { e.preventDefault(); console.log("Exporting:", exportFormData); alert("Exporting Data (Simulated - API Call TODO)"); /* TODO: Call exportPlanData API */ closeModal(); };
+    const handleExportSubmit = (e) => { e.preventDefault(); console.log("Exporting:", exportFormData);  toast.success("Exporting Data (Simulated - API Call TODO)"); /* TODO: Call exportPlanData API */ closeModal(); };
  
     const handleAddEditExpenseSubmit = async (e, type) => {
         e.preventDefault();
@@ -654,11 +655,11 @@ const FamilyBudgetingPage = () => {
             if (editingItem) {
                 await updateFamilyExpense(editingItem._id, payload);
                 await fetchPlanData(selectedPlanId);
-                alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense updated!`);
+                 toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense updated!`);
             } else {
                 await createFamilyExpense(selectedPlanId, payload);
                 await fetchPlanData(selectedPlanId);
-                alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense added!`);
+                 toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense added!`);
             }
             closeModal();
         } catch (err) {
@@ -693,7 +694,7 @@ const FamilyBudgetingPage = () => {
         try {
             // API Call to update member role
             await updateMemberRole(selectedPlanId, memberUserId, { role: newRole });
-            alert("Member role updated successfully!");
+             toast.success("Member role updated successfully!");
             await fetchPlanData(selectedPlanId); // Refetch plan data to update the members list
             closeModal();
         } catch (err) {
@@ -735,7 +736,7 @@ const FamilyBudgetingPage = () => {
                     throw new Error("Unknown item type to delete");
             }
 
-            alert(`${itemDescription.charAt(0).toUpperCase() + itemDescription.slice(1)} deleted successfully!`);
+             toast.success(`${itemDescription.charAt(0).toUpperCase() + itemDescription.slice(1)} deleted successfully!`);
 
             // Refetch data
             if (deletingItemType === 'plan') {
@@ -755,7 +756,7 @@ const FamilyBudgetingPage = () => {
     };
     // --- Refresh Handler ---
     const handleRefresh = async (section) => {
-        alert(`Refreshing ${section}...`);
+         toast.success(`Refreshing ${section}...`);
         setDetailsError(null); setMembersError(null); setExpensesError(null); // Clear previous errors
         switch (section) {
             case 'Plan Details':
@@ -765,7 +766,7 @@ const FamilyBudgetingPage = () => {
                 if (selectedPlanId) {
                     await fetchPlanData(selectedPlanId); // Refetch all data for the current plan
                 } else {
-                     alert("No plan selected to refresh.");
+                      toast.success("No plan selected to refresh.");
                 }
                 break;
             case 'Plans List':
@@ -774,7 +775,7 @@ const FamilyBudgetingPage = () => {
             default:
                 console.warn("Unknown refresh section:", section);
         }
-         alert(`${section} refreshed!`);
+          toast.success(`${section} refreshed!`);
     };
 
     const handleapproval = async (expenseId, action) => {
@@ -783,10 +784,10 @@ const FamilyBudgetingPage = () => {
         try {
             if (action === 'approve') {
                 await approveFamilyExpense( expenseId); // API Call to approve expense
-                alert("Expense approved successfully!");
+                 toast.success("Expense approved successfully!");
             } else if (action === 'reject') {
                 await rejectFamilyExpense( expenseId); // API Call to reject expense
-                alert("Expense rejected successfully!");
+                 toast.success("Expense rejected successfully!");
             }
             await fetchPlanData(selectedPlanId); // Refetch plan data to update the expenses list
             closeModal();

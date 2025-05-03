@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Modal from '../../components/Modal';
 import '../../styles/ExpenseManagementPage.css'; // Ensure this path is correct
+import { toast } from 'react-hot-toast';
 import {
     // Expense API
     fetchExpensesForCurrentMonth,
@@ -315,10 +316,10 @@ const ExpenseManagementPage = () => {
         try {
             if (editingExpense && editingExpense._id) {
                 await updateExpense(editingExpense._id, payload);
-                alert('Expense updated successfully!');
+                toast.success('Expense updated successfully!');
             } else {
                 await addExpense(payload);
-                alert('Expense added successfully!');
+                toast.success('Expense added successfully!');
             }
             await fetchPageData();
             closeModal();
@@ -336,7 +337,7 @@ const ExpenseManagementPage = () => {
         setIsLoadingExpenses(true);
         try {
             await deleteExpense(deletingExpenseId);
-            alert('Expense deleted successfully!');
+            toast.success('Expense deleted successfully!');
             await fetchPageData();
             closeModal();
         } catch (error) {
@@ -347,8 +348,8 @@ const ExpenseManagementPage = () => {
         }
     };
 
-    const handleExportSubmit = (e) => { e.preventDefault(); alert("Export functionality not implemented."); closeModal(); };
-    const handleRefresh = () => { fetchPageData(); alert("Data refresh initiated!"); };
+    const handleExportSubmit = (e) => { e.preventDefault(); toast.success("Export functionality not implemented."); closeModal(); };
+    const handleRefresh = () => { fetchPageData();toast.success("Data Refreshed"); };
     const truncateNotes = (text, maxLength = 30) => {
          if (!text || text.length <= maxLength) return { truncated: text, needsTruncating: false };
          return { truncated: text.substring(0, maxLength) + "...", needsTruncating: true };

@@ -9,6 +9,8 @@ import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
 import NotificationsPage from './pages/users/NotificationsPage';
 import ProtectedRoute from './components/ProtectedRoute'; // Import the wrapper
 
+import { Toaster } from 'react-hot-toast';
+
 import './App.css'; // Import your CSS file
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
   return (
       <> {/* Use Fragment shorthand */}
         <Router>
+        <Toaster position="top-center" reverseOrder={false} />
+
           <Routes>
             {/* Public Route */}
             <Route path="/login" element={<Login />} />
