@@ -132,8 +132,8 @@ const deleteBudget = async (req, res) => {
 
         // ✅ Send a notification to the user about the deletion
         await sendNotification({
-            recipient_user_id: req.user.userId,cd 
-            type: 'generic_message', // Or 'budget_deleted' if you make a specific enum
+            recipient_user_id: req.user.userId,
+            type: 'generic_message', 
             message: `Your budget "${categoryName}" was deleted.`,
             actor_user_id: req.user.userId,
             related_entity: {
