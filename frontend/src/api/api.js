@@ -908,5 +908,21 @@ export const removeMember = async (planId, memberUserId) => {
   }
 };
 
-// --- Other API Functions ---
-// ... (Keep existing functions for getUserFamilyPlans, addFamilyPlan, etc.)
+/***
+ * Fetches the expenses for a specific family plan.
+ * @async
+ * @param {string} planId - The ID of the family plan.
+ * @returns {Promise<Array<object>>} Array of expense objects [{ _id, amount, date, description, ... }, ...]
+ * @throws {Error} If planId is missing, fetch fails, or response is not ok.
+ */
+export const getPlanExpenses = async (planId) => {
+  if (!planId) throw new Error("Plan ID is required to fetch expenses.");
+  const endpoint = `${BASE_URL}/family-plans/${planId}/expenses`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || `Failed to fetch expenses (Status: ${response.status})`);
+      return data || []; // Return fetched expenses or empty array
+  } catch (error) { console.error(`❌ Error fetching expenses for plan ${planId}:`, error); throw error; }
+}

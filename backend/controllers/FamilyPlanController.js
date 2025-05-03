@@ -105,8 +105,9 @@ const   updatePlan = async (req, res) => {
     try {
         const userId = req.user.userId;
         const planId = req.params.planId; // Get planId from URL parameter
-        const { plan_name, total_budget_amount, start_date, end_date, currency } = req.body;
-
+        const { plan_name, total_budget_amount, start_date, end_date, currency, categories } = req.body;
+        console.log("Update Plan Request:", req.body); // Debugging log
+        console.log('categories:', categories); // Debugging log
         if (!userId) {
             return res.status(401).json({ message: 'Authentication required.' });
         }
@@ -124,6 +125,26 @@ const   updatePlan = async (req, res) => {
         if (start_date !== undefined) updateData.start_date = start_date;
         if (end_date !== undefined) updateData.end_date = end_date;
         if (currency !== undefined) updateData.currency = currency;
+
+        // If categories are provided, update the budget for each category
+        if (categories && Array.isArray(categories)) {
+            for (const category of categories) {
+            const { category_id, budget } = category;
+
+            if (!category_id || budget === undefined) {
+                return res.status(400).json({ message: 'Each category must have a name and budget amount.' });
+            }
+
+            // Upsert (update or insert) the budget for the category
+            await FamilyBudget.findOneAndUpdate(
+                { plan_id: planId, category_id },
+                { $set: { limit_amount:budget } },
+                { upsert: true, new: true, runValidators: true }
+            );
+            }
+        }
+
+
 
         if (Object.keys(updateData).length === 0) {
              return res.status(400).json({ message: 'No update fields provided.' });
@@ -245,6 +266,18 @@ const getPlanDetails = async (req, res) => {
             .populate('owner_user_id', 'username email') // Populate owner details if needed
             .lean(); // Use lean for performance
 
+        // Fetch budgets for each category in the plan
+        const categoryBudgets = await FamilyBudget.find({ plan_id: planId })
+            .populate('category_id', 'name') // Populate category details if needed
+            .lean();
+
+        planDetails.categoryBudgets = categoryBudgets.map(budget => ({
+            categoryId: budget.category_id._id,
+            categoryName: budget.category_id.name,
+            limitAmount: budget.limit_amount,
+        }));
+
+        console.log("Plan Details:", planDetails); // Debugging log
         if (!planDetails) {
             return res.status(404).json({ message: 'Plan not found.' });
         }

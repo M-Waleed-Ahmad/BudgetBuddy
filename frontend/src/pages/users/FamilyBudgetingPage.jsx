@@ -10,24 +10,13 @@ import userAvatarPlaceholder from '../../assets/avatar.png'; // Adjust path if n
 // API Imports
 import {
     // Plan Management APIs
-    getUserFamilyPlans,
-    addFamilyPlan,
-    updatePlanSettings,
-    deleteFamilyPlan,
+     getUserFamilyPlans, addFamilyPlan,
+    updatePlanSettings, deleteFamilyPlan,
     // Categories API
     getCategories,
     // Plan Details API
-    getPlanDetails,
-    getPlanMembers,
-    inviteMember,
-    updateMemberRole,
-    removeMember,
-
-
-    // TODO: Import other necessary APIs when implemented (keeping placeholders)
-    // getPlanMembers, getPlanExpenses, inviteMember, removeMember, updateMemberRole,
-    // addFamilyExpense, updateFamilyExpense, deleteFamilyExpense, addPersonalExpenseToPlan,
-    // updatePersonalExpenseInPlan, deletePersonalExpenseInPlan, exportPlanData,
+    getPlanDetails, getPlanMembers, inviteMember,
+    updateMemberRole, removeMember,
 } from '../../api/api'; // Adjust path if needed
 
 
@@ -44,27 +33,28 @@ const ExportIcon = ({ size = 16 }) => <span style={{ fontSize: `${size}px`, curs
 const FamilyBudgetingPage = () => {
 
     // --- Component State ---
-    const [userPlansAndRoles, setUserPlansAndRoles] = useState([]); // Fetched user plans
-    const [selectedPlanId, setSelectedPlanId] = useState('');    // ID of the currently selected plan
-    const [currentPlanDetails, setCurrentPlanDetails] = useState(null); // Detailed info of the selected plan (null initially)
-    const [availableCategories, setAvailableCategories] = useState([]); // Fetched categories
-    const [categoryMap, setCategoryMap] = useState({}); // Map category ID to name for display
+    const [userPlansAndRoles, setUserPlansAndRoles] = useState([]);
+    const [selectedPlanId, setSelectedPlanId] = useState('');
+    const [currentPlanDetails, setCurrentPlanDetails] = useState(null);
+    const [availableCategories, setAvailableCategories] = useState([]);
+    const [categoryMap, setCategoryMap] = useState({});
+    const [totalAllocatedBudget, setTotalAllocatedBudget] = useState(0);
 
     // Loading States
-    const [isLoadingPlans, setIsLoadingPlans] = useState(true); // Loading plan list initially
-    const [isLoadingCategories, setIsLoadingCategories] = useState(true); // Loading categories initially
-    const [isLoadingPlanDetails, setIsLoadingPlanDetails] = useState(false); // Loading details for the selected plan
-    const [isLoadingMembers, setIsLoadingMembers] = useState(false); // TODO: Use when fetching members
-    const [isLoadingExpenses, setIsLoadingExpenses] = useState(false); // TODO: Use when fetching expenses
-    const [isSubmitting, setIsSubmitting] = useState(false); // For modal form submissions/deletions
+    const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+    const [isLoadingPlanDetails, setIsLoadingPlanDetails] = useState(false);
+    const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+    const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Error States
     const [plansError, setPlansError] = useState(null);
     const [categoriesError, setCategoriesError] = useState(null);
-    const [detailsError, setDetailsError] = useState(null); // Error fetching specific plan details
-    const [membersError, setMembersError] = useState(null); // TODO: Use when fetching members
-    const [expensesError, setExpensesError] = useState(null); // TODO: Use when fetching expenses
-    const [submitError, setSubmitError] = useState(null); // For modal form submission errors
+    const [detailsError, setDetailsError] = useState(null);
+    const [membersError, setMembersError] = useState(null);
+    const [expensesError, setExpensesError] = useState(null);
+    const [submitError, setSubmitError] = useState(null);
 
     // Modal Visibility States
     const [modalState, setModalState] = useState({
@@ -77,23 +67,20 @@ const FamilyBudgetingPage = () => {
     });
 
     // State for items being edited/deleted/viewed
-    const [editingItem, setEditingItem] = useState(null); // Stores the full object being edited
-    const [deletingItemId, setDeletingItemId] = useState(null); // Stores ID for delete confirmation
-    const [deletingItemType, setDeletingItemType] = useState(''); // e.g., 'member', 'familyExpense', 'personalExpense', 'plan'
+    const [editingItem, setEditingItem] = useState(null);
+    const [deletingItemId, setDeletingItemId] = useState(null);const [deletingItemType, setDeletingItemType] = useState(''); // e.g., 'member', 'familyExpense', 'personalExpense', 'plan'
 
     // Form Data States - Align keys with API payload expectations (snake_case often)
     const [addPlanFormData, setAddPlanFormData] = useState({ plan_name: '' }); // Simple add plan
-    const [settingsFormData, setSettingsFormData] = useState({ plan_name: '', total_budget_amount: '', start_date: '', end_date: '' }); // Matches API
+    const [settingsFormData, setSettingsFormData] = useState({ plan_name: '', total_budget_amount: 0, start_date: '', end_date: '', categories: [] }); // Matches API
     const [addMemberFormData, setAddMemberFormData] = useState({ email: '', role: 'viewer' });
     const [expenseFormData, setExpenseFormData] = useState({ date: new Date().toISOString().split('T')[0], category_id: '', description: '', amount: '', notes: '' }); // Use category_id
     const [exportFormData, setExportFormData] = useState({ format: 'csv', dateRange: 'current_month' });
 
-    // --- Dummy Data (REPLACE with fetched data based on selectedPlanId) ---
-    // TODO: Replace these with state fetched via API calls in fetchPlanData
+    // --- Data States ---
     const [familyMembers, setFamilyMembers] = useState([]);
     const [familyExpenses, setFamilyExpenses] = useState([]);
     const [personalExpenses, setPersonalExpenses] = useState([]);
-    // --- End Dummy Data Section ---
 
     // --- Derived State ---
     const currentUserRoleForSelectedPlan = useMemo(() => {
@@ -118,7 +105,7 @@ const FamilyBudgetingPage = () => {
             { name: 'Budget Amount', type: 'bar', barWidth: '40%', data: [500, 800, 1200, 600, 900, 700], itemStyle: { color: '#91cc75' } }, // Example data
             { name: 'Expense Amount', type: 'bar', barWidth: '40%', data: [400, 900, 1000, 500, 750, 800], itemStyle: { color: '#fc8452' } }  // Example data
         ]
-    }), [/* Dependencies: fetched category budgets, fetched category expenses */]);
+    }), );
 
     const personalPieChartOptions = useMemo(() => ({
         tooltip: { trigger: 'item', formatter: '{b}: Rs {c} ({d}%)' },
@@ -131,7 +118,7 @@ const FamilyBudgetingPage = () => {
                 { value: 3500, name: 'Remaining Budget', itemStyle: { color: '#ee6666' } } // Example
             ]
         }]
-    }), [/* Dependencies: fetched personal expenses, personal budget limit */]);
+    }),);
 
      const personalBarChartOptions = useMemo(() => ({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: '{b}<br/>{a0}: Rs {c0}<br/>{a1}: Rs {c1}' }, // Added Rs formatting
@@ -143,7 +130,7 @@ const FamilyBudgetingPage = () => {
             { name: 'Budget', type: 'bar', barWidth: '30%', data: [600, 500, 700], itemStyle: { color: '#5470c6' } }, // Example
             { name: 'Expense', type: 'bar', barWidth: '30%', data: [500, 450, 800], itemStyle: { color: '#ee6666' } } // Example
         ]
-    }), [/* Dependencies: fetched personal expenses, personal category budgets */]);
+    }),);
 
     // --- Animation Variants ---
     const pageVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } };
@@ -153,55 +140,57 @@ const FamilyBudgetingPage = () => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
-            // Assuming dateString is YYYY-MM-DD from the API or date input
-            const date = new Date(dateString + 'T00:00:00'); // Add time part to avoid timezone issues
-            if (isNaN(date.getTime())) return dateString; // Return original if invalid
+            const date = new Date(dateString + 'T00:00:00');
+            if (isNaN(date.getTime())) return dateString;
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         } catch (e) {
             console.error("Date format error:", dateString, e);
-            return dateString; // Fallback
+            return dateString;
         }
     };
 
     // --- Modal Open/Close Handlers ---
     const openModal = (modalName, item = null, itemType = '') => {
-        setSubmitError(null); // Clear previous submission errors
-        // Close all other modals first
+        setSubmitError(null);
         setModalState(prev => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {}));
-        // Open the target modal
         setModalState(prev => ({ ...prev, [modalName]: true }));
 
-        setEditingItem(item); // Store item for editing/viewing details
+        setEditingItem(item);
 
-        if (itemType && item) { // For delete confirmation, store ID and type
-            setDeletingItemId(item._id || item.id); // Use _id from DB or fallback to id if needed
+        if (itemType && item) {
+            setDeletingItemId(item._id || item.id);
             setDeletingItemType(itemType);
-        } else { // Clear delete state if not opening a delete modal
-             setDeletingItemId(null);
-             setDeletingItemType('');
+        } else {
+            setDeletingItemId(null);
+            setDeletingItemType('');
         }
 
-        // Pre-fill forms based on which modal is opening
         if (modalName === 'isSettingsOpen' && currentPlanDetails) {
             setSettingsFormData({
                 plan_name: currentPlanDetails.plan_name || '',
                 total_budget_amount: currentPlanDetails.total_budget_amount?.toString() || '',
-                start_date: currentPlanDetails.start_date ? currentPlanDetails.start_date.split('T')[0] : '', // Format for date input
-                end_date: currentPlanDetails.end_date ? currentPlanDetails.end_date.split('T')[0] : '', // Format for date input
+                start_date: currentPlanDetails.start_date ? currentPlanDetails.start_date.split('T')[0] : '',
+                end_date: currentPlanDetails.end_date ? currentPlanDetails.end_date.split('T')[0] : '',
+                categories: availableCategories.map(category => ({
+                    category_id: category._id,
+                    category_name: category.name,
+                    budget:
+                        currentPlanDetails.categoryBudgets?.find(cat => cat.categoryId === category._id)?.limitAmount
+                        || 0,
+                })),
             });
         } else if (modalName === 'isAddPlanOpen') {
-            setAddPlanFormData({ plan_name: '' }); // Reset Add Plan form
+            setAddPlanFormData({ plan_name: '' });
         } else if (modalName === 'isAddMemberOpen') {
-             setAddMemberFormData({ email: '', role: 'viewer' }); // Reset Add Member form
+            setAddMemberFormData({ email: '', role: 'viewer' });
         } else if (modalName === 'isAddPersonalExpenseOpen') {
-             // Reset Expense form, set default category if available
-             setExpenseFormData({
-                 date: new Date().toISOString().split('T')[0],
-                 category_id: availableCategories[0]?._id || '', // Use ID of first category
-                 description: '',
-                 amount: '',
-                 notes: ''
-             });
+            setExpenseFormData({
+                date: new Date().toISOString().split('T')[0],
+                category_id: availableCategories[0]?._id || '',
+                description: '',
+                amount: '',
+                notes: ''
+            });
         } else if (modalName === 'isEditPersonalExpenseOpen' && item) {
             setExpenseFormData({
                 date: item.date ? item.date.split('T')[0] : '',
@@ -219,20 +208,15 @@ const FamilyBudgetingPage = () => {
                 notes: item.notes || ''
             });
         }
-        // TODO: Add pre-fill logic for isEditMemberOpen if needed
     };
 
     const closeModal = () => {
         setModalState(prev => Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {}));
-        setSubmitError(null); // Clear errors when closing any modal
-        // Delay reset for potential exit animations and avoid flicker
+        setSubmitError(null);
         setTimeout(() => {
             setEditingItem(null);
             setDeletingItemId(null);
             setDeletingItemType('');
-            // Optionally reset specific forms if needed when *any* modal closes,
-            // but pre-filling in openModal is usually sufficient.
-            // setExpenseFormData({ date: new Date().toISOString().split('T')[0], category_id: availableCategories[0]?._id || '', description: '', amount: '', notes: '' });
         }, 300);
     };
 
@@ -272,23 +256,20 @@ const FamilyBudgetingPage = () => {
         } finally {
             setIsLoadingPlans(false);
         }
-    }, []); // No dependencies needed
+    }, []); 
 
     const fetchCategoriesOnce = useCallback(async () => {
         setIsLoadingCategories(true);
         setCategoriesError(null);
         try {
-            const categories = await getCategories(); // API Call
+            const categories = await getCategories(); 
             const validCategories = categories || [];
             setAvailableCategories(validCategories);
-            // Create a map for easy name lookup by ID
             const catMap = validCategories.reduce((acc, cat) => { acc[cat._id] = cat.name; return acc; }, {});
             setCategoryMap(catMap);
-            // Set default category_id in expense form state if it's empty and categories exist
             if (validCategories.length > 0) {
                 setExpenseFormData(prev => ({
                     ...prev,
-                    // Set default only if category_id is not already set (e.g., by editing)
                     category_id: prev.category_id || validCategories[0]._id
                 }));
             }
@@ -300,68 +281,56 @@ const FamilyBudgetingPage = () => {
         } finally {
             setIsLoadingCategories(false);
         }
-    }, []); // No dependencies needed
+    }, []); 
 
     const fetchPlanData = useCallback(async (planId) => {
         if (!planId) {
             setCurrentPlanDetails({}); setFamilyMembers([]); setFamilyExpenses([]); setPersonalExpenses([]);
             return;
         }
-        // Set loading states for all data related to the specific plan
         setIsLoadingPlanDetails(true);
-        setIsLoadingMembers(true); // Start loading members
-        setIsLoadingExpenses(true); // Start loading expenses (if fetching here)
+        setIsLoadingMembers(true);
+        setIsLoadingExpenses(true);
         setPlansError(null); setMembersError(null); setExpensesError(null);
 
         try {
-            // Fetch details, members, and expenses (adjust based on your actual expense fetch)
-            const [detailsRes, membersRes /*, expensesRes */] = await Promise.allSettled([
-                getPlanDetails(planId),      // API Call for details
-                getPlanMembers(planId),      // API Call for members
-                // getPlanExpenses(planId),  // TODO: API Call for expenses
+            const [detailsRes, membersRes] = await Promise.allSettled([
+            getPlanDetails(planId),
+            getPlanMembers(planId),
             ]);
 
-            // Process Plan Details
             if (detailsRes.status === 'fulfilled' && detailsRes.value) {
-                setCurrentPlanDetails(detailsRes.value || {});
+            setCurrentPlanDetails(detailsRes.value || {});
             } else {
-                console.error("Err fetch details:", detailsRes.reason);
-                setPlansError(detailsRes.reason?.message || "Failed fetch plan details.");
-                setCurrentPlanDetails({}); // Reset on error
-                 // Stop if details fail, as other calls might depend on it or role
-                 throw new Error("Failed to load essential plan details.");
+            console.error("Err fetch details:", detailsRes.reason);
+            setPlansError(detailsRes.reason?.message || "Failed fetch plan details.");
+            setCurrentPlanDetails({});
+            throw new Error("Failed to load essential plan details.");
             }
-            setIsLoadingPlanDetails(false); // Stop details loader
+            setIsLoadingPlanDetails(false);
 
-            // Process Members
             if (membersRes.status === 'fulfilled' && membersRes.value) {
-                setFamilyMembers(membersRes.value || []);
+            setFamilyMembers(membersRes.value || []);
             } else {
-                console.error("Err fetch members:", membersRes.reason);
-                setMembersError(membersRes.reason?.message || "Failed fetch members.");
-                setFamilyMembers([]);
+            console.error("Err fetch members:", membersRes.reason);
+            setMembersError(membersRes.reason?.message || "Failed fetch members.");
+            setFamilyMembers([]);
             }
-            setIsLoadingMembers(false); // Stop member loader
+            setIsLoadingMembers(false);
 
-            // TODO: Process Expenses Response
-            setIsLoadingExpenses(true); // Simulate expense loading for now
-            await new Promise(res => setTimeout(res, 100)); // Simulate delay
-            setFamilyExpenses([]); // Clear placeholder
-            setPersonalExpenses([]); // Clear placeholder
-            setIsLoadingExpenses(false); // Stop expense loader
-
+            setIsLoadingExpenses(true);
+            await new Promise(res => setTimeout(res, 100));
+            setFamilyExpenses([]);
+            setPersonalExpenses([]);
+            setIsLoadingExpenses(false);
 
         } catch (error) {
-            // Catch errors from Promise.allSettled rejections or the explicit throw
             console.error(`Error fetching data for plan ${planId}:`, error);
-            // Set a general error or keep specific ones set above
             if (!plansError) setPlansError(error.message || `Failed to load plan data.`);
-            // Ensure loading states are off
             setIsLoadingPlanDetails(false); setIsLoadingMembers(false); setIsLoadingExpenses(false);
-            // Reset data states
             setCurrentPlanDetails({}); setFamilyMembers([]); setFamilyExpenses([]); setPersonalExpenses([]);
         }
-    }, []); // Removed dependencies to rely solely on planId argument
+        }, []);
     // --- Form Submit Handlers ---
     const handleAddPlanSubmit = async (e) => {
         e.preventDefault();
@@ -373,13 +342,10 @@ const FamilyBudgetingPage = () => {
              return;
         }
         try {
-            // API Call to create the plan (only pass plan_name as per form state)
             const newPlan = await addFamilyPlan({ plan_name: addPlanFormData.plan_name });
             alert("Plan added successfully!");
-            await fetchUserPlans(); // Refresh the list of plans
-            // fetchUserPlans will automatically select the first plan (which should be the new one if list is sorted)
-            // Or, explicitly select the new plan:
-            // setSelectedPlanId(newPlan._id);
+            await fetchUserPlans();
+      
             closeModal();
         } catch (err) {
             console.error("Add plan failed:", err);
@@ -394,7 +360,15 @@ const FamilyBudgetingPage = () => {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitError(null);
-
+        const totalAllocated = settingsFormData.categories.reduce(
+            (sum, c) => sum + parseFloat(c.budget || 0),
+            0
+        );
+    
+        if (totalAllocated > parseFloat(settingsFormData.total_budget_amount)) {
+            setSubmitError(`Allocated category budgets ($${totalAllocated}) exceed total budget ($${settingsFormData.total_budget_amount}).`);
+            return;
+        }
         // Validate inputs (use state variable names directly)
         const numericTotal = parseFloat(settingsFormData.total_budget_amount);
         if (!settingsFormData.plan_name.trim() || isNaN(numericTotal) || numericTotal < 0 || !settingsFormData.start_date || !settingsFormData.end_date || new Date(settingsFormData.start_date) >= new Date(settingsFormData.end_date)) {
@@ -408,8 +382,13 @@ const FamilyBudgetingPage = () => {
             plan_name: settingsFormData.plan_name,
             total_budget_amount: numericTotal,
             start_date: settingsFormData.start_date,
-            end_date: settingsFormData.end_date
+            end_date: settingsFormData.end_date,
+            categories: availableCategories.map(category => ({
+            category_id: category._id,
+            budget: parseFloat(settingsFormData[`category_${category._id}`]) || 0,
+            })),
         };
+        console.log("Settings Payload:", payload); // Log the data being sent
 
         try {
             if (!selectedPlanId) throw new Error("No plan selected to update.");
@@ -436,7 +415,6 @@ const FamilyBudgetingPage = () => {
         }
     };
 
-    // TODO: Implement API calls for these handlers
     const handleAddMemberSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -530,7 +508,6 @@ const FamilyBudgetingPage = () => {
          }
     };
 
-    // TODO: Implement Edit Member Submit
     const handleEditMemberSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -564,8 +541,8 @@ const FamilyBudgetingPage = () => {
             setIsSubmitting(false);
         }
     };
+  
     // --- Delete Confirmation Handler ---
-       // --- Delete Confirmation Handler ---
        const confirmDelete = async () => {
         if (!deletingItemId || !deletingItemType) return;
         setIsSubmitting(true);
@@ -639,29 +616,22 @@ const FamilyBudgetingPage = () => {
 
     // --- Effects ---
 
-    // Initial Data Load: Fetch plans and categories once on mount
     useEffect(() => {
         fetchUserPlans();
         fetchCategoriesOnce();
-    }, [fetchUserPlans, fetchCategoriesOnce]); // Run only on mount
+    }, [fetchUserPlans, fetchCategoriesOnce]); 
 
     // Fetch specific plan data whenever the selectedPlanId changes
     useEffect(() => {
-        // Only fetch if a plan ID is selected and not during initial plan list loading
         if (selectedPlanId && !isLoadingPlans) {
             fetchPlanData(selectedPlanId);
         } else if (!selectedPlanId && !isLoadingPlans) {
-            // If no plan is selected (e.g., after deleting the last one, or initially if no plans)
-            // Ensure all plan-specific data is cleared
-            setCurrentPlanDetails(null);
+             setCurrentPlanDetails(null);
             setFamilyMembers([]);
             setFamilyExpenses([]);
             setPersonalExpenses([]);
             setDetailsError(null); setMembersError(null); setExpensesError(null);
         }
-        // Dependency on selectedPlanId ensures this runs when the selection changes.
-        // Dependency on fetchPlanData ensures the latest version of the fetch function is used.
-        // Added isLoadingPlans to prevent fetching details before the plan list (and initial selection) is ready.
     }, [selectedPlanId, fetchPlanData, isLoadingPlans]);
 
     // --- Render ---
@@ -913,29 +883,137 @@ const FamilyBudgetingPage = () => {
             <Modal isOpen={modalState.isSettingsOpen} onClose={closeModal} title="Plan Settings">
                 <form onSubmit={handleSettingsSubmit} className="modal-form">
                     {submitError && <p className="error-message modal-error">{submitError}</p>}
-                    {/* Use names matching settingsFormData state keys */}
+
+                    {/* Plan Name */}
                     <div className="form-group">
-                        <label htmlFor="plan_name_set">Plan Name</label>
-                        <input type="text" id="plan_name_set" name="plan_name" required className="input-field" value={settingsFormData.plan_name} onChange={(e) => handleFormChange(e, setSettingsFormData)} />
+                    <label htmlFor="plan_name_set">Plan Name</label>
+                    <input
+                        type="text"
+                        id="plan_name_set"
+                        name="plan_name"
+                        required
+                        className="input-field"
+                        value={settingsFormData.plan_name}
+                        onChange={(e) => handleFormChange(e, setSettingsFormData)}
+                    />
                     </div>
+
+                    {/* Total Budget */}
                     <div className="form-group">
-                        <label htmlFor="total_budget_amount_set">Total Budget (Rs)</label>
-                        <input type="number" id="total_budget_amount_set" name="total_budget_amount" required min="0" step="any" className="input-field" value={settingsFormData.total_budget_amount} onChange={(e) => handleFormChange(e, setSettingsFormData)} />
+                    <label htmlFor="total_budget_amount_set">Total Budget (Rs)</label>
+                    <input
+                        type="number"
+                        id="total_budget_amount_set"
+                        name="total_budget_amount"
+                        required
+                        min="0"
+                        step="any"
+                        className="input-field"
+                        value={settingsFormData.total_budget_amount}
+                        onChange={(e) => handleFormChange(e, setSettingsFormData)}
+                    />
                     </div>
+
+                    {/* Start Date */}
                     <div className="form-group">
-                        <label htmlFor="start_date_set">Start Date</label>
-                        <input type="date" id="start_date_set" name="start_date" required className="input-field" value={settingsFormData.start_date} onChange={(e) => handleFormChange(e, setSettingsFormData)} />
+                    <label htmlFor="start_date_set">Start Date</label>
+                    <input
+                        type="date"
+                        id="start_date_set"
+                        name="start_date"
+                        required
+                        className="input-field"
+                        value={settingsFormData.start_date}
+                        onChange={(e) => handleFormChange(e, setSettingsFormData)}
+                    />
                     </div>
+
+                    {/* End Date */}
                     <div className="form-group">
-                        <label htmlFor="end_date_set">End Date</label>
-                        <input type="date" id="end_date_set" name="end_date" required className="input-field" value={settingsFormData.end_date} onChange={(e) => handleFormChange(e, setSettingsFormData)} />
+                    <label htmlFor="end_date_set">End Date</label>
+                    <input
+                        type="date"
+                        id="end_date_set"
+                        name="end_date"
+                        required
+                        className="input-field"
+                        value={settingsFormData.end_date}
+                        onChange={(e) => handleFormChange(e, setSettingsFormData)}
+                    />
                     </div>
-                    <div className="form-actions">
-                        <button type="button" className="secondary-button" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
-                        <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Settings'}</button>
+
+                    {/* Category-wise Budget Allocation */}
+                    <div className="form-group">
+                    <label>Category-wise Budget Allocation</label>
+                    {availableCategories.length > 0 ? (
+                        availableCategories.map((category) => (
+                        <div key={category._id} className="category-budget-row">
+                            <label htmlFor={`category_${category._id}`}>{category.name}</label>
+                            <input
+                            type="number"
+                            id={`category_${category._id}`}
+                            name={`category_${category._id}`}
+                            min="0"
+                            step="any"
+                            className="input-field"
+                            value={
+                                settingsFormData.categories.find(c => c.category_id === category._id)?.budget || ''
+                            }
+                            onChange={(e) => {
+                                const value = parseFloat(e.target.value) || 0;
+
+                                // Update category budget
+                                setSettingsFormData(prev => {
+                                const updatedCategories = prev.categories.map(c =>
+                                    c.category_id === category._id ? { ...c, budget: value } : c
+                                );
+                                return {
+                                    ...prev,
+                                    categories: updatedCategories,
+                                };
+                                });
+
+                                // Recalculate total allocated after category budget change
+                                setTimeout(() => {
+                                const total = settingsFormData.categories.reduce((sum, c) => {
+                                    return c.category_id === category._id
+                                    ? sum + value
+                                    : sum + parseFloat(c.budget || 0);
+                                }, 0);
+                                setTotalAllocatedBudget(total);
+                                }, 0);
+                            }}
+                            />
+                        </div>
+                        ))
+                    ) : (
+                        <p className="info-message small">No categories available for budget allocation.</p>
+                    )}
+
+                    {/* Total allocated info */}
+                    <p className="info-message small">
+                        Total Allocated: Rs {totalAllocatedBudget} / Rs {settingsFormData.total_budget_amount}
+                    </p>
+
+                    {/* Overbudget warning */}
+                    {totalAllocatedBudget > parseFloat(settingsFormData.total_budget_amount) && (
+                        <p className="error-message">⚠️ Allocated budget exceeds total budget!</p>
+                    )}
                     </div>
+
+                    {/* Save Button */}
+                    <button
+                    type="submit"
+                    className="primary-button"
+                    disabled={
+                        isSubmitting ||
+                        totalAllocatedBudget > parseFloat(settingsFormData.total_budget_amount)
+                    }
+                    >
+                    {isSubmitting ? 'Saving...' : 'Save Settings'}
+                    </button>
                 </form>
-            </Modal>
+                </Modal>
 
              {/* Add Member Modal */}
              <Modal isOpen={modalState.isAddMemberOpen} onClose={closeModal} title="Add New Member">
