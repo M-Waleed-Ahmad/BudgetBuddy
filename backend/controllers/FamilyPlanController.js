@@ -292,10 +292,64 @@ const getPlanDetails = async (req, res) => {
         res.status(500).json({ message: "Server error fetching plan details.", error: error.message });
     }
 };
+
+// --- Fetch All Categories of the Owner for the Plan ---
+const getOwnerCategories = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const planId = req.params.planId;
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Authentication required.' });
+        }
+        if (!mongoose.Types.ObjectId.isValid(planId)) {
+            return res.status(400).json({ message: 'Invalid Plan ID format.' });
+        }
+
+        // 1. Check if user is a member of the plan
+        const membership = await FamilyMember.findOne({ user_id: userId, plan_id: planId });
+        if (!membership) {
+            return res.status(404).json({ message: 'User is not a member of this plan.' });
+        }
+
+        // 2. Fetch the plan to get the owner ID
+        const plan = await FamilyPlan.findById(planId).lean();
+        if (!plan) {
+            return res.status(404).json({ message: 'Plan not found.' });
+        }
+
+        // 3. Fetch all categories associated with the owner of the plan
+        const ownerCategories = await FamilyBudget.find({ plan_id: planId })
+            .populate({
+            path: 'category_id',
+            match: { user_id: plan.owner_user_id }, // Match categories with the owner's user ID
+            select: 'name', // Select only the name field of the category
+            })
+            .lean();
+
+        // Filter out any categories where the match did not succeed (i.e., null category_id)
+        const filteredCategories = ownerCategories.filter(category => category.category_id);
+            console.log("Owner Categories:", ownerCategories); // Debugging log
+
+        const formattedCategories = ownerCategories.map(category => ({
+            _id: category.category_id._id,
+            name: category.category_id.name,
+            user_id: category.user_id,
+        }));
+
+        res.status(200).json(formattedCategories);
+
+    } catch (error) {
+        console.error("Error fetching owner categories:", error);
+        res.status(500).json({ message: "Server error fetching owner categories.", error: error.message });
+    }
+};
 module.exports = {
     getUserPlans,
     createPlan,
     updatePlan,
     deletePlan,
     getPlanDetails,
+    getOwnerCategories,
+
 };

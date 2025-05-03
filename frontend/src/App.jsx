@@ -9,6 +9,8 @@ import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
 import NotificationsPage from './pages/users/NotificationsPage';
 import ProtectedRoute from './components/ProtectedRoute'; // Import the wrapper
 
+import './App.css'; // Import your CSS file
+
 function App() {
   // This simulation is generally better handled within FamilyBudgetingPage itself
   const fetchedUserRoleForThisPlan = 'admin';

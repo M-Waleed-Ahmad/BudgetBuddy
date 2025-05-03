@@ -13,7 +13,7 @@ import {
      getUserFamilyPlans, addFamilyPlan,
     updatePlanSettings, deleteFamilyPlan,
     // Categories API
-    getCategories,
+     getCategoriesByPlan,
     // Plan Details API
     getPlanDetails, getPlanMembers, inviteMember,
     updateMemberRole, removeMember,
@@ -403,11 +403,12 @@ const FamilyBudgetingPage = () => {
         }
     }, []);
 
-    const fetchCategoriesOnce = useCallback(async () => {
+    const fetchCategoriesOnce = useCallback(async (planId) => {
         setIsLoadingCategories(true);
         setCategoriesError(null);
         try {
-            const categories = await getCategories(); 
+            const categories = await  getCategoriesByPlan(planId); 
+            console.log("Fetched categories:", categories); // Debug log 
             const validCategories = categories || [];
             setAvailableCategories(validCategories);
             const catMap = validCategories.reduce((acc, cat) => { acc[cat._id] = cat.name; return acc; }, {});
@@ -651,7 +652,7 @@ const FamilyBudgetingPage = () => {
     
         try {
             if (editingItem) {
-                await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
+                await updateFamilyExpense(editingItem._id, payload);
                 await fetchPlanData(selectedPlanId);
                 alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense updated!`);
             } else {
@@ -803,7 +804,7 @@ const FamilyBudgetingPage = () => {
        // --- Initial Data Load Effects ---
        useEffect(() => {
         fetchUserPlans();
-        fetchCategoriesOnce();
+        console.log("Fetched Categories", availableCategories); // Debug log  
     }, [fetchUserPlans, fetchCategoriesOnce]);
 
     useEffect(() => {
@@ -811,6 +812,8 @@ const FamilyBudgetingPage = () => {
             fetchPlanData(selectedPlanId).then(() => {
                 fetchFamilyExpenses(selectedPlanId);
                 fetchPersonalExpenses(selectedPlanId);
+                fetchCategoriesOnce(selectedPlanId);
+
             });
         } else {
             setCurrentPlanDetails(null);

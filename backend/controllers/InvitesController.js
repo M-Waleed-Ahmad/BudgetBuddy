@@ -80,6 +80,7 @@ const acceptInvite = async (req, res) => {
             return res.status(400).json({ message: 'You are already a member of this plan' });
         }
 
+
         // --- Actions ---
         // 1. Create FamilyMember record
         const newMember = new FamilyMember({
@@ -88,6 +89,7 @@ const acceptInvite = async (req, res) => {
             role: invite.role_assigned,
         });
         await newMember.save();
+
 
         // 2. Delete the invite (simpler than updating status)
         await invite.deleteOne();

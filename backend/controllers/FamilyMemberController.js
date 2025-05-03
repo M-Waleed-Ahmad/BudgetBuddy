@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const FamilyPlan = require('../models/FamilyPlan');
 const FamilyMember = require('../models/FamilyMember');
 const User = require('../models/User');
+const Plan = require('../models/FamilyPlan'); // Assuming you have a Plan model
 const Invite = require('../models/Invites');
-
+const sendNotification = require('../utils/sendNotifications'); // Assuming you have a utility for sending notifications
 // --- Helper: Check User Role in Plan ---
 // Returns the membership document if user is member, throws error otherwise
 // Optionally checks for specific required roles
@@ -118,6 +119,25 @@ const inviteMember = async (req, res) => {
             role_assigned: role_assigned,
             status: 'pending',
             // expires_at: ... // Set expiry if desired
+        });
+           const plan = await Plan.findById(planId);
+                if (!plan) {
+                    return res.status(404).json({ error: 'Plan not found' });
+                }
+                const planName = plan.plan_name; // Assuming the Plan model has a 'name' field
+                // Fetch all family members for the plan
+
+        // Send notification to the invitee 
+        await sendNotification({
+            recipient_user_id: inviteeUserId, // ID of the user being invited
+            type: 'invite_received',
+            message: `You have been invited to join the family plan "${planName}" as a "${role_assigned}".`,
+            actor_user_id: inviterUserId, // ID of the user sending the invite
+            related_entity: {
+                id: newInvite._id,
+                model_type: 'Invite',
+            },
+            link: `/invites/${newInvite._id}`, // Link to view the invite
         });
         await newInvite.save();
 

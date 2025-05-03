@@ -978,6 +978,27 @@ export const getExpenseById = async (expenseId) => {
 };
 
 /**
+ * Fetches all categories for a specific family plan.
+ * @async
+ * @param {string} planId - The ID of the family plan.
+ * @returns {Promise<Array<object>>} Array of category objects.
+ * @throws {Error} If planId is missing, fetch fails, or response is not ok.
+ * */
+export const getCategoriesByPlan = async (planId) => {
+  if (!planId) throw new Error("Plan ID is required to fetch categories.");
+  const endpoint = `${BASE_URL}/family-plans/${planId}/categories`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+    const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to fetch categories (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error fetching categories for plan ${planId}:`, error);
+    throw error;
+  }
+};
+/**
  * Creates a new family expense.
  * @async
  * @param {object} expenseData - The expense data.
