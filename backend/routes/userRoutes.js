@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { getUserProfile, updateUserProfile, updateCurrencyPreference
-    , updateUI
+    , updateUI, getMyProfile
  } = require('../controllers/userController');
 const verifyToken = require('../middleware/authMiddleware'); // Your auth middleware
 
@@ -17,6 +17,9 @@ router.route('/profile/currency')
 
 router.route('/profile/ui')
     .put(verifyToken, updateUI); // PUT to update UI preferences
+
+router.get('/me',verifyToken, getMyProfile);
+
 
 // Add other user-related routes here later (e.g., change password specifically, etc.)
 

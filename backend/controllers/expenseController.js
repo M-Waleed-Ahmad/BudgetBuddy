@@ -2,7 +2,7 @@
 const Expense = require('../models/Expense');
 const MonthlyBudget = require('../models/MonthlyBudget');
 const mongoose = require('mongoose');
-const { startOfMonth, endOfMonth, format } = require('date-fns'); // Use date-fns for reliable date handling
+const { format, startOfMonth, endOfMonth, subMonths, eachMonthOfInterval } = require('date-fns');
 
 // Helper to get current YYYY-MM string
 const getCurrentYearMonth = () => format(new Date(), 'yyyy-MM');
@@ -252,11 +252,213 @@ const getCategoryWiseSpendingForCurrentMonth = async (req, res) => {
         res.status(500).json({ message: 'Server error while fetching category-wise spending', error: error.message });
     }
 };
+const getPersonalExpenses = async (req, res) => { // Can reuse/extend existing GET /api/expenses
+    try {
+        const userId = req.user.userId;
+        if (!userId) return res.status(401).json({ message: 'Auth required.' });
+
+        const limit = parseInt(req.query.limit, 10) || 5; // Default limit
+        const sortQuery = req.query.sort || '-expense_date'; // Default sort
+
+        // Basic sort validation (prevent injection)
+        const allowedSortFields = ['expense_date', 'amount', 'created_at'];
+        let sortOptions = {};
+        if (typeof sortQuery === 'string') {
+            const direction = sortQuery.startsWith('-') ? -1 : 1;
+            const field = sortQuery.replace('-', '');
+            if (allowedSortFields.includes(field)) {
+                sortOptions[field] = direction;
+            } else {
+                sortOptions = { expense_date: -1 }; // Default fallback
+            }
+        } else {
+             sortOptions = { expense_date: -1 }; // Default fallback
+        }
+
+
+        const expenses = await Expense.find({ user_id: userId }) // Filter by user
+            .sort(sortOptions)
+            .limit(limit)
+            .populate('category_id', 'name') // Populate category name
+            .lean();
+
+        res.status(200).json(expenses || []);
+
+    } catch (error) {
+        console.error("Error fetching personal expenses:", error);
+        res.status(500).json({ message: "Server error fetching expenses.", error: error.message });
+    }
+};
+
+// --- Get Current Month's Total Personal Spending ---
+// GET /api/expenses/current-month-total
+const getCurrentMonthSpendingTotal = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) return res.status(401).json({ message: 'Auth required.' });
+
+        const now = new Date();
+        const startDate = startOfMonth(now);
+        const endDate = endOfMonth(now);
+
+        const result = await Expense.aggregate([
+            {
+                $match: {
+                    user_id: new mongoose.Types.ObjectId(userId), // Convert string ID to ObjectId
+                    expense_date: { $gte: startDate, $lte: endDate }
+                }
+            },
+            {
+                $group: {
+                    _id: null, // Group all matching documents
+                    totalSpent: { $sum: "$amount" }
+                }
+            }
+        ]);
+
+        const totalSpent = result.length > 0 ? result[0].totalSpent : 0;
+        res.status(200).json({ totalSpent });
+
+    } catch (error) {
+        console.error("Error fetching current month spending total:", error);
+        res.status(500).json({ message: "Server error calculating spending total.", error: error.message });
+    }
+};
+
+// --- Get Spending Trends by Category over N Months ---
+// GET /api/expenses/trends?months=9
+const getSpendingTrends = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) return res.status(401).json({ message: 'Auth required.' });
+
+        const monthsToFetch = parseInt(req.query.months, 10) || 9;
+        if (monthsToFetch <= 0 || monthsToFetch > 24) {
+            return res.status(400).json({ message: 'Invalid number of months requested.' });
+        }
+
+        const now = new Date();
+        const endDate = endOfMonth(now);
+        const startDate = startOfMonth(subMonths(now, monthsToFetch - 1));
+
+        const monthLabels = eachMonthOfInterval({ start: startDate, end: endDate })
+            .map(date => format(date, 'yyyy-MM'));
+
+        const results = await Expense.aggregate([
+            // 1. Match user and date range
+            { $match: {
+                user_id: new mongoose.Types.ObjectId(userId),
+                expense_date: { $gte: startDate, $lte: endDate }
+            }},
+            // 2. Project month string and category ID - REMOVED timeZone
+            { $project: {
+                // Use $dateToString WITHOUT the timeZone option
+                month: { $dateToString: { format: "%Y-%m", date: "$expense_date" } },
+                category_id: 1,
+                amount: 1
+            }},
+            // 3. Group by month and category, sum amount
+            { $group: {
+                _id: { month: "$month", category: "$category_id" },
+                monthlyCategoryTotal: { $sum: "$amount" }
+            }},
+            // 4. Group again by category, pushing monthly data
+            { $group: {
+                _id: "$_id.category", // Group by category ID
+                monthlyData: {
+                    $push: {
+                        month: "$_id.month",
+                        total: "$monthlyCategoryTotal"
+                    }
+                }
+            }},
+            // 5. Lookup category name
+            { $lookup: {
+                from: 'categories', // Ensure this matches your collection name
+                localField: '_id',
+                foreignField: '_id',
+                as: 'categoryInfo'
+            }},
+            // 6. Project the final shape
+            { $project: {
+                _id: 0,
+                name: { $ifNull: [{ $arrayElemAt: ["$categoryInfo.name", 0] }, "Uncategorized"] },
+                data: "$monthlyData"
+            }},
+            // 7. Sort by category name (optional)
+            { $sort: { name: 1 } }
+        ]);
+
+        // Post-processing: Ensure each category has data for all months
+        const processedCategories = results.map(category => {
+            const monthlyDataMap = category.data.reduce((map, item) => {
+                map[item.month] = item.total;
+                return map;
+            }, {});
+            const fullData = monthLabels.map(month => monthlyDataMap[month] || 0); // Fill missing months with 0
+            return { name: category.name, data: fullData };
+        });
+
+        res.status(200).json({
+            months: monthLabels,
+            categories: processedCategories
+        });
+
+    } catch (error) {
+        console.error("Error fetching spending trends:", error);
+        // Check for the specific MongoServerError related to $dateToString if needed for debugging
+        if (error.codeName === 'Location18534' || error.message.includes('$dateToString')) {
+             console.error("Potential MongoDB version issue with $dateToString timezone.");
+        }
+        res.status(500).json({ message: "Server error fetching spending trends.", error: error.message });
+    }
+};
+const getRecentExpenses = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) return res.status(401).json({ message: 'Auth required.' });
+
+        const limit = parseInt(req.query.limit, 10) || 5; // Default limit
+        const sortQuery = req.query.sort || '-expense_date'; // Default sort
+
+        // Basic sort validation (prevent injection)
+        const allowedSortFields = ['expense_date', 'amount', 'created_at'];
+        let sortOptions = {};
+        if (typeof sortQuery === 'string') {
+            const direction = sortQuery.startsWith('-') ? -1 : 1;
+            const field = sortQuery.replace('-', '');
+            if (allowedSortFields.includes(field)) {
+                sortOptions[field] = direction;
+            } else {
+                sortOptions = { expense_date: -1 }; // Default fallback
+            }
+        } else {
+             sortOptions = { expense_date: -1 }; // Default fallback
+        }
+
+
+        const expenses = await Expense.find({ user_id: userId }) // Filter by user
+            .sort(sortOptions)
+            .limit(limit)
+            .populate('category_id', 'name') // Populate category name
+            .lean();
+
+        res.status(200).json(expenses || []);
+
+    } catch (error) {
+        console.error("Error fetching recent expenses:", error);
+        res.status(500).json({ message: "Server error fetching recent expenses.", error: error.message });
+    }
+};
 
 module.exports = {
     getExpensesForCurrentMonthPlan,
     addExpense,
     updateExpense,
     deleteExpense,
-    getCategoryWiseSpendingForCurrentMonth
+    getCategoryWiseSpendingForCurrentMonth,
+    getPersonalExpenses,
+    getCurrentMonthSpendingTotal,
+    getSpendingTrends,
+    getRecentExpenses
 };

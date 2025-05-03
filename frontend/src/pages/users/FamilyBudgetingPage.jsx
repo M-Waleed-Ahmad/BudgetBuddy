@@ -155,7 +155,7 @@ const FamilyBudgetingPage = () => {
                 barWidth: '40%', 
                 data: availableCategories.map(category => {
                     const expenses = familyExpenses
-                        .filter(expense => expense.category_id === category._id && expense.status === 'approved')
+                        .filter(expense => expense.category_id?._id === category._id && expense.status === 'approved')
                         .reduce((sum, expense) => sum + (expense.amount || 0), 0);
                     return expenses;
                 }), 

@@ -1096,3 +1096,59 @@ export const rejectFamilyExpense = async (expenseId) => {
     throw error;
   }
 }
+
+
+
+// api/api.js
+
+// Assume BASE_URL and getAuthHeaders() are defined elsewhere
+// const BASE_URL = '/api';
+// const getAuthHeaders = () => ({ /* ... headers ... */ });
+
+// --- User API ---
+export const getMyProfile = async () => {
+  const endpoint = `${BASE_URL}/user/me`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch profile');
+      return data;
+  } catch (error) { console.error('❌ Error getMyProfile:', error); throw error; }
+};
+
+export const getRecentExpenses = async (limit = 3) => {
+  const endpoint = `${BASE_URL}/expenses/recent?limit=${3}&sort=-expense_date`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch recent expenses');
+      return data || [];
+  } catch (error) {
+      console.error('❌ Error getRecentExpenses:', error);
+      throw error;
+  }
+};
+
+export const getCurrentMonthSpendingTotal = async () => {
+  const endpoint = `${BASE_URL}/expenses/current-month-total`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch spending total');
+      return data.totalSpent || 0; // Return the number
+  } catch (error) { console.error('❌ Error getCurrentMonthSpendingTotal:', error); throw error; }
+};
+
+export const getSpendingTrends = async (months = 9) => {
+  const endpoint = `${BASE_URL}/expenses/trends?period=monthly&months=${months}`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch spending trends');
+      return data || { months: [], categories: [] }; // Ensure default structure
+  } catch (error) { console.error('❌ Error getSpendingTrends:', error); throw error; }
+};
