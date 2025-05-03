@@ -1152,3 +1152,51 @@ export const getSpendingTrends = async (months = 9) => {
       return data || { months: [], categories: [] }; // Ensure default structure
   } catch (error) { console.error('❌ Error getSpendingTrends:', error); throw error; }
 };
+
+
+// --- Notifications API ---
+
+export const getNotifications = async () => {
+  const endpoint = `${BASE_URL}/notifications`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch notifications');
+      return data || []; // Return empty array if no notifications
+  } catch (error) { console.error('❌ Error getNotifications:', error); throw error; }
+}
+
+export const markNotificationAsRead = async (notificationId) => {
+  if (!notificationId) throw new Error("Notification ID is required to mark as read.");
+  const endpoint = `${BASE_URL}/notifications/${notificationId}`;
+  console.log(`API Call: PUT ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'PUT', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to mark notification as read');
+      return data; // Return the updated notification object
+  } catch (error) { console.error(`❌ Error markNotificationAsRead ${notificationId}:`, error); throw error; }
+};
+
+
+export const deleteNotification = async (notificationId) => {
+  if (!notificationId) throw new Error("Notification ID is required to delete.");
+  const endpoint = `${BASE_URL}/notifications/${notificationId}`;
+  console.log(`API Call: DELETE ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'DELETE', headers: getAuthHeaders() });
+      if (response.status === 204) return { message: 'Notification deleted successfully.' }; // Handle No Content
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to delete notification');
+      return data; // Return success message from backend if status 200/OK
+  } catch (error) {
+       if (error instanceof SyntaxError && error.message.includes('Unexpected end of JSON input')) {
+            console.warn("Caught SyntaxError likely due to 204 No Content. Treating as success.");
+            return { message: 'Notification deleted successfully' };
+       }
+      console.error(`❌ Error deleting notification ${notificationId}:`, error);
+      throw error;
+  }
+};
+

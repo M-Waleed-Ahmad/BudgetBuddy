@@ -213,7 +213,7 @@ const BudgetManagementPage = () => {
             acc[categoryId].total += limit;
             // Using CategoryWiseSpending fetched from the backend 
             const usedAmount = categoryWiseSpending[categoryName] || 0; // Placeholder for actual used amount
-            acc[categoryId].used += usedAmount; // Simulated usage for now
+            acc[categoryId].used = usedAmount; // Simulated usage for now
             
             return acc;
         }, {});
