@@ -7,7 +7,9 @@ const {
     updateExpense, 
     deleteExpense ,
     getExpensesByPlanAndUser,
-    getExpensesByPlan
+    getExpensesByPlan,
+    approveExpense,
+    rejectExpense
 } = require('../controllers/FamilyExpenseController');
 const verifyToken = require('../middleware/authMiddleware'); // Import the middleware
 
@@ -18,7 +20,7 @@ router.get('/plan/:plan_id', verifyToken, getExpensesByPlan);
 router.get('/:id', verifyToken, getExpenseById);
 
 // Route to get all expenses for a specific plan and user
-router.get('/plan/:plan_id/user/:user_id', verifyToken, getExpensesByPlanAndUser);
+router.get('/plan/:plan_id/user', verifyToken, getExpensesByPlanAndUser);
 
 // Route to create a new expense
 router.post('/', verifyToken, createExpense);
@@ -28,6 +30,10 @@ router.put('/:id', verifyToken, updateExpense);
 
 // Route to delete an expense by ID
 router.delete('/:id', verifyToken, deleteExpense);
+// Route to approve an expense by ID
+router.put('/approve/:id', verifyToken, approveExpense);
 
+// Route to reject an expense by ID
+router.put('/reject/:id', verifyToken, rejectExpense);
 
 module.exports = router;

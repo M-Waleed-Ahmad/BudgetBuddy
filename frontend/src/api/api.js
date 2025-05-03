@@ -908,21 +908,191 @@ export const removeMember = async (planId, memberUserId) => {
   }
 };
 
-/***
- * Fetches the expenses for a specific family plan.
+// --- Family Expense APIs ---
+
+/**
+ * Fetches all expenses for a specific family plan.
  * @async
  * @param {string} planId - The ID of the family plan.
- * @returns {Promise<Array<object>>} Array of expense objects [{ _id, amount, date, description, ... }, ...]
+ * @returns {Promise<Array<object>>} Array of expense objects.
  * @throws {Error} If planId is missing, fetch fails, or response is not ok.
  */
-export const getPlanExpenses = async (planId) => {
+export const getExpensesByPlan = async (planId) => {
   if (!planId) throw new Error("Plan ID is required to fetch expenses.");
-  const endpoint = `${BASE_URL}/family-plans/${planId}/expenses`;
+  const endpoint = `${BASE_URL}/family-expenses/plan/${planId}`;
   console.log(`API Call: GET ${endpoint}`);
   try {
-      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || `Failed to fetch expenses (Status: ${response.status})`);
-      return data || []; // Return fetched expenses or empty array
-  } catch (error) { console.error(`❌ Error fetching expenses for plan ${planId}:`, error); throw error; }
+    const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to fetch expenses (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error fetching expenses for plan ${planId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all expenses for a specific family plan and user.
+ * @async
+ * @param {string} planId - The ID of the family plan.
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<Array<object>>} Array of expense objects.
+ * @throws {Error} If IDs are missing, fetch fails, or response is not ok.
+ */
+export const getExpensesByPlanAndUser = async (planId) => {
+  if (!planId) throw new Error("Plan ID and User ID are required to fetch expenses.");
+  const endpoint = `${BASE_URL}/family-expenses/plan/${planId}/user/`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+    const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to fetch expenses (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error fetching expenses for plan ${planId} `, error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches a single expense by its ID.
+ * @async
+ * @param {string} expenseId - The ID of the expense.
+ * @returns {Promise<object>} The expense object.
+ * @throws {Error} If expenseId is missing, fetch fails, or response is not ok.
+ */
+export const getExpenseById = async (expenseId) => {
+  if (!expenseId) throw new Error("Expense ID is required to fetch the expense.");
+  const endpoint = `${BASE_URL}/family-expenses/${expenseId}`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+    const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to fetch expense (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error fetching expense ${expenseId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Creates a new family expense.
+ * @async
+ * @param {object} expenseData - The expense data.
+ * @returns {Promise<object>} The newly created expense object.
+ * @throws {Error} If fetch fails or response is not ok.
+ */
+export const createFamilyExpense = async (planId, expenseData) => {
+  const endpoint = `${BASE_URL}/family-expenses`;
+  console.log(`API Call: POST ${endpoint} with data:`, expenseData);
+  try {
+    const payload = {
+      plan_id: planId,
+      ...expenseData,
+      expense_date: expenseData.date, // map frontend 'date' to backend 'expense_date'
+      status: 'pending',               // or any default you'd like
+      approved_by_user_id: null,       // initially null or however your logic dictates
+    };
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to create expense (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error('❌ Error creating expense:', error);
+    throw error;
+  }
+};
+
+
+/**
+ * Updates an existing family expense.
+ * @async
+ * @param {string} expenseId - The ID of the expense to update.
+ * @param {object} expenseData - The updated expense data.
+ * @returns {Promise<object>} The updated expense object.
+ * @throws {Error} If expenseId is missing, fetch fails, or response is not ok.
+ */
+export const updateFamilyExpense = async (expenseId, expenseData) => {
+  if (!expenseId) throw new Error("Expense ID is required to update the expense.");
+  const endpoint = `${BASE_URL}/family-expenses/${expenseId}`;
+  console.log(`API Call: PUT ${endpoint} with data:`, expenseData);
+  try {
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(expenseData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to update expense (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error updating expense ${expenseId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a family expense by its ID.
+ * @async
+ * @param {string} expenseId - The ID of the expense to delete.
+ * @returns {Promise<object>} Success message object.
+ * @throws {Error} If expenseId is missing, fetch fails, or response is not ok.
+ */
+export const deleteFamilyExpense = async (expenseId) => {
+  if (!expenseId) throw new Error("Expense ID is required to delete the expense.");
+  const endpoint = `${BASE_URL}/family-expenses/${expenseId}`;
+  console.log(`API Call: DELETE ${endpoint}`);
+  try {
+    const response = await fetch(endpoint, { method: 'DELETE', headers: getAuthHeaders() });
+    if (response.status === 204) return { message: 'Expense deleted successfully.' };
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to delete expense (Status: ${response.status})`);
+    return data;
+  } catch (error) {
+    console.error(`❌ Error deleting expense ${expenseId}:`, error);
+    throw error;
+  }
+};
+
+export const approveFamilyExpense = async (expenseId) => {
+  if (!expenseId) throw new Error("Expense ID is required to approve the expense.");
+  const endpoint = `${BASE_URL}/family-expenses/approve/${expenseId}`;
+  console.log(`API Call: PUT ${endpoint}`);
+  try {
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to approve expense (Status: ${response.status})`);
+    return data; // Returns the approved expense object
+  } catch (error) {
+    console.error(`❌ Error approving expense ${expenseId}:`, error);
+    throw error;
+  }
+}
+export const rejectFamilyExpense = async (expenseId) => {
+  if (!expenseId) throw new Error("Expense ID is required to reject the expense.");
+  const endpoint = `${BASE_URL}/family-expenses/reject/${expenseId}`;
+  console.log(`API Call: PUT ${endpoint}`);
+  try {
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || `Failed to reject expense (Status: ${response.status})`);
+    return data; // Returns the rejected expense object
+  } catch (error) {
+    console.error(`❌ Error rejecting expense ${expenseId}:`, error);
+    throw error;
+  }
 }

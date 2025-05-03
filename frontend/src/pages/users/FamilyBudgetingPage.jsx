@@ -17,6 +17,11 @@ import {
     // Plan Details API
     getPlanDetails, getPlanMembers, inviteMember,
     updateMemberRole, removeMember,
+    // Expenses APIs
+    getExpensesByPlan, getExpensesByPlanAndUser,
+    getExpenseById, createFamilyExpense,
+    updateFamilyExpense, deleteFamilyExpense,
+    approveFamilyExpense, rejectFamilyExpense,
 } from '../../api/api'; // Adjust path if needed
 
 
@@ -89,7 +94,9 @@ const FamilyBudgetingPage = () => {
     }, [selectedPlanId, userPlansAndRoles]);
 
     // TODO: Update these calculations when *actual* expense data is fetched and structured
-    const spentAmount = useMemo(() => familyExpenses.reduce((sum, item) => sum + (item.amount || 0), 0), [familyExpenses]);
+    const spentAmount = useMemo(() => familyExpenses
+        .filter(item => item.status === 'approved')
+        .reduce((sum, item) => sum + (item.amount || 0), 0), [familyExpenses]);
     const remainingAmount = useMemo(() => (currentPlanDetails?.total_budget_amount || 0) - spentAmount, [currentPlanDetails, spentAmount]);
     const spentPercentage = useMemo(() => (currentPlanDetails?.total_budget_amount || 0) > 0 ? Math.round((spentAmount / (currentPlanDetails?.total_budget_amount || 1)) * 100) : 0, [currentPlanDetails, spentAmount]);
 
@@ -256,7 +263,26 @@ const FamilyBudgetingPage = () => {
         } finally {
             setIsLoadingPlans(false);
         }
-    }, []); 
+    }, []);
+
+    const fetchFamilyExpenses = useCallback(async (planId) => {
+        if (!planId) return;
+        setIsLoadingExpenses(true);
+        setExpensesError(null);
+        setFamilyExpenses([]); // Reset expenses before fetching
+        try {
+            const expenses = await getExpensesByPlan(planId); // API Call
+            const validExpenses = (expenses || []).filter(expense => expense.status === 'approved' || expense.status === 'pending'); // Filter for approved or pending expenses
+            setFamilyExpenses(validExpenses);
+            console.log("Fetched family expenses:", expenses); // Debug log
+        } catch (error) {
+            console.error("Error fetching family expenses:", error);
+            setExpensesError(error.message || "Failed to load family expenses.");
+            setFamilyExpenses([]);
+        } finally {
+            setIsLoadingExpenses(false);
+        }
+    }, []);
 
     const fetchCategoriesOnce = useCallback(async () => {
         setIsLoadingCategories(true);
@@ -331,6 +357,26 @@ const FamilyBudgetingPage = () => {
             setCurrentPlanDetails({}); setFamilyMembers([]); setFamilyExpenses([]); setPersonalExpenses([]);
         }
         }, []);
+
+    const fetchPersonalExpenses = useCallback(async (planId) => {
+        if (!planId) return;
+        setIsLoadingExpenses(true);
+        setExpensesError(null);
+        setPersonalExpenses([]); // Reset expenses before fetching
+        try {
+            const expenses = await getExpensesByPlanAndUser(planId); // API Call
+            const validExpenses = expenses || [];
+            setPersonalExpenses(validExpenses);
+            console.log("Fetched personal expenses:", expenses); // Debug log
+        } catch (error) {
+            console.error("Error fetching personal expenses:", error);
+            setExpensesError(error.message || "Failed to load personal expenses.");
+            setPersonalExpenses([]);
+        } finally {
+            setIsLoadingExpenses(false);
+        }
+    }, []);
+    
     // --- Form Submit Handlers ---
     const handleAddPlanSubmit = async (e) => {
         e.preventDefault();
@@ -355,6 +401,7 @@ const FamilyBudgetingPage = () => {
             setIsSubmitting(false);
         }
     };
+
 
     const handleSettingsSubmit = async (e) => {
         e.preventDefault();
@@ -469,32 +516,19 @@ const FamilyBudgetingPage = () => {
 
          try {
              if (editingItem) { // Editing existing expense
-                 console.log(`TODO: Call update${type === 'personal' ? 'Personal' : 'Family'}Expense API`);
-                 alert(`Updating ${type} expense: ${editingItem._id} (Simulated)`);
-                 // Simulate API Call
-                 await new Promise(res => setTimeout(res, 500));
-                 // TODO: Replace simulation with actual API call like:
-                 // if (type === 'personal') {
-                 //     await updatePersonalExpenseInPlan(selectedPlanId, editingItem._id, payload);
-                 // } else {
-                 //     await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
-                 // }
-                 // Refresh data after update
+                 if (type === 'personal') {
+                     await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
+                 } else {
+                     await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
+                 }
                  await fetchPlanData(selectedPlanId);
                  alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense updated!`);
-
              } else { // Adding new expense
-                 console.log(`TODO: Call add${type === 'personal' ? 'Personal' : 'Family'}Expense API`);
-                 alert(`Adding new ${type} expense (Simulated)`);
-                 // Simulate API Call
-                 await new Promise(res => setTimeout(res, 500));
-                 // TODO: Replace simulation with actual API call like:
-                 // if (type === 'personal') {
-                 //     await addPersonalExpenseToPlan(selectedPlanId, payload);
-                 // } else {
-                 //     await addFamilyExpense(selectedPlanId, payload);
-                 // }
-                 // Refresh data after adding
+                 if (type === 'personal') {
+                     await createFamilyExpense(selectedPlanId, payload);
+                 } else {
+                     await createFamilyExpense(selectedPlanId, payload);
+                 }
                  await fetchPlanData(selectedPlanId);
                  alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense added!`);
              }
@@ -502,7 +536,6 @@ const FamilyBudgetingPage = () => {
          } catch (err) {
               console.error(`Error saving ${type} expense:`, err);
               setSubmitError(err.message || `Failed to save ${type} expense.`);
-              // Keep modal open
          } finally {
             setIsSubmitting(false);
          }
@@ -614,27 +647,53 @@ const FamilyBudgetingPage = () => {
          alert(`${section} refreshed!`);
     };
 
-    // --- Effects ---
+    const handleapproval = async (expenseId, action) => {
+        setIsSubmitting(true);
+        setSubmitError(null);
+        try {
+            if (action === 'approve') {
+                await approveFamilyExpense( expenseId); // API Call to approve expense
+                alert("Expense approved successfully!");
+            } else if (action === 'reject') {
+                await rejectFamilyExpense( expenseId); // API Call to reject expense
+                alert("Expense rejected successfully!");
+            }
+            await fetchPlanData(selectedPlanId); // Refetch plan data to update the expenses list
+            closeModal();
+        } catch (err) {
+            console.error("Error updating expense approval:", err);
+            setSubmitError(err.message || "Failed to update expense approval.");
+            // Keep modal open on error
+        }
+        finally {
+            setIsSubmitting(false);
+        }
+    };
 
-    useEffect(() => {
+    // --- Effects ---
+       // --- Initial Data Load Effects ---
+       useEffect(() => {
         fetchUserPlans();
         fetchCategoriesOnce();
-    }, [fetchUserPlans, fetchCategoriesOnce]); 
+    }, [fetchUserPlans, fetchCategoriesOnce]);
 
-    // Fetch specific plan data whenever the selectedPlanId changes
     useEffect(() => {
-        if (selectedPlanId && !isLoadingPlans) {
-            fetchPlanData(selectedPlanId);
-        } else if (!selectedPlanId && !isLoadingPlans) {
-             setCurrentPlanDetails(null);
+        if (selectedPlanId) {
+            fetchPlanData(selectedPlanId).then(() => {
+                fetchFamilyExpenses(selectedPlanId);
+                fetchPersonalExpenses(selectedPlanId);
+            });
+        } else {
+            setCurrentPlanDetails(null);
             setFamilyMembers([]);
             setFamilyExpenses([]);
             setPersonalExpenses([]);
-            setDetailsError(null); setMembersError(null); setExpensesError(null);
+            setDetailsError(null);
+            setMembersError(null);
+            setExpensesError(null);
         }
-    }, [selectedPlanId, fetchPlanData, isLoadingPlans]);
-
-    // --- Render ---
+    }, [selectedPlanId, fetchPlanData, fetchFamilyExpenses , fetchPersonalExpenses ]);
+      // --- Render ---
     return (
         <div className="page-container">
             <Navbar />
@@ -720,96 +779,142 @@ const FamilyBudgetingPage = () => {
                         </motion.section>
 
                         {/* --- Family Members (Admin Only View) --- */}
-                                {/* Family Members (Admin Only) */}
-                            {currentUserRoleForSelectedPlan === 'admin' && (
-                            <motion.section className="content-section" variants={itemVariants}>
-                                <div className="section-header"><h2>Family Members</h2></div>
-                                <div className="filter-export-bar compact-bar">
-                                    {/* Placeholder Filters */}
-                                    <input type="text" placeholder="Search Email" className="filter-input small-input" />
-                                    <button onClick={() => fetchPlanData(selectedPlanId)} className="refresh-button icon-text-button small-button" disabled={isLoadingMembers || isSubmitting}>Refresh <RefreshIcon size={14}/></button>
-                                    <button onClick={() => openModal('isAddMemberOpen')} className="primary-button small-button" disabled={isLoadingMembers || isSubmitting}><UserIcon size={14}/> Invite Member</button>
-                                </div>
-                                {membersError && <p className="error-message small">{membersError}</p>}
-                                <div className="data-table-container">
-                                    {isLoadingMembers ? <p>Loading members...</p> : (
-                                        <table className="data-table members-table">
-                                            <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
-                                            <tbody>
-                                                {/* Loop through fetched familyMembers state */}
-                                                {familyMembers.map((member) => (
-                                                    // Use FamilyMember doc ID as key if available, otherwise user ID
-                                                    <tr key={member._id || member.user?._id}>
-                                                        <td><img src={member.user?.avatar || userAvatarPlaceholder} alt="avatar" className="table-avatar"/></td>
-                                                        <td>{member.user?.name || 'Invited User'}</td>
-                                                        <td>{member.user?.email || 'N/A'}</td>
-                                                        <td>{member.role}</td>
-                                                        <td className="action-cell">
-                                                            {/* Pass the full member object to edit modal */}
-                                                            <button onClick={() => openModal('isEditMemberOpen', member)} title="Edit Member Role" className="icon-button" disabled={isSubmitting}><EditIcon size={14}/></button>
-                                                            {/* Pass the user's ID to delete modal */}
-                                                            <button onClick={() => openModal('isDeleteMemberOpen', member.user, 'member')} title="Remove Member" className="icon-button" disabled={isSubmitting}><DeleteIcon size={14}/></button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                                {familyMembers.length === 0 && <tr><td colSpan="5" className="no-data-message">No members in this plan yet.</td></tr>}
-                                            </tbody>
-                                        </table>
-                                    )}
-                                </div>
-                            </motion.section>
-                        )}
-                        {/* --- Family Expense Record --- */}
+                            {/* Family Members (Admin Only) */}
+                        {currentUserRoleForSelectedPlan === 'admin' && (
                         <motion.section className="content-section" variants={itemVariants}>
-                            <div className="section-header"><h2>Family Expense Record</h2></div>
-                             <div className="filter-export-bar compact-bar">
-                                <div className="filter-controls">
-                                    {/* TODO: Implement filtering/sorting */}
-                                    <input type="text" placeholder="Search By Description" className="filter-input small-input" />
-                                    <div className="filter-group"><label>Filter By Category:</label><select className="filter-select small-select" disabled={isLoadingCategories || availableCategories.length === 0}><option value="">All</option>{availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
-                                    <div className="filter-group"><label>Sort By Amount:</label><select className="filter-select small-select"><option value="desc">Descending</option><option value="asc">Ascending</option></select></div>
-                                </div>
-                                {(currentUserRoleForSelectedPlan === 'admin' || currentUserRoleForSelectedPlan === 'editor') && (
-                                    <motion.button onClick={() => openModal('isExportOpen')} title="Export Expenses" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="secondary-button export-button small-button" disabled={isSubmitting}><ExportIcon size={14}/> Export</motion.button>
-                                )}
+                            <div className="section-header"><h2>Family Members</h2></div>
+                            <div className="filter-export-bar compact-bar">
+                                {/* Placeholder Filters */}
+                                <input type="text" placeholder="Search Email" className="filter-input small-input" />
+                                <button onClick={() => fetchPlanData(selectedPlanId)} className="refresh-button icon-text-button small-button" disabled={isLoadingMembers || isSubmitting}>Refresh <RefreshIcon size={14}/></button>
+                                <button onClick={() => openModal('isAddMemberOpen')} className="primary-button small-button" disabled={isLoadingMembers || isSubmitting}><UserIcon size={14}/> Invite Member</button>
                             </div>
-                            {isLoadingExpenses && <div className="loading-message small">Loading family expenses...</div>}
-                            {expensesError && <div className="error-message small">Error loading family expenses: {expensesError}</div>}
-                             {!isLoadingExpenses && !expensesError && (
-                                <div className="data-table-container">
-                                    <table className="data-table expense-table">
-                                        <thead><tr><th>ID</th><th>Date</th><th>Member</th><th>Category</th><th>Description</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                            {membersError && <p className="error-message small">{membersError}</p>}
+                            <div className="data-table-container">
+                                {isLoadingMembers ? <p>Loading members...</p> : (
+                                    <table className="data-table members-table">
+                                        <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
                                         <tbody>
-                                            {familyExpenses.map((item) => (
-                                                <tr key={item._id}>
-                                                     {/* Use _id from DB */}
-                                                    <td>{item._id.slice(-6)}</td>
-                                                    <td>{formatDate(item.date)}</td>
-                                                    <td>{item.member}</td>{/* TODO: Show member name? */}
-                                                    <td>{categoryMap[item.category_id] || 'Unknown'}</td> {/* Use map */}
-                                                    <td>{item.description}</td>
-                                                    <td>Rs.{item.amount?.toLocaleString()}</td>
-                                                    <td>{item.status}</td>
+                                            {/* Loop through fetched familyMembers state */}
+                                            {familyMembers.map((member) => (
+                                                // Use FamilyMember doc ID as key if available, otherwise user ID
+                                                <tr key={member._id || member.user?._id}>
+                                                    <td><img src={member.user?.avatar || userAvatarPlaceholder} alt="avatar" className="table-avatar"/></td>
+                                                    <td>{member.user?.name || 'Invited User'}</td>
+                                                    <td>{member.user?.email || 'N/A'}</td>
+                                                    <td>{member.role}</td>
                                                     <td className="action-cell">
-                                                        {/* Check permissions */}
-                                                        {(currentUserRoleForSelectedPlan === 'admin' || currentUserRoleForSelectedPlan === 'editor' /*|| item.addedBy === currentUserId */) && (
-                                                          <>
-                                                            <motion.button onClick={() => openModal('isEditFamilyExpenseOpen', item)} title="Edit Expense" whileTap={{ scale: 0.9 }} className="icon-button" disabled={isSubmitting}><EditIcon size={14}/></motion.button>
-                                                            <motion.button onClick={() => openModal('isDeleteFamilyExpenseOpen', item, 'familyExpense')} title="Delete Expense" whileTap={{ scale: 0.9 }} className="icon-button" disabled={isSubmitting}><DeleteIcon size={14}/></motion.button>
-                                                          </>
-                                                        )}
+                                                        {/* Pass the full member object to edit modal */}
+                                                        <button onClick={() => openModal('isEditMemberOpen', member)} title="Edit Member Role" className="icon-button" disabled={isSubmitting}><EditIcon size={14}/></button>
+                                                        {/* Pass the user's ID to delete modal */}
+                                                        <button onClick={() => openModal('isDeleteMemberOpen', member.user, 'member')} title="Remove Member" className="icon-button" disabled={isSubmitting}><DeleteIcon size={14}/></button>
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {familyExpenses.length === 0 && <tr><td colSpan="8" className="no-data-message">No family expenses recorded for this plan.</td></tr>}
+                                            {familyMembers.length === 0 && <tr><td colSpan="5" className="no-data-message">No members in this plan yet.</td></tr>}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </motion.section>
+                        )}
+                        {/* --- Family Expense Record --- */}
+                        <motion.section className="content-section" variants={itemVariants}>
+                            <div className="section-header space-between">
+                                <h2>Family Expense Record</h2>
+                                {(currentUserRoleForSelectedPlan === 'admin' || currentUserRoleForSelectedPlan === 'editor') && (
+                                    <button onClick={() => openModal('isAddFamilyExpenseOpen')} className="primary-button small-button" disabled={isLoadingCategories || isSubmitting}>
+                                        <AddIcon size={14}/> Add Family Expense
+                                    </button>
+                                )}
+                            </div>
+                            <div className="filter-export-bar compact-bar">
+                                <div className="filter-controls">
+                                    {/* TODO: Implement filtering logic */}
+                                    <input type="text" placeholder="Search Description..." className="filter-input small-input" />
+                                    <select className="filter-select small-select" disabled={isLoadingCategories}>
+                                        <option value="">All Categories</option>
+                                        {availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}
+                                    </select>
+                                    <select className="filter-select small-select"><option value="date_desc">Date (Newest)</option></select>
+                                    <button onClick={() => fetchFamilyExpenses(selectedPlanId)} className="refresh-button icon-text-button small-button" disabled={isLoadingExpenses || isSubmitting || !selectedPlanId}>
+                                        Refresh <RefreshIcon size={14}/>
+                                    </button>
+                                </div>
+                                <button onClick={() => openModal('isExportOpen')} title="Export Expenses" className="secondary-button export-button small-button" disabled={isLoadingExpenses || familyExpenses.length === 0}>
+                                    <ExportIcon size={14}/> Export
+                                </button>
+                            </div>
+                            {/* Display Loading / Error State */}
+                            {isLoadingExpenses && <p className='loading-text small'>Loading family expenses...</p>}
+                            {expensesError && <p className="error-message small">{expensesError}</p>}
+
+                            {!isLoadingExpenses && !expensesError && (
+                                <div className="data-table-container">
+                                    <table className="data-table expense-table">
+                                        <thead>
+                                            <tr>
+                                                {/* Use short ID or remove if not needed */}
+                                                {/* <th scope="col">ID</th> */}
+                                                <th scope="col">Date</th>
+                                                <th scope="col">Added By</th>
+                                                <th scope="col">Category</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col">Amount</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {familyExpenses.length > 0 ? (
+                                                familyExpenses.map((item) => (
+                                                    <tr key={item._id}>
+                                                        {/* <td>{item._id.slice(-6)}</td> */}
+                                                        <td>{formatDate(item.expense_date)}</td>
+                                                        {/* Access populated user name */}
+                                                        <td>{item.added_by_user_id?.name || 'N/A'}</td>
+                                                        {/* Access populated category name or use map */}
+                                                        <td>{item.category_id?.name || categoryMap[item.category_id] || 'N/A'}</td>
+                                                        <td>{item.description}</td>
+                                                        <td>Rs.{item.amount?.toLocaleString()}</td>
+                                                        <td>
+                                                            <span className={`status-badge status-${item.status?.toLowerCase()}`}>
+                                                                {item.status || 'N/A'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="action-cell">
+                                                            {/* TODO: Implement permission checks for edit/delete based on role AND who added it */}
+                                                            {(currentUserRoleForSelectedPlan === 'admin' || currentUserRoleForSelectedPlan === 'editor' /* || item.added_by_user_id?._id === loggedInUserId */) && (
+                                                                <>
+                                                                    <button onClick={() => openModal('isEditFamilyExpenseOpen', item)} title="Edit Expense" className="icon-button" disabled={isSubmitting}><EditIcon size={14}/></button>
+                                                                    <button onClick={() => openModal('isDeleteFamilyExpenseOpen', item, 'familyExpense')} title="Delete Expense" className="icon-button" disabled={isSubmitting}><DeleteIcon size={14}/></button>
+                                                                </>
+                                                            )}
+                                                           {/* Admin-only approve/reject buttons */}
+                                                            {currentUserRoleForSelectedPlan === 'admin' && item.status === 'pending' && (
+                                                                <>
+                                                                <button onClick={() => handleapproval(item._id, 'approve')} title="Approve Expense" className="icon-button" disabled={isSubmitting}>
+                                                                    ✅
+                                                                </button>
+                                                                <button onClick={() => handleapproval(item._id, 'reject')} title="Disapprove Expense" className="icon-button" disabled={isSubmitting}>
+                                                                    ❌
+                                                                </button>
+                                                                </>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr><td colSpan="7" className="no-data-message">No family expenses recorded for this plan period.</td></tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
-                             )}
+                            )}
                         </motion.section>
-
                         {/* --- Your Personal Record --- */}
                         <motion.section className="content-section" variants={itemVariants}>
+                         
                             <div className="section-header"><h2>Your Personal Record (within this Plan)</h2></div>
                             {/* TODO: Add loading/error states for personal charts */}
                             <div className="personal-charts-container">
@@ -842,8 +947,8 @@ const FamilyBudgetingPage = () => {
                                                 <tr key={item._id}>
                                                     {/* Use _id from DB */}
                                                     <td>{item._id.slice(-6)}</td>
-                                                    <td>{formatDate(item.date)}</td>
-                                                    <td>{categoryMap[item.category_id] || 'Unknown'}</td> {/* Use map */}
+                                                    <td>{formatDate(item.created_at)}</td>
+                                                    <td>{item.category_id.name || 'Unknown'}</td> {/* Use map */}
                                                     <td>{item.description}</td><td>Rs.{item.amount?.toLocaleString()}</td><td>{item.status}</td>
                                                     <td className="action-cell">
                                                         <motion.button onClick={() => openModal('isEditPersonalExpenseOpen', item)} title="Edit My Expense" whileTap={{ scale: 0.9 }} className="icon-button" disabled={isSubmitting}><EditIcon size={14}/></motion.button>
