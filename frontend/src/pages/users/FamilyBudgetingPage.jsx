@@ -44,7 +44,6 @@ const FamilyBudgetingPage = () => {
     const [availableCategories, setAvailableCategories] = useState([]);
     const [categoryMap, setCategoryMap] = useState({});
     const [totalAllocatedBudget, setTotalAllocatedBudget] = useState(0);
-
     // Loading States
     const [isLoadingPlans, setIsLoadingPlans] = useState(true);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -100,45 +99,163 @@ const FamilyBudgetingPage = () => {
     const remainingAmount = useMemo(() => (currentPlanDetails?.total_budget_amount || 0) - spentAmount, [currentPlanDetails, spentAmount]);
     const spentPercentage = useMemo(() => (currentPlanDetails?.total_budget_amount || 0) > 0 ? Math.round((spentAmount / (currentPlanDetails?.total_budget_amount || 1)) * 100) : 0, [currentPlanDetails, spentAmount]);
 
+    const remainingAmountPerCategory = useMemo(() => {
+        const budgetMap = currentPlanDetails?.categoryBudgets?.reduce((acc, cat) => {
+            acc[cat.categoryId] = cat.limitAmount || 0;
+            return acc;
+        }, {});
+        console.log("Budget Map:", budgetMap); // Debug log
+    
+        const spentMap = familyExpenses.reduce((acc, expense) => {
+            if (expense.status === 'approved') {
+                // Fix: Access category_id._id
+                const categoryId = expense.category_id._id || expense.category_id; 
+                acc[categoryId] = (acc[categoryId] || 0) + (expense.amount || 0);
+            }
+            return acc;
+        }, {});
+        console.log("Spent Map:", spentMap); // Debug log
+    
+        const remainingMap = Object.keys(budgetMap || {}).reduce((acc, catId) => {
+            acc[catId] = (budgetMap[catId] || 0) - (spentMap[catId] || 0);
+            return acc;
+        }, {});
+        console.log("Remaining Map:", remainingMap); // Debug log
+    
+        return remainingMap;
+    }, [currentPlanDetails, familyExpenses]);
+    
     // --- ECharts Options ---
     // TODO: Update chart data based on fetched expenses and categories
     const mainBarChartOptions = useMemo(() => ({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: { data: ['Budget Amount', 'Expense Amount'], bottom: 0, textStyle: { color: '#555' } },
         grid: { left: '3%', right: '4%', bottom: '10%', containLabel: true },
-        xAxis: { type: 'category', data: ['Food', 'Travel', 'Utilities', 'Entertainment', 'Shopping', 'Health'], axisTick: { alignWithLabel: true }, axisLabel: { color: '#666' } }, // Example categories
-        yAxis: { type: 'value', axisLabel: { formatter: 'Rs {value}', color: '#666' } }, // Added Rs
+        xAxis: { 
+            type: 'category', 
+            data: availableCategories.map(category => category.name), 
+            axisTick: { alignWithLabel: true }, 
+            axisLabel: { color: '#666' } 
+        },
+        yAxis: { type: 'value', axisLabel: { formatter: 'Rs {value}', color: '#666' } },
         series: [
-            { name: 'Budget Amount', type: 'bar', barWidth: '40%', data: [500, 800, 1200, 600, 900, 700], itemStyle: { color: '#91cc75' } }, // Example data
-            { name: 'Expense Amount', type: 'bar', barWidth: '40%', data: [400, 900, 1000, 500, 750, 800], itemStyle: { color: '#fc8452' } }  // Example data
+            { 
+                name: 'Budget Amount', 
+                type: 'bar', 
+                barWidth: '40%', 
+                data: availableCategories.map(category => {
+                    const budget = currentPlanDetails?.categoryBudgets?.find(cat => cat.categoryId === category._id)?.limitAmount || 0;
+                    return budget;
+                }), 
+                itemStyle: { color: '#91cc75' } 
+            },
+            { 
+                name: 'Expense Amount', 
+                type: 'bar', 
+                barWidth: '40%', 
+                data: availableCategories.map(category => {
+                    const expenses = familyExpenses
+                        .filter(expense => expense.category_id === category._id && expense.status === 'approved')
+                        .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+                    return expenses;
+                }), 
+                itemStyle: { color: '#fc8452' } 
+            }
         ]
-    }), );
+    }), [availableCategories, currentPlanDetails, familyExpenses]);
 
-    const personalPieChartOptions = useMemo(() => ({
-        tooltip: { trigger: 'item', formatter: '{b}: Rs {c} ({d}%)' },
-        legend: { data: ['Your Spending', 'Remaining Budget'], bottom: 0, textStyle: { color: '#555' } },
-        series: [{
-            name: 'Contribution', type: 'pie', radius: ['40%', '70%'], avoidLabelOverlap: false,
-            label: { show: false }, emphasis: { label: { show: false } }, labelLine: { show: false },
-            data: [ // TODO: Update with actual personal spending vs budget/limit
-                { value: 1500, name: 'Your Spending', itemStyle: { color: '#5470c6' } }, // Example
-                { value: 3500, name: 'Remaining Budget', itemStyle: { color: '#ee6666' } } // Example
+    const personalPieChartOptions = useMemo(() => {
+        const personalSpending = personalExpenses
+            .filter(expense => expense.status === 'approved')
+            .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+        const remainingBudget = (currentPlanDetails?.total_budget_amount || 0) - personalSpending;
+
+        return {
+            tooltip: { trigger: 'item', formatter: '{b}: Rs {c} ({d}%)' },
+            legend: { data: ['Your Spending', 'Remaining Budget'], bottom: 0, textStyle: { color: '#555' } },
+            series: [{
+                name: 'Contribution', 
+                type: 'pie', 
+                radius: ['40%', '70%'], 
+                avoidLabelOverlap: false,
+                label: { show: false }, 
+                emphasis: { label: { show: false } }, 
+                labelLine: { show: false },
+                data: [
+                    { value: personalSpending, name: 'Your Spending', itemStyle: { color: '#5470c6' } },
+                    { value: remainingBudget > 0 ? remainingBudget : 0, name: 'Remaining Budget', itemStyle: { color: '#ee6666' } }
+                ]
+            }]
+        };
+    }, [personalExpenses, currentPlanDetails]);
+
+    const personalBarChartOptions = useMemo(() => {
+        const categories = [];
+        const budgetData = [];
+        const expenseData = [];
+    
+        availableCategories.forEach(category => {
+            categories.push(category.name);
+    
+            const budget = currentPlanDetails?.categoryBudgets?.find(cat => cat.categoryId === category._id)?.limitAmount || 0;
+            budgetData.push(budget);
+            console.log("Expense Data:", personalExpenses); // Debug log
+            const expenses = personalExpenses
+            .filter(expense => expense.category_id?._id === category._id && expense.status === 'approved')
+            .reduce((sum, expense) => sum + (expense.amount || 0), 0);
+        
+            expenseData.push(expenses);
+        });
+    
+        console.log("Personal Bar Chart Data:", { categories, budgetData, expenseData }); // Debug log
+    
+        return {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' },
+                formatter: '{b}<br/>{a0}: Rs {c0}<br/>{a1}: Rs {c1}'
+            },
+            legend: {
+                data: ['Budget', 'Expense'],
+                bottom: 0,
+                textStyle: { color: '#555' }
+            },
+            grid: {
+                top: '15%',
+                left: '3%',
+                right: '4%',
+                bottom: '10%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: categories,
+                axisTick: { alignWithLabel: true },
+                axisLabel: { color: '#666' }
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: { formatter: 'Rs {value}', color: '#666' }
+            },
+            series: [
+                {
+                    name: 'Budget',
+                    type: 'bar',
+                    barWidth: '30%',
+                    data: budgetData,
+                    itemStyle: { color: '#5470c6' }
+                },
+                {
+                    name: 'Expense',
+                    type: 'bar',
+                    barWidth: '30%',
+                    data: expenseData,
+                    itemStyle: { color: '#ee6666' }
+                }
             ]
-        }]
-    }),);
-
-     const personalBarChartOptions = useMemo(() => ({
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: '{b}<br/>{a0}: Rs {c0}<br/>{a1}: Rs {c1}' }, // Added Rs formatting
-        legend: { data: ['Budget', 'Expense'], bottom: 0, textStyle: { color: '#555' } },
-        grid: { top:'15%', left: '3%', right: '4%', bottom: '10%', containLabel: true },
-        xAxis: { type: 'category', data: ['Food', 'Travel', 'Other'], axisTick: { alignWithLabel: true }, axisLabel: { color: '#666' } }, // Example categories
-        yAxis: { type: 'value', axisLabel: { formatter: 'Rs {value}', color: '#666' } }, // Added Rs
-        series: [ // TODO: Update with actual personal budget vs expenses by category
-            { name: 'Budget', type: 'bar', barWidth: '30%', data: [600, 500, 700], itemStyle: { color: '#5470c6' } }, // Example
-            { name: 'Expense', type: 'bar', barWidth: '30%', data: [500, 450, 800], itemStyle: { color: '#ee6666' } } // Example
-        ]
-    }),);
-
+        };
+    }, [availableCategories, currentPlanDetails, personalExpenses]);
+    
     // --- Animation Variants ---
     const pageVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } };
     const itemVariants = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } } };
@@ -225,6 +342,8 @@ const FamilyBudgetingPage = () => {
             setDeletingItemId(null);
             setDeletingItemType('');
         }, 300);
+        window.location.reload();  // Reload the page from cache
+
     };
 
     // --- Form Input Handlers ---
@@ -499,48 +618,58 @@ const FamilyBudgetingPage = () => {
         }
     };
     const handleExportSubmit = (e) => { e.preventDefault(); console.log("Exporting:", exportFormData); alert("Exporting Data (Simulated - API Call TODO)"); /* TODO: Call exportPlanData API */ closeModal(); };
-    const handleAddEditExpenseSubmit = async (e, type) => { // Type is 'personal' or 'family'
-         e.preventDefault();
-         setIsSubmitting(true);
-         setSubmitError(null);
-
-         const numericAmount = parseFloat(expenseFormData.amount) || 0;
-         if (numericAmount <= 0 || !expenseFormData.category_id || !expenseFormData.date || !expenseFormData.description.trim()) {
-             setSubmitError("Please fill date, category, description, and amount (> 0).");
-             setIsSubmitting(false);
-             return;
-         }
-
-         const payload = { ...expenseFormData, amount: numericAmount };
-         console.log("Payload:", payload); // Log the data being sent
-
-         try {
-             if (editingItem) { // Editing existing expense
-                 if (type === 'personal') {
-                     await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
-                 } else {
-                     await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
-                 }
-                 await fetchPlanData(selectedPlanId);
-                 alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense updated!`);
-             } else { // Adding new expense
-                 if (type === 'personal') {
-                     await createFamilyExpense(selectedPlanId, payload);
-                 } else {
-                     await createFamilyExpense(selectedPlanId, payload);
-                 }
-                 await fetchPlanData(selectedPlanId);
-                 alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense added!`);
-             }
-             closeModal();
-         } catch (err) {
-              console.error(`Error saving ${type} expense:`, err);
-              setSubmitError(err.message || `Failed to save ${type} expense.`);
-         } finally {
+ 
+    const handleAddEditExpenseSubmit = async (e, type) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setSubmitError(null);
+    
+        const numericAmount = parseFloat(expenseFormData.amount) || 0;
+        if (numericAmount <= 0 || !expenseFormData.category_id || !expenseFormData.date || !expenseFormData.description.trim()) {
+            setSubmitError("Please fill date, category, description, and amount (> 0).");
             setIsSubmitting(false);
-         }
+            return;
+        }
+    
+        // Get remaining budget for this category
+        let remainingBudget = remainingAmountPerCategory[expenseFormData.category_id] || 0;
+        console.log("Remaining Budget for Category:", remainingBudget); // Debug log
+    
+        // If editing, add back the old amount of the current expense (since it'll be replaced)
+        if (editingItem && editingItem.category_id === expenseFormData.category_id) {
+            remainingBudget += editingItem.amount || 0;
+        }
+    
+        if (numericAmount > remainingBudget) {
+            setSubmitError(`Amount exceeds the remaining budget for this category. Remaining: Rs ${remainingBudget.toLocaleString()}`);
+            setIsSubmitting(false);
+            return;
+        }
+    
+        const payload = { ...expenseFormData, amount: numericAmount };
+        console.log("Payload:", payload);
+    
+        try {
+            if (editingItem) {
+                await updateFamilyExpense(selectedPlanId, editingItem._id, payload);
+                await fetchPlanData(selectedPlanId);
+                alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense updated!`);
+            } else {
+                await createFamilyExpense(selectedPlanId, payload);
+                await fetchPlanData(selectedPlanId);
+                alert(`${type.charAt(0).toUpperCase() + type.slice(1)} Expense added!`);
+            }
+            closeModal();
+        } catch (err) {
+            console.error(`Error saving ${type} expense:`, err);
+            setSubmitError(err.message || `Failed to save ${type} expense.`);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+    
 
+    
     const handleEditMemberSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -576,7 +705,7 @@ const FamilyBudgetingPage = () => {
     };
   
     // --- Delete Confirmation Handler ---
-       const confirmDelete = async () => {
+    const confirmDelete = async () => {
         if (!deletingItemId || !deletingItemType) return;
         setIsSubmitting(true);
         setSubmitError(null);
@@ -590,12 +719,12 @@ const FamilyBudgetingPage = () => {
                     itemDescription = 'member'; // Ensure description is correct
                     break;
                 case 'familyExpense':
-                    console.log("TODO: Call deleteFamilyExpense API");
-                    await new Promise(res=>setTimeout(res, 500)); // Simulate
+                    await deleteFamilyExpense(deletingItemId); // API Call integrated
+                    itemDescription = 'family expense';
                     break;
                 case 'personalExpense':
-                     console.log("TODO: Call deletePersonalExpenseInPlan API");
-                     await new Promise(res=>setTimeout(res, 500)); // Simulate
+                    await deleteFamilyExpense(deletingItemId); // API Call integrated
+                    itemDescription = 'personal expense';
                     break;
                 case 'plan':
                     itemDescription = 'plan';
