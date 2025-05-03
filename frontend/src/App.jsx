@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
 import Login from './pages/login'
+import Signup from './pages/signup'
+import ContactUs from './pages/contactUs'
 import Dashboard from './pages/users/dashboard'
 function App() {
   const [count, setCount] = useState(0)
@@ -16,7 +18,7 @@ function App() {
       <>
         {/* <Login /> */}
 
-        <Dashboard />
+        <ContactUs/>
       </>
   )
 }
