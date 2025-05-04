@@ -1,143 +1,393 @@
-/* contactUs.css */
-.contact-page {
-  font-family: Arial, sans-serif;
-  color: #333;
-  max-width: 800px;
+/* =============================================== */
+/* Styles for ContactUs Component                */
+/* Base Styles + Dark Form Theme                 */
+/* =============================================== */
+
+/* --- Base & Typography --- */
+.ContactUsPage {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: #374151; /* gray-700 */
+  background-color: #f9fafb; /* gray-50 */
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.ContactUsPage *,
+.ContactUsPage *:before,
+.ContactUsPage *:after {
+  box-sizing: inherit;
+}
+
+.ContactUsPage .contact-us-container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo-circle {
-  width: 30px;
-  height: 30px;
-  background-color: #5d5fef;
-  border-radius: 50%;
-}
-
-.logo-text {
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.header-links {
-  display: flex;
-  gap: 20px;
-}
-
-.active-link {
-  color: #5d5fef;
-  font-weight: bold;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-}
-
-.mission-section, .vision-section {
-  margin-bottom: 25px;
-}
-
-.mission-section h2, .vision-section h2 {
-  font-size: 1.3rem;
-  margin-bottom: 8px;
-  color: #444;
-}
-
-.mission-section p, .vision-section p {
-  color: #666;
-  line-height: 1.5;
-}
-
-.connect-section {
-  margin: 30px 0;
-}
-
-.connect-section h3 {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-}
-
-.checkbox-group {
+  padding: 3rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4rem;
 }
 
-.checkbox-item {
+.ContactUsPage h2 {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  color: #111827; /* gray-900 */
+  margin: 0 0 0.75rem 0; /* Reset top margin */
+  line-height: 1.2;
+}
+
+.ContactUsPage h3 {
+  font-size: clamp(1.3rem, 4vw, 1.6rem);
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+  margin: 0 0 1rem 0;
+}
+
+.ContactUsPage h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+  margin: 0 0 0.25rem 0;
+}
+
+.ContactUsPage p {
+  line-height: 1.65;
+  margin: 0 0 1rem 0;
+  color: #4b5563; /* gray-600 */
+}
+
+.ContactUsPage .subtitle {
+  font-size: 1.1rem;
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 2.5rem;
+  max-width: 60ch;
+}
+
+.ContactUsPage a {
+  color: #4f46e5; /* indigo-600 */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.ContactUsPage a:hover {
+  color: #3730a3; /* indigo-800 */
+  text-decoration: underline;
+}
+
+
+/* --- Main Connect Section (Form/Details + Map) --- */
+.ContactUsPage .connect-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.ContactUsPage .form-and-details-container {
+  width: 100%;
+  order: 1;
+}
+
+.ContactUsPage .map-container {
+  width: 100%;
+  order: 2;
+  min-height: 350px;
+}
+
+.ContactUsPage .contactMap {
+  width: 100%;
+  height: 100%;
+  min-height: 350px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ContactUsPage .contactMap iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 350px;
+  border: none;
+}
+
+
+/* =============================================== */
+/* === Dark Form Theme Specific Styles         === */
+/* Apply theme class ".ContactUsDarkFormTheme"   */
+/* to ".ContactUsPage" div in JSX                */
+/* =============================================== */
+
+/* --- Contact Details (Dark Theme Version) --- */
+.ContactUsDarkFormTheme .contact-details {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.ContactUsDarkFormTheme .contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: #1f2937; /* gray-800 */
+}
+
+.ContactUsDarkFormTheme .contact-item .contact-icon {
+  color: #1f2937; /* gray-800 */
+  flex-shrink: 0;
+  margin-top: 0.15em;
+  width: 20px;
+  height: 20px;
+}
+
+.ContactUsDarkFormTheme .contact-item a {
+  color: #2563eb; /* blue-600 */
+}
+.ContactUsDarkFormTheme .contact-item a:hover {
+  color: #1d4ed8; /* blue-700 */
+}
+
+/* --- Dark Themed Contact Form --- */
+.ContactUsDarkFormTheme .contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Row container for icon + input */
+.ContactUsDarkFormTheme .form-field-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.75rem;
+}
+.ContactUsDarkFormTheme .form-field-row.textarea-row {
+  align-items: flex-start;
 }
 
-.checkbox-item input {
-  width: 18px;
-  height: 18px;
+/* Icon next to input field */
+.ContactUsDarkFormTheme .form-field-icon {
+  color: #374151; /* gray-700 */
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  transition: color 0.2s ease-in-out; /* Add transition for potential focus change */
+}
+.ContactUsDarkFormTheme .form-field-row.textarea-row .form-field-icon {
+  margin-top: 0.5rem; /* Align icon with top of textarea */
+}
+/* Optional: change icon color when input is focused */
+/* .ContactUsDarkFormTheme .form-field-row:focus-within .form-field-icon {
+  color: #6b7280; // gray-500
+} */
+
+
+/* Input/Textarea field wrapper */
+.ContactUsDarkFormTheme .input-wrapper {
+  flex-grow: 1;
+  background-color: #374151; /* gray-700 */
+  border: 1px solid #4b5563; /* gray-600 */
+  border-radius: 0.375rem; /* 6px */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  position: relative; /* Needed if adding internal elements like clear buttons */
+  display: flex; /* Ensures input inside fills width correctly */
 }
 
-.input-section {
-  display: flex;
-  gap: 20px;
-  margin: 25px 0;
+/* Input wrapper focus state */
+.ContactUsDarkFormTheme .input-wrapper:focus-within {
+  border-color: #9ca3af; /* gray-400 */
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3); /* gray focus ring */
 }
 
-.input-group {
-  flex: 1;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #555;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.info-section {
-  display: flex;
-  gap: 40px;
-  margin: 30px 0;
-}
-
-.info-column {
-  flex: 1;
-}
-
-.info-column h4 {
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  color: #444;
-}
-
-.info-column p {
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.map-button {
-  background-color: #5d5fef;
-  color: white;
-  padding: 10px 20px;
+/* The actual input/textarea elements */
+.ContactUsDarkFormTheme .form-input,
+.ContactUsDarkFormTheme .form-textarea {
+  background-color: transparent;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
+  outline: none;
+  color: #f9fafb; /* gray-50 */
+  font-size: 1rem;
+  width: 100%; /* Fill the wrapper */
+  padding: 0.75rem 1rem; /* 12px 16px */
+  line-height: 1.5; /* Standard line height */
 }
+
+.ContactUsDarkFormTheme .form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Placeholder text style */
+.ContactUsDarkFormTheme .form-input::placeholder,
+.ContactUsDarkFormTheme .form-textarea::placeholder {
+  color: #9ca3af; /* gray-400 */
+  opacity: 1;
+}
+
+/* --- Submit Button Row and Styling (Dark Theme) --- */
+.ContactUsDarkFormTheme .button-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+/* Empty div to align button visually with inputs */
+.ContactUsDarkFormTheme .form-field-icon-placeholder {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.ContactUsDarkFormTheme .submit-button {
+  flex-grow: 1;
+  background-color: #1f2937; /* gray-800 */
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid transparent; /* Start with transparent border */
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease-in-out;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.ContactUsDarkFormTheme .submit-button:hover {
+  background-color: #374151; /* gray-700 */
+  /* border-color: #4b5563; // gray-600 - Optional: border on hover */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
+
+}
+
+.ContactUsDarkFormTheme .submit-button:focus {
+  outline: none;
+  border-color: #6b7280; /* gray-500 */
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.4); /* Gray focus ring */
+}
+
+.ContactUsDarkFormTheme .submit-button:active {
+  background-color: #111827; /* gray-900 */
+  border-color: transparent; /* Reset border on active */
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Reset shadow */
+}
+
+/* --- Success Message (Dark Theme Version) --- */
+.ContactUsDarkFormTheme .success-message {
+  flex-grow: 1;
+  padding: 0.75rem 1rem;
+  background-color: #374151; /* Match input background */
+  color: #d1d5db; /* gray-300 */
+  border: 1px solid #4b5563; /* Match input border */
+  border-radius: 0.375rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+
+/* --- Team Section Styling (General) --- */
+.ContactUsPage .team-section {
+  padding-top: 3rem;
+  border-top: 1px solid #e5e7eb; /* gray-200 */
+  margin-top: 3rem;
+}
+
+.ContactUsPage .team-title {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: clamp(1.8rem, 4.5vw, 2.25rem);
+  color: #111827; /* gray-900 */
+}
+
+.ContactUsPage .team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+}
+
+.ContactUsPage .team-member-card {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  text-align: center;
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+
+.ContactUsPage .team-member-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+}
+
+.ContactUsPage .team-member-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.ContactUsPage .team-member-info {
+  padding: 1.25rem 1rem;
+}
+
+.ContactUsPage .team-member-name {
+  font-size: 1.15rem;
+  /* Uses h4 styles */
+}
+
+.ContactUsPage .team-member-title {
+  font-size: 0.9rem;
+  color: #6b7280; /* gray-500 */
+  margin-bottom: 0;
+}
+
+
+/* --- Responsiveness --- */
+@media (min-width: 768px) { /* Medium screens and up */
+  .ContactUsPage .contact-us-container {
+    padding: 5rem 2rem;
+  }
+
+  .ContactUsPage .connect-section {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3rem;
+  }
+
+  .ContactUsPage .form-and-details-container { width: 50%; order: 1; }
+  .ContactUsPage .map-container {
+    width: 50%;
+    order: 2;
+    height: auto;
+    min-height: 500px;
+   }
+   .ContactUsPage .contactMap {
+     height: 500px;
+     min-height: 500px;
+   }
+  .ContactUsPage .contactMap iframe {
+     height: 500px;
+     min-height: 500px;
+   }
+
+  .ContactUsPage .team-grid {
+    gap: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) { /* Large screens and up */
+  .ContactUsPage .connect-section {
+    gap: 4rem;
+  }
+
+  .ContactUsPage .form-and-details-container { width: 45%; }
+  .ContactUsPage .map-container { width: 55%; }
+
+  .ContactUsPage .team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+/* --- End of Styles --- */

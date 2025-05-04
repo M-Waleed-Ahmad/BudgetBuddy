@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './pages/login';
-// import Signup from './pages/signup';
-// import LandingPage from './pages/LandingPage';
-// import ContactUsPage from './pages/ContactUsPage';
+import Signup from './pages/signup';
+import LandingPage from './pages/LandingPage';
+import ContactUsPage from './pages/contactUs';
 import Dashboard from './pages/users/dashboard';
 import BudgetManagementPage from './pages/users/budgetManagement';
 import ExpenseManagementPage from './pages/users/expenseManagement';
@@ -23,9 +23,9 @@ function App() {
 
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          {/* <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/contact-us" element={<ContactUsPage />} /> */}
+          <Route path="/contact-us" element={<ContactUsPage />} />
 
           {/* Protected Routes */}
           <Route
