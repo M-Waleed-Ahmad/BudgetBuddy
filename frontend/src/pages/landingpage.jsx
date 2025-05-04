@@ -1,6 +1,6 @@
 import React from 'react';
-import Navbar from '../components/navbar';
-import Footer from '../components/Footer';
+import Navbar from '../components/navbar1';
+import Footer from '../components/Footer1';
 // import '../styles/landingpage.css'; 
 
 const LandingPage = () => {
