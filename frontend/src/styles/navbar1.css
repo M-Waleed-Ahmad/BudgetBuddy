@@ -1,0 +1,97 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+  }
+  
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  
+.logo {
+  width: 44px;
+  height: 44px;
+  padding: 4px;
+  background-color: white;
+  border-radius: 12px; /* rounded square */
+  object-fit: cover;
+  box-sizing: border-box;
+}
+
+  
+  .brand-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 20px;
+    margin-left: 24px;
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    position: relative;
+    padding-bottom: 3px;
+  }
+  
+  .nav-link.active {
+    color: #2563eb;
+  }
+  
+  .nav-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #2563eb;
+    border-radius: 2px;
+  }
+  
+  .navbar-actions {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .signup-btn {
+    background-color: #eef4ff;
+    color: #2563eb;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+  
+  .login-btn {
+    background-color: #4f46e5;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+  
+  .icon {
+    font-size: 16px;
+  }
+  

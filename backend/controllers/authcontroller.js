@@ -59,5 +59,17 @@ const login = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const logoutUser = async (req, res) => {
+  try {
+    console.log('Logout request received.');
 
-module.exports = { signup, login };
+    console.log(`User ${req.user?.userId || 'Unknown'} logged out.`);
+
+    res.status(200).json({ message: 'Logout successful. Please clear your token from storage.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+module.exports = { signup, login , logoutUser };
