@@ -1266,7 +1266,7 @@ export const sendContactMessage = async (email, name, message) => {
 };
 export const subscribeToNewsletter = async (email) => {
   try {
-    const response = await fetch('/api/newsletter', {
+    const response = await fetch(`${BASE_URL}/newsletter`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
