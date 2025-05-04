@@ -3,10 +3,16 @@ import { motion } from 'framer-motion';
 import { MdPerson, MdEmail, MdMessage, MdLocationOn, MdPhone, MdOutlineAccessTime } from 'react-icons/md';
 // Ensure this path is correct for your project structure
 import '../styles/ContactUs.css';
+import {sendContactMessage} from '../api/api'; // Adjust the import based on your API structure
 // Assuming these components exist and are correctly imported
 import Navbar from '../components/navbar1'; // Check if this should be Navbar or Navbar1
 import Footer from '../components/Footer1'; // Check if this should be Footer or Footer1
+import { toast } from 'react-hot-toast';
 import userAvatar from '../assets/avatar.png';
+import saad from '../assets/saad.png'; // Example image, replace with actual image path
+import azlan from '../assets/azlan.png'; // Example image, replace with actual image path
+import ashar from '../assets/ashar.png'; // Example image, replace with actual image path
+import waleed from '../assets/waleed.png'; // Example image, replace with actual image path
 // --- Configuration ---
 const YOUR_COMPANY_ADDRESS_LINE1 = "123 Main Street";
 const YOUR_COMPANY_ADDRESS_LINE2 = "New York, NY 10001";
@@ -14,10 +20,10 @@ const YOUR_COMPANY_PHONE = "+1 (555) 123-4567";
 const YOUR_COMPANY_EMAIL = "info@yourcompany.com";
 const YOUR_COMPANY_HOURS = "Mon - Fri: 9:00 AM - 5:00 PM";
 const teamMembers = [
-  { id: 1, name: "Alex Johnson", title: "Support Lead", img: userAvatar },
-  { id: 2, name: "Maria Garcia", title: "Sales Manager", img: userAvatar },
-  { id: 3, name: "Kenichi Tanaka", title: "Technical Support", img: userAvatar },
-  { id: 4, name: "Aisha Khan", title: "Client Relations", img: userAvatar },
+  { id: 1, name: "Waleed Ahmad", title: "Team Lead", img: waleed },
+  { id: 2, name: "Muhammad Saad", title: "Sales Manager", img: saad },
+  { id: 3, name: "Ashar Mehmood", title: "Technical Support", img: ashar },
+  { id: 4, name: "Azlan Khalid", title: "Client Relations", img: azlan },
 ];
 // --- End Configuration ---
 
@@ -49,18 +55,25 @@ const ContactUs = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form Data Submitted:', formData);
-    // Simulate submission
-    setTimeout(() => {
+  
+    try {
+      const { email, name, message } = formData;
+      const result = await sendContactMessage(email, name, message);
+      console.log('Message sent:', result);
       setIsSubmitted(true);
-      setFormData({ name: '', email: '', message: '' }); // Clear form
-       // Hide message after 5 seconds
-       setTimeout(() => setIsSubmitted(false), 5000);
-    }, 1000);
+      setFormData({ name: '', email: '', message: '' });
+      toast.success('Message sent successfully!'); // Use toast for success message
+      // Hide success message after 5 seconds
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (error) {
+      console.error('Submission failed:', error);
+      alert(error.message);
+    }
   };
-
+  
+  
   return (
     <>
       {/* Assuming Navbar component is correctly imported */}

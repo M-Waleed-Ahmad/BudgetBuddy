@@ -8,7 +8,7 @@ body, html {
 /* Page wrapper with background */
 .login-page {
   position: relative;
-  height: 100vh;
+  height: 100%;
   width: 100vw;
   display: flex;
   justify-content: center;
@@ -58,8 +58,9 @@ body, html {
   }
   
   .login-form input {
-    width: 100%;
+    width: 90%;
     padding: 12px 15px;
+    color:#000;
     border: 1px solid #ccc;
     border-radius: 10px;
     font-size: 14px;
@@ -69,6 +70,10 @@ body, html {
   .forgot-password {
     text-align: right;
     margin-bottom: 20px;
+  }
+  .forget{
+    cursor: pointer;
+    text-decoration: underline ;
   }
   
   .forgot-password a {
@@ -125,13 +130,30 @@ body, html {
     color: white;
   }
   
-  .signup-prompt {
-    font-size: 13px;
-    margin-bottom: 10px;
-  }
+
   
   .signup-prompt a {
     color: #4b7bec;
     text-decoration: none;
+  }
+  
+  .modal-form input {
+    width: 90%;
+    color: #000;
+    background-color: transparent;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .modal-form button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    background: #007aff;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
   }
   

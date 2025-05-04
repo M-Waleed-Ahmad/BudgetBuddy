@@ -12,6 +12,7 @@ const familyPlanRoutes = require('./routes/FamilyPlanRoutes'); // Adjust path
 const familyMemberRoutes = require('./routes/FamilyMemberRoutes'); // Adjust path
 const FamilyExpenseRoutes = require('./routes/FamilyPlanExpenseRoutes'); // Adjust path
 const NotificationRoutes = require('./routes/NotificationsRoutes'); // Adjust path
+const GenericRoutes = require('./routes/GenericRoutes'); // Adjust path
 const cors = require('cors');
 dotenv.config();
 const app = express();
@@ -40,7 +41,7 @@ app.use('/api/family-plans', familyPlanRoutes); // <-- Use family plan routes
 app.use('/api/family-members', familyMemberRoutes); // <-- Use family member routes
 app.use('/api/family-expenses', FamilyExpenseRoutes); // <-- Use family expense routes
 app.use('/api/notifications', NotificationRoutes); // <-- Use notification routes
-
+app.use('/api/', GenericRoutes); // <-- Use generic routes
 
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGO_URI)

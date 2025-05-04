@@ -67,6 +67,27 @@ export const logoutUser = async () => {
   return { message: 'Logout initiated' }; 
 };
 
+export const forgetPassword = async (email,password,recovery_email) => {
+  try {
+    const response = await fetch(`${BASE_URL}/auth/forgetPassword`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }), // Send email in the request body
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Password reset failed');
+    }
+    return data;
+  } catch (error) {
+    console.error('❌ Password reset error:', error);
+    throw error;
+  }
+};
+
 // --- Profile API Functions ---
 
 export const getUserProfile = async () => {
@@ -1221,3 +1242,46 @@ export const deleteNotification = async (notificationId) => {
   }
 };
 
+
+export const sendContactMessage = async (email, name, message) => {
+  try {
+    const response = await fetch(`${BASE_URL}/contact-us`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, name, message }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send message');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+export const subscribeToNewsletter = async (email) => {
+  try {
+    const response = await fetch('/api/newsletter', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Subscription failed');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};

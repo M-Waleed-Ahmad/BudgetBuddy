@@ -71,5 +71,27 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const forgetPassword = async (req, res) => {
+  try {
+    const { email,recovery_email,password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-module.exports = { signup, login , logoutUser };
+    if (user.recovery_email !== recovery_email) return res.status(400).json({ message: 'Recovery email does not match' });
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update password
+    user.password_hash = hashedPassword;
+    await user.save();
+    res.status(200).json({ message: 'Password updated successfully' });
+  }
+  catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+
+module.exports = { signup, login , logoutUser, forgetPassword };
