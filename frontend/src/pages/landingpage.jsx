@@ -1,130 +1,129 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { MdPerson, MdEmail, MdMessage, MdLocationOn, MdPhone, MdOutlineAccessTime } from 'react-icons/md';
-// Correct the import path if your CSS file is named ContactUs.css
-import '../styles/ContactUs.css';
-import Navbar from '../components/navbar1'; // Assuming these exist
-import Footer from '../components/Footer1'; // Assuming these exist
+import { FiArrowRight } from 'react-icons/fi';
+import Navbar from '../components/navbar1';
+import Footer from '../components/footer1';
+import '../styles/landingpage.css';  
 
-// --- Configuration (remains the same) ---
-const YOUR_COMPANY_ADDRESS_LINE1 = "123 Main Street";
-const YOUR_COMPANY_ADDRESS_LINE2 = "New York, NY 10001";
-const YOUR_COMPANY_PHONE = "+1 (555) 123-4567";
-const YOUR_COMPANY_EMAIL = "info@yourcompany.com";
-const YOUR_COMPANY_HOURS = "Mon - Fri: 9:00 AM - 5:00 PM";
-const teamMembers = [ /* ... team member data ... */ ];
-// --- End Configuration ---
-
-// --- Animation Variants (remain the same) ---
-const sectionVariants = { /* ... */ };
-const itemVariants = { /* ... */ };
-const formItemVariants = { /* ... */ };
-const feedbackVariants = { /* ... */ };
-
-
-const ContactUs = () => {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-
-  const handleInputChange = (e) => { /* ... */ };
-  const handleSubmit = (e) => { /* ... */ };
-
+const landingpage = () => {
   return (
     <>
-      <Navbar/>
-      {/* Apply the class to the main wrapper */}
-      <div className="ContactUsPage ContactUsDarkFormTheme"> {/* ADD THEME CLASS */}
-        <div className="contact-us-container">
-
-          {/* --- Main Contact Section --- */}
-          <motion.section
-            className="connect-section"
-            initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionVariants}
+    <Navbar />
+    {  <div className="landing-container">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="hero-title"
           >
-            {/* --- Left Side: Form & Contact Details --- */}
-            <motion.div
-                className="form-and-details-container"
-                initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} transition={{ staggerChildren: 0.1 }}
+            Master Your Finances
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="hero-subtitle"
+          >
+            Track expenses, budget smartly, and share insights with ease
+          </motion.p>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="hero-actions"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="primary-btn"
             >
-              <h2>Get in Touch</h2>
-              <p className="subtitle">
-                Have questions or want to discuss a project? Fill out the form below or use our contact details.
-              </p>
-
-              {/* --- Direct Contact Details --- */}
-              <motion.div className="contact-details" variants={itemVariants}>
-                {/* Contact items remain structurally the same */}
-                {YOUR_COMPANY_ADDRESS_LINE1 && ( <div className="contact-item"> <MdLocationOn size={24} className="contact-icon" /> <span>{YOUR_COMPANY_ADDRESS_LINE1}<br/>{YOUR_COMPANY_ADDRESS_LINE2}</span> </div> )}
-                {YOUR_COMPANY_PHONE && ( <div className="contact-item"> <MdPhone size={20} className="contact-icon" /> <a href={`tel:${YOUR_COMPANY_PHONE}`}>{YOUR_COMPANY_PHONE}</a> </div> )}
-                {YOUR_COMPANY_EMAIL && ( <div className="contact-item"> <MdEmail size={20} className="contact-icon" /> <a href={`mailto:${YOUR_COMPANY_EMAIL}`}>{YOUR_COMPANY_EMAIL}</a> </div> )}
-                {YOUR_COMPANY_HOURS && ( <div className="contact-item"> <MdOutlineAccessTime size={20} className="contact-icon" /> <span>{YOUR_COMPANY_HOURS}</span> </div> )}
-              </motion.div>
-
-              {/* --- Contact Form (STRUCTURE UPDATED) --- */}
-              <form onSubmit={handleSubmit} className="contact-form">
-
-                {/* Name Field */}
-                <motion.div className="form-field-row" variants={formItemVariants}>
-                  <MdPerson className="form-field-icon" size={24} aria-hidden="true" />
-                  <div className="input-wrapper">
-                    <input type="text" placeholder="Your Name" name="name" required className="form-input" aria-label="Your Name" value={formData.name} onChange={handleInputChange} />
-                  </div>
-                </motion.div>
-
-                {/* Email Field */}
-                <motion.div className="form-field-row" variants={formItemVariants}>
-                   <MdEmail className="form-field-icon" size={24} aria-hidden="true" />
-                   <div className="input-wrapper">
-                     <input type="email" placeholder="Your Email Address" name="email" required className="form-input" aria-label="Your Email Address" value={formData.email} onChange={handleInputChange} />
-                   </div>
-                </motion.div>
-
-                 {/* Message Field */}
-                 <motion.div className="form-field-row textarea-row" variants={formItemVariants}>
-                   {/* Note: Using MdMessage icon from previous version, adjust if needed */}
-                   <MdMessage className="form-field-icon" size={24} aria-hidden="true" />
-                   <div className="input-wrapper textarea-wrapper">
-                     <textarea placeholder="Your Message" name="message" rows="5" required className="form-textarea" aria-label="Your Message" value={formData.message} onChange={handleInputChange}></textarea>
-                   </div>
-                 </motion.div>
-
-                {/* Submit Button */}
-                <motion.div className="button-row" variants={formItemVariants}>
-                    {/* Empty div for alignment if needed, or adjust styling */}
-                    <div className="form-field-icon-placeholder"></div>
-                    <motion.button type="submit" className="submit-button" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-                      Send Message
-                    </motion.button>
-                </motion.div>
-
-                {/* Success Message */}
-                {isSubmitted && (
-                    <motion.div className="form-field-row" /* Use row for alignment */ >
-                        <div className="form-field-icon-placeholder"></div> {/* Align with inputs */}
-                        <motion.div className="success-message" initial="hidden" animate="visible" exit="hidden" variants={feedbackVariants}>
-                            Thank you! We'll be in touch soon.
-                        </motion.div>
-                    </motion.div>
-                )}
-              </form>
-            </motion.div>
-
-            {/* --- Right Side: Map --- */}
-            {/* Map section remains the same */}
-            <motion.div className="map-container" variants={itemVariants}>
-               <div className="contactMap"> <iframe /* ... */ ></iframe> </div>
-            </motion.div>
-          </motion.section>
-
-          {/* --- Team Section --- */}
-          {/* Team section remains the same */}
-          {teamMembers.length > 0 && ( <motion.section /* ... */ > </motion.section> )}
-
+              Join Us <FiArrowRight />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="secondary-btn"
+            >
+              Request Demo
+            </motion.button>
+          </motion.div>
         </div>
-      </div>
-      <Footer />
+
+        {/* Video Section */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.7 }}
+          className="video-container"
+        >
+          <div className="video-placeholder">
+            {/* Replace with your actual video */}
+            <video autoPlay loop muted className="demo-video">
+              <source src="/demo-video.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Features Section */}
+      <section className="features-section">
+        <h2 className="section-title">Feature Highlights</h2>
+
+        <div className="features-grid">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              className="feature-card"
+              whileHover={{ y: -5 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+    </div>}
+    <Footer />
     </>
   );
 };
 
-export default ContactUs;
+// Feature data
+const features = [
+  {
+    title: "Real-time Collaboration",
+    description: "Work together in real-time on a shared budget, making financial planning a breeze."
+  },
+  {
+    title: "View Editing History",
+    description: "Never lose track of changes. Our platform offers a complete history of all budget edits."
+  },
+  {
+    title: "Detailed Insights",
+    description: "Get in-depth analysis of your spending habits and identify areas for improvement."
+  },
+  {
+    title: "Export Your Data",
+    description: "Take your financial data with you. Export budgets in various formats for your convenience."
+  },
+  {
+    title: "Smart Suggestions",
+    description: "Receive personalized budgeting advice tailored to your financial circumstances."
+  },
+  {
+    title: "Data Protection",
+    description: "Your data is encrypted and secure, ensuring that your financial information is protected."
+  }
+];
+
+export default landingpage;
