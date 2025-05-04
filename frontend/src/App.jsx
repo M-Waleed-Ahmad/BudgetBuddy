@@ -1,42 +1,99 @@
-// import React from 'react'; // Removed useState as it's not used here
-// import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-// import Login from './pages/login';
-// import Dashboard from './pages/users/dashboard';
-// import BudgetManagementPage from './pages/users/budgetManagement';
-// import ExpenseManagementPage from './pages/users/expenseManagement';
-// import SettingsPage from './pages/users/profile';
-// import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
-// import NotificationsPage from './pages/users/NotificationsPage';
-// import ProtectedRoute from './components/ProtectedRoute'; // Import the wrapper
-// import Login from './pages/login'
-// import Dashboard from './pages/users/dashboard'
-// import Navbar from './components/navbar1';
-// import Footer from './components/footer1';
-
-import React from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-
-import Login from "./pages/login";
-import Dashboard from "./pages/users/dashboard";
-import BudgetManagementPage from "./pages/users/budgetManagement";
-import ExpenseManagementPage from "./pages/users/expenseManagement";
-import SettingsPage from "./pages/users/profile";
-import FamilyBudgetingPage from "./pages/users/FamilyBudgetingPage";
-import NotificationsPage from "./pages/users/NotificationsPage";
-
-import ProtectedRoute from "./components/ProtectedRoute";
-import landingpage from "./pages/landingpage";
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Login from './pages/login';
+// import Signup from './pages/signup';
+import LandingPage from './pages/LandingPage';
+// import ContactUsPage from './pages/ContactUsPage';
+import Dashboard from './pages/users/dashboard';
+import BudgetManagementPage from './pages/users/budgetManagement';
+import ExpenseManagementPage from './pages/users/expenseManagement';
+import SettingsPage from './pages/users/profile';
+import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
+import NotificationsPage from './pages/users/NotificationsPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
+import './App.css';
 
 function App() {
   return (
-      <>
-      {/* {<Login /> } */}
-      {<landingpage/>}
+    <>
+      <Router>
+        <Toaster position="top-center" reverseOrder={false} />
+        <Routes>
 
-      {/* <Dashboard /> */}
-      </>
-      
-  )
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<LandingPage />} />
+          {/* <Route path="/signup" element={<Signup />} /> */}
+          {/* <Route path="/contact-us" element={<ContactUsPage />} /> */}
+
+          {/* Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/budget-management"
+            element={
+              <ProtectedRoute>
+                <BudgetManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expense-management"
+            element={
+              <ProtectedRoute>
+                <ExpenseManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shared-budgeting"
+            element={
+              <ProtectedRoute>
+                <FamilyBudgetingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Default Route: Redirect based on login */}
+          <Route
+            path="/home"
+            element={
+              localStorage.getItem('token')
+                ? <Navigate to="/dashboard" replace />
+                : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Catch-all for unmatched routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+
+        </Routes>
+      </Router>
+    </>
+  );
 }
 
 export default App;

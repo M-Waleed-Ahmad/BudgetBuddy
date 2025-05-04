@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiArrowRight } from 'react-icons/fi';
-import Navbar from '../../components/navbar1';
-import Footer from '../../components/footer1';
-import '../../styles/landingpage.css';  
+import Navbar from '../components/navbar1';
+import Footer from '../components/footer1';
+import '../styles/landingpage.css';  
 
 const landingpage = () => {
   return (
