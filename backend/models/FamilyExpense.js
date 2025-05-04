@@ -51,9 +51,7 @@ const familyExpenseSchema = new mongoose.Schema({
     ref: 'User',
     default: null,
   },
-  // Note: Decide if you need a 'type' field ('family' vs 'personal within plan')
-  // If ALL expenses in this collection are considered 'family', no type field needed.
-  // type: { type: String, enum: ['family', 'personal'], default: 'family' },
+ 
 
   created_at: { type: Date, default: Date.now }
   // No 'updated_at' needed unless expenses themselves are frequently edited beyond correction

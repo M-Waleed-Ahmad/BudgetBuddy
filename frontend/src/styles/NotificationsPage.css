@@ -232,3 +232,8 @@
       .notification-time { font-size: 0.8rem; }
       .action-button { padding: 4px; }
   }
+  /* global toast styling */
+.react-hot-toast {
+  font-family: 'Poppins', sans-serif;
+}
+

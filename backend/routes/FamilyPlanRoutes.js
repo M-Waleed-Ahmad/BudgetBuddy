@@ -1,6 +1,6 @@
 // routes/familyPlanRoutes.js
 const express = require('express');
-const familyPlanController = require('../controllers/familyPlanController');
+const familyPlanController = require('../controllers/FamilyPlanController');
 const verifyToken = require('../middleware/authMiddleware'); // Your JWT auth middleware
 
 const router = express.Router();
@@ -22,6 +22,8 @@ router.delete('/:planId', verifyToken, familyPlanController.deletePlan);
 // GET /api/family-plans/:planId - Fetch details of a specific plan
 router.get('/:planId', verifyToken, familyPlanController.getPlanDetails);
 
+// Get all categories for a specific plan
+router.get('/:planId/categories', verifyToken, familyPlanController.getOwnerCategories);
 
 // --- Routes for other plan-related resources (Members, Budgets, Expenses) will go here or in separate files ---
 // Example: router.use('/:planId/members', memberRoutes);

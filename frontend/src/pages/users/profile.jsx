@@ -17,7 +17,8 @@ import {
     updateUI,
     getPendingInvitations, acceptInvitation, rejectInvitation
 } from '../../api/api.js';                     
-import '../../styles/profile.css';  
+import '../../styles/profile.css'; 
+import { toast } from 'react-hot-toast'; // Import toast for notifications
 
 // --- Icons ---
 const EditIcon = ({ size = 16 }) => <span className="icon" style={{fontSize: `${size}px`}} title="Edit">✏️</span>;
@@ -120,7 +121,7 @@ const SettingsPage = () => {
         if (file && file.type.startsWith('image/')) {
             setSelectedImageFile(file);
             const reader = new FileReader(); reader.onloadend = () => { setImagePreviewUrl(reader.result); }; reader.readAsDataURL(file);
-        } else { setSelectedImageFile(null); setImagePreviewUrl(profileData.profileImage || ''); if(file) alert("Please select a valid image file."); }
+        } else { setSelectedImageFile(null); setImagePreviewUrl(profileData.profileImage || ''); if(file)  toast.success("Please select a valid image file."); }
     };
 
     // --- Action Handlers ---
@@ -132,14 +133,14 @@ const SettingsPage = () => {
         setIsSubmitting(prev => ({ ...prev, [sectionKey]: true }));
         try {
             await apiCall(dataToSend);
-            alert(successMessage || "Settings saved!");
+             toast.success(successMessage || "Settings saved!");
             // Optionally re-fetch profile if settings were part of it
             // await loadInitialData(); // Consider if needed, might cause flicker
         } catch (err) {
             console.error(`Failed to save ${sectionKey} settings:`, err);
             const errorMsg = err.message || `Could not save ${sectionKey} settings.`;
             setSectionErrors(prev => ({ ...prev, [sectionKey]: errorMsg }));
-            alert(errorMsg);
+             toast.success(errorMsg);
         } finally {
             setIsSubmitting(prev => ({ ...prev, [sectionKey]: false }));
         }
@@ -163,12 +164,12 @@ const SettingsPage = () => {
             setProfileData(prev => ({ ...prev, fullName: updatedProfile.name, recovery_email: updatedProfile.recovery_email, profileImage: updatedProfile.profileImage, password: '' }));
             setImagePreviewUrl(updatedProfile.profileImage || '');
             setSelectedImageFile(null);
-            alert("Profile updated successfully!");
+             toast.success("Profile updated successfully!");
         } catch (err) {
              console.error("Failed to save profile:", err);
              const errorMsg = err.message || 'Could not save profile.';
              setSectionErrors(prev => ({ ...prev, profile: errorMsg }));
-             alert(errorMsg);
+              toast.success(errorMsg);
         } finally {
             setIsSubmitting(prev => ({ ...prev, profile: false }));
         }
@@ -187,7 +188,7 @@ const SettingsPage = () => {
     const handleCategorySubmit = async (e) => {
         e.preventDefault();
         const categoryName = categoryFormData.name.trim();
-        if (!categoryName) { alert("Category name cannot be empty."); return; }
+        if (!categoryName) {  toast.success("Category name cannot be empty."); return; }
         setSectionErrors(prev => ({...prev, category: null}));
         setIsSubmitting(prev => ({...prev, category: true}));
         const categoryId = editingCategory?._id; // Use _id from MongoDB object
@@ -196,13 +197,13 @@ const SettingsPage = () => {
             const savedCategory = await apiCall;
             if (editingCategory) { setCategories(prev => prev.map(cat => cat._id === categoryId ? savedCategory : cat)); }
             else { setCategories(prev => [savedCategory, ...prev]); }
-            alert(`Category ${editingCategory ? 'updated' : 'added'}!`);
+             toast.success(`Category ${editingCategory ? 'updated' : 'added'}!`);
             closeModal();
         } catch (err) {
              console.error(`Failed to ${editingCategory ? 'update' : 'add'} category:`, err);
              const errorMsg = err.message || `Failed to ${editingCategory ? 'update' : 'add'} category`;
              setSectionErrors(prev => ({...prev, category: errorMsg}));
-             alert(errorMsg);
+              toast.success(errorMsg);
         } finally {
              setIsSubmitting(prev => ({...prev, category: false}));
         }
@@ -221,13 +222,13 @@ const SettingsPage = () => {
                 await rejectInvitation(deletingItemId); // Assumes deletingItemId is the _id
                 setPendingInvitations(prev => prev.filter(inv => inv.id !== deletingItemId)); // Keep using id if that's what the API returns/uses
             }
-             alert(`${itemDescription.charAt(0).toUpperCase() + itemDescription.slice(1)} ${deletingItemType === 'invitation' ? 'rejected' : 'deleted'}!`);
+              toast.success(`${itemDescription.charAt(0).toUpperCase() + itemDescription.slice(1)} ${deletingItemType === 'invitation' ? 'rejected' : 'deleted'}!`);
             closeModal();
         } catch (err) {
              console.error(`Failed to delete/reject ${deletingItemType}:`, err);
              const errorMsg = err.message || `Failed action on ${itemDescription}`;
              setSectionErrors(prev => ({...prev, [deletingItemType]: errorMsg}));
-             alert(errorMsg);
+              toast.success(errorMsg);
         }
     };
     const handleAcceptInvite = async (inviteId) => { /* ... (keep logic, use _id if applicable) ... */
@@ -235,15 +236,15 @@ const SettingsPage = () => {
         try {
             await acceptInvitation(inviteId); // Assumes inviteId is the _id
             setPendingInvitations(prev => prev.filter(inv => inv.id !== inviteId)); // Keep using id if that's what the API returns/uses for key
-            alert(`Invitation accepted successfully!`);
+             toast.success(`Invitation accepted successfully!`);
         } catch (err) {
             console.error("Failed to accept invitation:", err);
             setSectionErrors(prev => ({...prev, invitation: err.message || 'Failed to accept invitation'}));
-            alert(err.message || 'Failed to accept invitation.');
+             toast.success(err.message || 'Failed to accept invitation.');
         }
     };
 
-    const handleLogout = async () => { try { await logoutUser(); } catch (error) { console.error('Backend logout failed:', error); } finally { localStorage.removeItem('token'); alert("Logged out successfully!"); navigate('/login', { replace: true }); } };
+    const handleLogout = async () => { try { await logoutUser(); } catch (error) { console.error('Backend logout failed:', error); } finally { localStorage.removeItem('token');  toast.success("Logged out successfully!"); navigate('/login', { replace: true }); } };
     // --- Effects ---
      useEffect(() => { if (editingCategory && modalState.isCategoryModalOpen) { setCategoryFormData({ name: editingCategory.name }); } else if (!editingCategory && modalState.isCategoryModalOpen) { setCategoryFormData({ name: '' }); } }, [editingCategory, modalState.isCategoryModalOpen]);
 

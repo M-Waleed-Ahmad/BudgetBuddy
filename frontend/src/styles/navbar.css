@@ -20,6 +20,7 @@
   height: 45px;
   width: auto;
   display: block;
+  background-color: transparent;
 }
 
 .navbar-links {

@@ -1,5 +1,6 @@
 const MonthlyBudget = require('../models/MonthlyBudget');
-
+const getCurrentYearMonth = () => format(new Date(), 'yyyy-MM');
+const { format } = require('date-fns'); // Import date-fns for date formatting
 // Get all monthly budgets
 const getAllMonthlyBudgets = async (req, res) => {
     try {
@@ -94,6 +95,36 @@ const getCurrentMonthBudget = async (req, res) => {
     }
 };
 
+const getCurrentUserMonthlyBudget = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) {
+            return res.status(401).json({ message: 'Authentication required.' });
+        }
+
+        const currentMonthYear = getCurrentYearMonth();
+
+        const budget = await MonthlyBudget.findOne({
+            user_id: userId,
+            month_year: currentMonthYear
+        }).lean(); // Use lean for performance
+
+        if (!budget) {
+            // It's not an error if no budget is set, return appropriate response
+            // Option 1: Return 404
+             return res.status(404).json({ message: 'No monthly budget set for the current month.' });
+            // Option 2: Return 200 with null or empty object
+            // return res.status(200).json(null);
+        }
+
+        res.status(200).json(budget);
+
+    } catch (error) {
+        console.error("Error fetching current monthly budget:", error);
+        res.status(500).json({ message: "Server error fetching monthly budget.", error: error.message });
+    }
+};
+
 
 module.exports = {
     getAllMonthlyBudgets,
@@ -101,5 +132,6 @@ module.exports = {
     createMonthlyBudget,
     updateMonthlyBudget,
     deleteMonthlyBudget,
-    getCurrentMonthBudget
+    getCurrentMonthBudget,
+    getCurrentUserMonthlyBudget
 };

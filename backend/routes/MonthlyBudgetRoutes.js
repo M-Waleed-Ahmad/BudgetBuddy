@@ -7,6 +7,7 @@ const {
     updateMonthlyBudget,
     deleteMonthlyBudget,
     getCurrentMonthBudget,
+    getCurrentUserMonthlyBudget
 } = require('../controllers/MonthlyBudgetController');
 const verifyToken = require('../middleware/authMiddleware');
 
@@ -24,5 +25,8 @@ router.delete('/:id', verifyToken, deleteMonthlyBudget);
 
 // Route to get the current month's budget
 router.get('/current', verifyToken, getCurrentMonthBudget);
+
+router.get('/current', verifyToken, getCurrentUserMonthlyBudget);
+
 
 module.exports = router;
