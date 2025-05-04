@@ -1,10 +1,11 @@
 /* =============================================== */
-/* Styles for ContactUs Component                */
-/* Base Styles + Dark Form Theme                 */
+/* Styles for ContactUs Component (Scoped)       */
+/* ALL Selectors prefixed with .ContactUsComponent */
+/* Light Theme Version                           */
 /* =============================================== */
 
 /* --- Base & Typography --- */
-.ContactUsPage {
+.ContactUsComponent {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: #374151; /* gray-700 */
   background-color: #f9fafb; /* gray-50 */
@@ -12,13 +13,13 @@
   overflow-x: hidden;
 }
 
-.ContactUsPage *,
-.ContactUsPage *:before,
-.ContactUsPage *:after {
+.ContactUsComponent *,
+.ContactUsComponent *:before,
+.ContactUsComponent *:after {
   box-sizing: inherit;
 }
 
-.ContactUsPage .contact-us-container {
+.ContactUsComponent .contact-us-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 1rem;
@@ -27,71 +28,71 @@
   gap: 4rem;
 }
 
-.ContactUsPage h2 {
+.ContactUsComponent h2 {
   font-size: clamp(2rem, 5vw, 2.75rem);
   font-weight: 700;
   color: #111827; /* gray-900 */
-  margin: 0 0 0.75rem 0; /* Reset top margin */
+  margin: 0 0 0.75rem 0;
   line-height: 1.2;
 }
 
-.ContactUsPage h3 {
+.ContactUsComponent h3 {
   font-size: clamp(1.3rem, 4vw, 1.6rem);
   font-weight: 600;
   color: #1f2937; /* gray-800 */
   margin: 0 0 1rem 0;
 }
 
-.ContactUsPage h4 {
+.ContactUsComponent h4 {
   font-size: 1.1rem;
   font-weight: 600;
   color: #111827; /* gray-900 */
   margin: 0 0 0.25rem 0;
 }
 
-.ContactUsPage p {
+.ContactUsComponent p {
   line-height: 1.65;
   margin: 0 0 1rem 0;
   color: #4b5563; /* gray-600 */
 }
 
-.ContactUsPage .subtitle {
+.ContactUsComponent .subtitle {
   font-size: 1.1rem;
   color: #4b5563; /* gray-600 */
   margin-bottom: 2.5rem;
   max-width: 60ch;
 }
 
-.ContactUsPage a {
+.ContactUsComponent a {
   color: #4f46e5; /* indigo-600 */
   text-decoration: none;
   transition: color 0.2s ease;
 }
-.ContactUsPage a:hover {
+.ContactUsComponent a:hover {
   color: #3730a3; /* indigo-800 */
   text-decoration: underline;
 }
 
 
 /* --- Main Connect Section (Form/Details + Map) --- */
-.ContactUsPage .connect-section {
+.ContactUsComponent .connect-section {
   display: flex;
   flex-direction: column;
   gap: 3rem;
 }
 
-.ContactUsPage .form-and-details-container {
+.ContactUsComponent .form-and-details-container {
   width: 100%;
   order: 1;
 }
 
-.ContactUsPage .map-container {
+.ContactUsComponent .map-container {
   width: 100%;
   order: 2;
   min-height: 350px;
 }
 
-.ContactUsPage .contactMap {
+.ContactUsComponent .contactMap {
   width: 100%;
   height: 100%;
   min-height: 350px;
@@ -100,7 +101,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.ContactUsPage .contactMap iframe {
+.ContactUsComponent .contactMap iframe {
   display: block;
   width: 100%;
   height: 100%;
@@ -109,204 +110,180 @@
 }
 
 
-/* =============================================== */
-/* === Dark Form Theme Specific Styles         === */
-/* Apply theme class ".ContactUsDarkFormTheme"   */
-/* to ".ContactUsPage" div in JSX                */
-/* =============================================== */
-
-/* --- Contact Details (Dark Theme Version) --- */
-.ContactUsDarkFormTheme .contact-details {
-  margin-bottom: 2.5rem;
+/* --- Contact Details --- */
+.ContactUsComponent .contact-details {
+  margin-bottom: 3rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1.25rem;
 }
 
-.ContactUsDarkFormTheme .contact-item {
+.ContactUsComponent .contact-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 1rem;
   font-size: 1rem;
-  color: #1f2937; /* gray-800 */
+  color: #374151; /* gray-700 */
 }
 
-.ContactUsDarkFormTheme .contact-item .contact-icon {
-  color: #1f2937; /* gray-800 */
+.ContactUsComponent .contact-item .contact-icon {
+  color: #6366f1; /* Accent color (indigo-500) */
   flex-shrink: 0;
-  margin-top: 0.15em;
-  width: 20px;
-  height: 20px;
+  margin-top: 0.1em;
+  width: 24px;
+  height: 24px;
 }
+/* Link color uses the default link style */
 
-.ContactUsDarkFormTheme .contact-item a {
-  color: #2563eb; /* blue-600 */
-}
-.ContactUsDarkFormTheme .contact-item a:hover {
-  color: #1d4ed8; /* blue-700 */
-}
 
-/* --- Dark Themed Contact Form --- */
-.ContactUsDarkFormTheme .contact-form {
+/* --- Light Themed Contact Form --- */
+.ContactUsComponent .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem; /* Space between form elements */
   margin-top: 2rem;
 }
 
-/* Row container for icon + input */
-.ContactUsDarkFormTheme .form-field-row {
+/* Input wrapper contains icon + input */
+.ContactUsComponent .input-wrapper {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
-.ContactUsDarkFormTheme .form-field-row.textarea-row {
-  align-items: flex-start;
-}
-
-/* Icon next to input field */
-.ContactUsDarkFormTheme .form-field-icon {
-  color: #374151; /* gray-700 */
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  transition: color 0.2s ease-in-out; /* Add transition for potential focus change */
-}
-.ContactUsDarkFormTheme .form-field-row.textarea-row .form-field-icon {
-  margin-top: 0.5rem; /* Align icon with top of textarea */
-}
-/* Optional: change icon color when input is focused */
-/* .ContactUsDarkFormTheme .form-field-row:focus-within .form-field-icon {
-  color: #6b7280; // gray-500
-} */
-
-
-/* Input/Textarea field wrapper */
-.ContactUsDarkFormTheme .input-wrapper {
-  flex-grow: 1;
-  background-color: #374151; /* gray-700 */
-  border: 1px solid #4b5563; /* gray-600 */
-  border-radius: 0.375rem; /* 6px */
+  background-color: #ffffff; /* White background */
+  border: 1px solid #d1d5db; /* gray-300 border */
+  border-radius: 0.5rem; /* 8px */
   transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  position: relative; /* Needed if adding internal elements like clear buttons */
-  display: flex; /* Ensures input inside fills width correctly */
+  position: relative; /* For absolute positioning icon */
+  padding-left: 0.875rem; /* Padding for the icon area */
 }
 
-/* Input wrapper focus state */
-.ContactUsDarkFormTheme .input-wrapper:focus-within {
-  border-color: #9ca3af; /* gray-400 */
-  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3); /* gray focus ring */
+.ContactUsComponent .input-wrapper:focus-within {
+  border-color: #818cf8; /* indigo-400 */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); /* Indigo focus ring */
 }
 
-/* The actual input/textarea elements */
-.ContactUsDarkFormTheme .form-input,
-.ContactUsDarkFormTheme .form-textarea {
+.ContactUsComponent .input-icon {
+  /* Position icon absolutely within the wrapper's left padding */
+  position: absolute;
+  left: 0.875rem; /* 14px */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af; /* gray-400 */
+  pointer-events: none; /* Don't intercept clicks */
+  width: 20px;
+  height: 20px;
+  transition: color 0.2s ease-in-out;
+}
+.ContactUsComponent .input-wrapper:focus-within .input-icon {
+  color: #6366f1; /* indigo-500 */
+}
+
+.ContactUsComponent .textarea-wrapper {
+  align-items: stretch; /* Allow wrapper to grow with textarea */
+  padding-left: 0; /* Remove left padding, icon handled differently */
+}
+.ContactUsComponent .textarea-wrapper .input-icon {
+  /* Position textarea icon differently if needed, e.g., align top */
+  top: 0.875rem; /* Align near top padding */
+  transform: translateY(0);
+  left: 0.875rem; /* Keep same horizontal position */
+}
+
+/* Actual input/textarea fields */
+.ContactUsComponent .form-input,
+.ContactUsComponent .form-textarea {
+  flex-grow: 1;
   background-color: transparent;
   border: none;
   outline: none;
-  color: #f9fafb; /* gray-50 */
+  color: #111827; /* gray-900 */
   font-size: 1rem;
-  width: 100%; /* Fill the wrapper */
-  padding: 0.75rem 1rem; /* 12px 16px */
-  line-height: 1.5; /* Standard line height */
+  width: 100%;
+  /* Padding: top/bottom, right, left (space for icon is now IN the wrapper padding) */
+  padding: 0.875rem 1rem 0.875rem 2.5rem; /* 14px 16px 14px 40px */
+  line-height: 1.5;
 }
 
-.ContactUsDarkFormTheme .form-textarea {
+.ContactUsComponent .form-textarea {
+  /* Adjust textarea padding if icon positioning differs */
+  padding-left: 2.5rem; /* Keep consistent left padding */
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
 }
 
-/* Placeholder text style */
-.ContactUsDarkFormTheme .form-input::placeholder,
-.ContactUsDarkFormTheme .form-textarea::placeholder {
+.ContactUsComponent .form-input::placeholder,
+.ContactUsComponent .form-textarea::placeholder {
   color: #9ca3af; /* gray-400 */
   opacity: 1;
 }
 
-/* --- Submit Button Row and Styling (Dark Theme) --- */
-.ContactUsDarkFormTheme .button-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-/* Empty div to align button visually with inputs */
-.ContactUsDarkFormTheme .form-field-icon-placeholder {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-}
-
-.ContactUsDarkFormTheme .submit-button {
-  flex-grow: 1;
-  background-color: #1f2937; /* gray-800 */
+/* --- Submit Button (Light Theme) --- */
+.ContactUsComponent .submit-button {
+  background-color: #4f46e5; /* indigo-600 */
   color: white;
   font-weight: 600;
   font-size: 1rem;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid transparent; /* Start with transparent border */
-  border-radius: 0.375rem;
+  padding: 0.875rem 1.5rem; /* 14px 24px */
+  border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease, box-shadow 0.2s ease;
   text-align: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  width: 100%; /* Full width button */
+  margin-top: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.ContactUsDarkFormTheme .submit-button:hover {
-  background-color: #374151; /* gray-700 */
-  /* border-color: #4b5563; // gray-600 - Optional: border on hover */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
-
+.ContactUsComponent .submit-button:hover {
+  background-color: #4338ca; /* indigo-700 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.ContactUsDarkFormTheme .submit-button:focus {
+.ContactUsComponent .submit-button:focus {
   outline: none;
-  border-color: #6b7280; /* gray-500 */
-  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.4); /* Gray focus ring */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3); /* Indigo focus ring */
 }
 
-.ContactUsDarkFormTheme .submit-button:active {
-  background-color: #111827; /* gray-900 */
-  border-color: transparent; /* Reset border on active */
+.ContactUsComponent .submit-button:active {
+  background-color: #3730a3; /* indigo-800 */
   transform: scale(0.98);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Reset shadow */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* --- Success Message (Dark Theme Version) --- */
-.ContactUsDarkFormTheme .success-message {
-  flex-grow: 1;
-  padding: 0.75rem 1rem;
-  background-color: #374151; /* Match input background */
-  color: #d1d5db; /* gray-300 */
-  border: 1px solid #4b5563; /* Match input border */
-  border-radius: 0.375rem;
+/* --- Success Message (Light Theme) --- */
+.ContactUsComponent .success-message {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background-color: #ecfdf5; /* green-50 */
+  color: #065f46; /* green-800 */
+  border: 1px solid #a7f3d0; /* green-200 */
+  border-radius: 0.5rem;
   text-align: center;
   font-weight: 500;
 }
 
 
 /* --- Team Section Styling (General) --- */
-.ContactUsPage .team-section {
+.ContactUsComponent .team-section {
   padding-top: 3rem;
   border-top: 1px solid #e5e7eb; /* gray-200 */
   margin-top: 3rem;
 }
 
-.ContactUsPage .team-title {
+.ContactUsComponent .team-title {
   text-align: center;
   margin-bottom: 3rem;
   font-size: clamp(1.8rem, 4.5vw, 2.25rem);
   color: #111827; /* gray-900 */
 }
 
-.ContactUsPage .team-grid {
+.ContactUsComponent .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
   justify-content: center;
 }
 
-.ContactUsPage .team-member-card {
+.ContactUsComponent .team-member-card {
   background-color: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -315,12 +292,12 @@
   transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
-.ContactUsPage .team-member-card:hover {
+.ContactUsComponent .team-member-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
 }
 
-.ContactUsPage .team-member-image {
+.ContactUsComponent .team-member-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
@@ -328,16 +305,16 @@
   background-color: #e5e7eb; /* gray-200 */
 }
 
-.ContactUsPage .team-member-info {
+.ContactUsComponent .team-member-info {
   padding: 1.25rem 1rem;
 }
 
-.ContactUsPage .team-member-name {
+.ContactUsComponent .team-member-name {
   font-size: 1.15rem;
   /* Uses h4 styles */
 }
 
-.ContactUsPage .team-member-title {
+.ContactUsComponent .team-member-title {
   font-size: 0.9rem;
   color: #6b7280; /* gray-500 */
   margin-bottom: 0;
@@ -345,49 +322,49 @@
 
 
 /* --- Responsiveness --- */
-@media (min-width: 768px) { /* Medium screens and up */
-  .ContactUsPage .contact-us-container {
+@media (min-width: 768px) {
+  .ContactUsComponent .contact-us-container {
     padding: 5rem 2rem;
   }
 
-  .ContactUsPage .connect-section {
+  .ContactUsComponent .connect-section {
     flex-direction: row;
     align-items: flex-start;
     gap: 3rem;
   }
 
-  .ContactUsPage .form-and-details-container { width: 50%; order: 1; }
-  .ContactUsPage .map-container {
+  .ContactUsComponent .form-and-details-container { width: 50%; order: 1; }
+  .ContactUsComponent .map-container {
     width: 50%;
     order: 2;
     height: auto;
     min-height: 500px;
    }
-   .ContactUsPage .contactMap {
+   .ContactUsComponent .contactMap {
      height: 500px;
      min-height: 500px;
    }
-  .ContactUsPage .contactMap iframe {
+  .ContactUsComponent .contactMap iframe {
      height: 500px;
      min-height: 500px;
    }
 
-  .ContactUsPage .team-grid {
+  .ContactUsComponent .team-grid {
     gap: 2.5rem;
   }
 }
 
-@media (min-width: 1024px) { /* Large screens and up */
-  .ContactUsPage .connect-section {
+@media (min-width: 1024px) {
+  .ContactUsComponent .connect-section {
     gap: 4rem;
   }
 
-  .ContactUsPage .form-and-details-container { width: 45%; }
-  .ContactUsPage .map-container { width: 55%; }
+  .ContactUsComponent .form-and-details-container { width: 45%; }
+  .ContactUsComponent .map-container { width: 55%; }
 
-  .ContactUsPage .team-grid {
+  .ContactUsComponent .team-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
-/* --- End of Styles --- */
+/* --- End of Scoped Styles --- */

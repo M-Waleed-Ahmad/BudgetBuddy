@@ -1,145 +1,191 @@
+/* ../styles/landingpage.css */
+
 /* Base Styles */
 .landing-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-  
-  /* Hero Section */
-  .hero-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 4rem 1rem;
-  }
-  
-  .hero-content {
-    max-width: 800px;
-    margin-bottom: 3rem;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #2d3748;
-  }
-  
-  .hero-subtitle {
-    font-size: 1.5rem;
-    color: #4a5568;
-    margin-bottom: 2.5rem;
-  }
-  
-  .hero-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-  }
-  
-  .primary-btn, .secondary-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .primary-btn {
-    background-color: #4299e1;
-    color: white;
-    border: none;
-  }
-  
-  .secondary-btn {
-    background-color: white;
-    color: #4299e1;
-    border: 2px solid #4299e1;
-  }
-  
-  /* Video Section */
-  .video-container {
-    width: 100%;
-    max-width: 800px;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  }
-  
-  .video-placeholder {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background-color: #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .demo-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  /* Features Section */
-  .features-section {
-    padding: 4rem 1rem;
-    text-align: center;
-  }
-  
-  .section-title {
-    font-size: 2.5rem;
-    margin-bottom: 3rem;
-    color: #2d3748;
-  }
-  
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem; /* Use 1rem padding for smaller screens */
+  font-family: sans-serif; /* Basic sans-serif font */
+  color: #333; /* Default text color */
+}
+
+/* Hero Section */
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 1rem 3rem 1rem; /* Adjust padding */
+}
+
+.hero-content {
+  max-width: 700px; /* Slightly smaller max-width */
+  margin-bottom: 2.5rem; /* Space before buttons */
+}
+
+.hero-title {
+  font-size: 3.5rem; /* Larger title */
+  font-weight: 700; /* Bold */
+  margin-bottom: 1rem; /* Space below title */
+  color: #1a202c; /* Darker color */
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem; /* Slightly larger subtitle */
+  color: #4a5568; /* Medium gray color */
+  margin-bottom: 2rem; /* Space below subtitle */
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem; /* Space below buttons before video */
+}
+
+.primary-btn, .secondary-btn {
+  padding: 0.8rem 1.8rem; /* Slightly larger padding */
+  border-radius: 8px; /* Consistent border radius */
+  font-weight: 600; /* Semi-bold */
+  font-size: 1rem;
+  display: inline-flex; /* Use inline-flex */
+  align-items: center;
+  justify-content: center; /* Center text */
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease, filter 0.2s ease;
+  border: none; /* Remove default border */
+  text-decoration: none; /* Remove underline if used as link */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Specific Button Colors from Image */
+.primary-btn {
+  background-color: #6B46C1; /* Purple-ish blue */
+  color: white;
+}
+
+.secondary-btn {
+  background-color: #805AD5; /* Lighter purple-ish blue */
+  color: white; /* White text as it's filled */
+  /* border: 2px solid #805AD5; Remove border for filled look */
+}
+
+/* Video Section */
+.video-container {
+  width: 100%;
+  max-width: 900px; /* Max width for the video */
+  margin: 0 auto; /* Center the container */
+  border-radius: 12px; /* Rounded corners like the reference */
+  overflow: hidden; /* Ensure video respects the border radius */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* Subtle shadow */
+  background-color: #e2e8f0; /* Fallback background */
+}
+
+.demo-video {
+  display: block; /* Remove extra space below video */
+  width: 100%;
+  height: auto; /* Maintain aspect ratio */
+  object-fit: cover;
+}
+
+/* Features Section */
+.features-section {
+  padding: 4rem 1rem; /* More padding */
+  text-align: center;
+  background-color: #f7fafc; /* Optional: Light background for contrast */
+  margin-top: 4rem; /* Space after hero/video */
+}
+
+.section-title {
+  font-size: 2.25rem; /* Slightly smaller section title */
+  font-weight: 600;
+  margin-bottom: 3.5rem; /* More space below title */
+  color: #2d3748;
+}
+
+.features-grid {
+  display: grid;
+  /* Default to 1 column, adjust via media queries */
+  grid-template-columns: 1fr;
+  gap: 2rem; /* Gap between cards */
+  max-width: 1100px; /* Max width for the grid */
+  margin: 0 auto; /* Center the grid */
+}
+
+.feature-card {
+  background: white;
+  border-radius: 10px; /* Slightly more rounded corners */
+  padding: 2rem 1.5rem; /* Adjust padding */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+  text-align: center; /* Center align all content */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Enhance shadow on hover */
+}
+
+/* Icon Styling */
+.feature-icon-container {
+  display: inline-flex; /* Center the icon block */
+  align-items: center;
+  justify-content: center;
+  width: 50px; /* Size of the square */
+  height: 50px;
+  background-color: #E9D8FD; /* Light purple background */
+  border-radius: 8px; /* Rounded corners for the square */
+  margin-bottom: 1.25rem; /* Space below icon */
+}
+
+.feature-icon {
+  font-size: 1.5rem; /* Size of the icon itself */
+  color: #6B46C1; /* Icon color matching primary button */
+}
+
+.feature-card h3 {
+  font-size: 1.2rem; /* Feature title size */
+  font-weight: 600;
+  margin-bottom: 0.75rem; /* Space below title */
+  color: #2d3748;
+}
+
+.feature-card p {
+  color: #4a5568;
+  line-height: 1.6;
+  font-size: 0.95rem; /* Slightly smaller description text */
+}
+
+/* Responsive Design */
+
+/* Medium screens (tablets) */
+@media (min-width: 640px) {
   .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
   }
-  
-  .feature-card {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 2rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    transition: transform 0.2s ease;
+   .hero-actions {
+     flex-wrap: nowrap; /* Prevent wrapping on medium screens */
+   }
+   .landing-container {
+      padding: 2rem; /* Increase padding */
+   }
+}
+
+/* Large screens (desktops) */
+@media (min-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns as in reference */
   }
-  
-  .feature-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    color: #2d3748;
+  .hero-title {
+    font-size: 4rem; /* Even larger on desktop */
   }
-  
-  .feature-card p {
-    color: #4a5568;
-    line-height: 1.6;
+  .hero-subtitle {
+    font-size: 1.35rem;
   }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .hero-title {
-      font-size: 2.5rem;
-    }
-    
-    .hero-subtitle {
-      font-size: 1.25rem;
-    }
-    
-    .hero-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    
-    .primary-btn, .secondary-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
+   .landing-container {
+      padding: 2rem 3rem; /* More horizontal padding */
+   }
+}
