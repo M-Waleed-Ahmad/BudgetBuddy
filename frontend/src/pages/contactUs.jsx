@@ -25,7 +25,6 @@ const teamMembers = [
   { id: 3, name: "Ashar Mehmood", title: "Technical Support", img: ashar },
   { id: 4, name: "Azlan Khalid", title: "Client Relations", img: azlan },
 ];
-// --- End Configuration ---
 
 // --- Animation Variants ---
 const sectionVariants = {
@@ -61,7 +60,6 @@ const ContactUs = () => {
     try {
       const { email, name, message } = formData;
       const result = await sendContactMessage(email, name, message);
-      console.log('Message sent:', result);
       setIsSubmitted(true);
       setFormData({ name: '', email: '', message: '' });
       toast.success('Message sent successfully!'); // Use toast for success message
