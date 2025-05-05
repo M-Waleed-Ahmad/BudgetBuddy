@@ -21,7 +21,6 @@ const Login = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      console.log("Already logged in, redirecting to:", from);
       navigate(from || '/dashboard', { replace: true });
     }
   }, [navigate, from]);
@@ -38,12 +37,10 @@ const Login = () => {
     e.preventDefault();
     try {
       const data = await loginUser(formData);
-      console.log('✅ Login successful:', data);
       localStorage.setItem('token', data.token);
       toast.success('Login successful!');
       navigate(from, { replace: true });
     } catch (error) {
-      console.error('❌ Login error:', error);
       toast.error(error.message || 'Login failed. Please check your credentials.');
     }
   };

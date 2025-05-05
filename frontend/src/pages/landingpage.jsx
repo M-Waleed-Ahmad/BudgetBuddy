@@ -2,9 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 // Import desired icons from react-icons
 import { FaUsers, FaHistory, FaChartBar, FaFileExport, FaLightbulb, FaLock } from 'react-icons/fa';
-// Removed FiArrowRight as it's not in the reference image buttons
-// import { FiArrowRight } from 'react-icons/fi';
-
 import Navbar1 from '../components/navbar1'; // Assuming these components exist
 import Footer from '../components/Footer1';  // Assuming these components exist
 import vid from '../assets/vid.mp4';      // Ensure this path is correct
