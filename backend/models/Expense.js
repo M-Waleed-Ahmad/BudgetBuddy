@@ -7,6 +7,8 @@ const expenseSchema = new mongoose.Schema({
   description: String,
   notes: String,
   expense_date: Date,
+  type: { type: String, enum: ['debit', 'credit'], default: 'debit' },
+  account: { type: String },
   created_at: { type: Date, default: Date.now }
 });
 

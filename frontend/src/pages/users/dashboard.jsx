@@ -4,6 +4,8 @@ import ReactECharts from 'echarts-for-react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer.jsx'; // Ensure correct extension if applicable
 import Modal from '../../components/Modal'; // Keep if any modals are added later
+import SmartInsightsCard from '../../features/insights/SmartInsightsCard';
+import SmartInsightsDrawer from '../../features/insights/SmartInsightsDrawer';
 import '../../styles/dashboard.css';
 
 // Import Actual/Placeholder API Functions
@@ -12,7 +14,8 @@ import {
     getRecentExpenses,
     getCurrentMonthSpendingTotal,
     getCurrentMonthBudget,
-    getSpendingTrends
+    getSpendingTrends,
+    getSmartRecommendations
     // Ensure these functions exist in your api/api.js file
 } from '../../api/api'; // Adjust path if needed
 
@@ -47,18 +50,25 @@ const Dashboard = () => {
     const [isLoadingTrends, setIsLoadingTrends] = useState(true);
     const [error, setError] = useState(null); // Combined error state for simplicity
 
+    const [insightsData, setInsightsData] = useState(null);
+    const [isLoadingInsights, setIsLoadingInsights] = useState(true);
+    const [insightsError, setInsightsError] = useState(null);
+    const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+
     // --- Data Fetching ---
     const fetchData = useCallback(async () => {
-        setIsLoadingProfile(true); setIsLoadingExpenses(true); setIsLoadingBudget(true); setIsLoadingTrends(true);
+        setIsLoadingProfile(true); setIsLoadingExpenses(true); setIsLoadingBudget(true); setIsLoadingTrends(true); setIsLoadingInsights(true);
         setError(null); // Clear previous errors
+        setInsightsError(null);
 
         try {
-            const [profile, recent, spendingTotal, budgetInfo, trends] = await Promise.allSettled([
+            const [profile, recent, spendingTotal, budgetInfo, trends, insights] = await Promise.allSettled([
                 getMyProfile(),
                 getRecentExpenses(5), // Fetch last 5 recent expenses
                 getCurrentMonthSpendingTotal(),
                 getCurrentMonthBudget(), // Fetches target like { _id, total_budget_amount }
-                getSpendingTrends(9) // Fetch last 9 months trends
+                getSpendingTrends(9), // Fetch last 9 months trends
+                getSmartRecommendations('this-month')
             ]);
 
             // Process results - set state or throw error if critical fetch failed
@@ -86,10 +96,18 @@ const Dashboard = () => {
             }
             setIsLoadingTrends(false);
 
+            if (insights.status === 'fulfilled' && insights.value) {
+                setInsightsData(insights.value);
+            } else {
+                console.error("Insights fetch error:", insights.reason);
+                setInsightsError(insights.reason?.message || 'Failed to load insights');
+            }
+            setIsLoadingInsights(false);
+
         } catch (err) { // Catch any synchronous errors in setup or re-thrown errors
             console.error("Dashboard data fetch setup error:", err);
             setError(err.message || "Failed to load dashboard data.");
-            setIsLoadingProfile(false); setIsLoadingExpenses(false); setIsLoadingBudget(false); setIsLoadingTrends(false);
+            setIsLoadingProfile(false); setIsLoadingExpenses(false); setIsLoadingBudget(false); setIsLoadingTrends(false); setIsLoadingInsights(false);
         }
     }, []);
 
@@ -163,6 +181,15 @@ const Dashboard = () => {
                     {isLoadingProfile ? "Loading..." : `Welcome Back, ${userName}`}
                 </motion.h1>
 
+                <motion.div className="smart-insights-wrapper" variants={itemVariants}>
+                    <SmartInsightsCard
+                        data={insightsData}
+                        isLoading={isLoadingInsights}
+                        error={insightsError}
+                        onOpen={() => setIsInsightsOpen(true)}
+                    />
+                </motion.div>
+
                 {/* Display general error if any fetch failed critically */}
                 {error && <motion.p variants={itemVariants} className="error-message centered-error">{error}</motion.p>}
 
@@ -194,7 +221,7 @@ const Dashboard = () => {
                             </motion.div>
 
                             {/* Spending Trends Line Chart Column */}
-                            <motion.div className="line-chart-column" variants={itemVariants}>
+                                <motion.div className="line-chart-column elevated-card" variants={itemVariants}>
                                 <h2>Spending Trends</h2>
                                 {/* Legend Filters */}
                                 <div className="chart-legend-filters">
@@ -221,7 +248,7 @@ const Dashboard = () => {
                         </div>
 
                         {/* Budget Section */}
-                        <motion.section className="budget-section-dash" variants={itemVariants}>
+                        <motion.section className="budget-section-dash elevated-card" variants={itemVariants}>
                              {isLoadingBudget ? <p className='loading-text small'>Loading budget...</p> : (
                                 <>
                                     <div className="donut-chart-area">
@@ -243,6 +270,7 @@ const Dashboard = () => {
                 )}
 
             </motion.main>
+            <SmartInsightsDrawer isOpen={isInsightsOpen} onClose={() => setIsInsightsOpen(false)} data={insightsData} />
             <Footer />
         </div>
     );

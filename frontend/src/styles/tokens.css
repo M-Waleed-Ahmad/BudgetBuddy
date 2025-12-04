@@ -1,0 +1,17 @@
+@import './design-tokens.css';
+
+:root {
+  /* Compatibility aliases for older color tokens */
+  --color-bg: var(--bg-main);
+  --color-surface: var(--bg-elevated);
+  --color-text: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border-subtle);
+  --color-primary: var(--accent);
+  --color-primary-contrast: var(--bg-main);
+  --shadow-sm: var(--shadow-soft);
+  --radius-md: var(--radius-md);
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 20px;
+}

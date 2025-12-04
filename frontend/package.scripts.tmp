@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "lint": "eslint \"src/**/*.{js,jsx}\"",
+    "format": "prettier --write \"src/**/*.{js,jsx}\""
+  }
+}

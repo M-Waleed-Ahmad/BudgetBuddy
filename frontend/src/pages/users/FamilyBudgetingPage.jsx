@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ReactECharts from 'echarts-for-react';
 import Navbar from '../../components/Navbar';        // Adjust path if needed
@@ -7,6 +8,7 @@ import Modal from '../../components/Modal';        // Adjust path if needed
 import '../../styles/FamilyBudgetingPage.css';   // Adjust path if needed
 import userAvatarPlaceholder from '../../assets/avatar.png'; // Adjust path if needed
 import { toast } from 'react-hot-toast'; // Import toast for notifications
+import useEntitlement from '../../hooks/useEntitlement';
 
 // API Imports
 import {
@@ -86,6 +88,8 @@ const FamilyBudgetingPage = () => {
     const [familyMembers, setFamilyMembers] = useState([]);
     const [familyExpenses, setFamilyExpenses] = useState([]);
     const [personalExpenses, setPersonalExpenses] = useState([]);
+    const navigate = useNavigate();
+    const { allowed, loading: entitlementLoading } = useEntitlement('family_budgeting');
 
     // --- Derived State ---
     const currentUserRoleForSelectedPlan = useMemo(() => {
@@ -802,6 +806,12 @@ const FamilyBudgetingPage = () => {
     };
 
     // --- Effects ---
+    useEffect(() => {
+        if (!entitlementLoading && !allowed) {
+            navigate('/pricing');
+        }
+    }, [entitlementLoading, allowed, navigate]);
+
        // --- Initial Data Load Effects ---
        useEffect(() => {
         fetchUserPlans();

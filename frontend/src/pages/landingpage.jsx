@@ -1,143 +1,187 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-// Import desired icons from react-icons
-import { FaUsers, FaHistory, FaChartBar, FaFileExport, FaLightbulb, FaLock } from 'react-icons/fa';
-// Removed FiArrowRight as it's not in the reference image buttons
-// import { FiArrowRight } from 'react-icons/fi';
+import {
+  FaUsers,
+  FaHistory,
+  FaChartBar,
+  FaFileExport,
+  FaLightbulb,
+  FaLock,
+} from 'react-icons/fa';
 
-import Navbar1 from '../components/navbar1'; // Assuming these components exist
-import Footer from '../components/Footer1';  // Assuming these components exist
-import vid from '../assets/vid.mp4';      // Ensure this path is correct
-import '../styles/landingpage.css';       // We will update this CSS file below
+import Navbar1 from '../components/navbar1';
+import Footer from '../components/Footer1';
+import vid from '../assets/vid.mp4';
+import '../styles/landingpage.css';
 
-const landingpage = () => {
+const features = [
+  {
+    icon: FaUsers,
+    title: 'Real-time Collaboration',
+    description:
+      'Share budgets with family and teammates so everyone stays aligned on spending.',
+  },
+  {
+    icon: FaChartBar,
+    title: 'Detailed Insights',
+    description:
+      'Visualize where your money goes each month with clear charts and summaries.',
+  },
+  {
+    icon: FaLightbulb,
+    title: 'Smart Suggestions',
+    description:
+      'Get simple, actionable tips based on your spending patterns and budgets.',
+  },
+  {
+    icon: FaHistory,
+    title: 'Edit History',
+    description:
+      'See how your budget evolved over time and who changed what.',
+  },
+  {
+    icon: FaFileExport,
+    title: 'Exportable Reports',
+    description:
+      'Download PDFs and CSVs for your records, tax filing, or sharing with others.',
+  },
+  {
+    icon: FaLock,
+    title: 'Secure by Design',
+    description:
+      'Your financial data is encrypted and protected with role-based access.',
+  },
+];
+
+const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleJoin = () => {
+    // Change '/signup' to your real signup route if needed
+    navigate('/signup');
+  };
+
+  const handleRequestDemo = () => {
+    // Change email to your own if needed
+    window.location.href = 'mailto:msa@budgetbuddy.com?subject=BudgetBuddy Demo Request';
+  };
+
   return (
     <>
-      <Navbar1 /> {/* Assuming Navbar1 handles its own styling */}
-      <div className="landing-container">
-        {/* Hero Section */}
-        <section className="hero-section">
-          <div className="hero-content">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
+      <Navbar1 />
+      <main className="landing-root">
+        {/* HERO */}
+        <section className="hero">
+          <div className="hero-inner">
+            {/* Text side */}
+            <motion.div
+              className="hero-text"
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="hero-title"
             >
-              Master Your Finances
-            </motion.h1>
+              <p className="hero-kicker">BudgetBuddy · Expense Management</p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="hero-subtitle"
-            >
-              Track expenses, budget smartly, and share insights with ease
-            </motion.p>
+              <h1 className="hero-title">
+                Take control of your money,
+                <span className="hero-title-highlight"> without the spreadsheets.</span>
+              </h1>
 
+              <p className="hero-subtitle">
+                Track expenses, set smarter budgets, and collaborate with your family on a
+                shared financial plan. All in one simple dashboard.
+              </p>
+
+              <div className="hero-actions">
+                <motion.button
+                  whileHover={{ scale: 1.04, filter: 'brightness(1.15)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="hero-btn hero-btn-primary"
+                  onClick={handleJoin}
+                >
+                  Join us
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.04, filter: 'brightness(1.05)' }}
+                  whileTap={{ scale: 0.97 }}
+                  className="hero-btn hero-btn-secondary"
+                  onClick={handleRequestDemo}
+                >
+                  Request demo
+                </motion.button>
+              </div>
+
+              <div className="hero-meta">
+                <span>AI recommendations</span>
+                <span>Family budgeting</span>
+                <span>PDF exports</span>
+              </div>
+            </motion.div>
+
+            {/* Video side – ALFA-style card with overlay */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="hero-actions"
+              className="hero-video-shell"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
             >
-              {/* Updated Button Styles */}
-              <motion.button
-                whileHover={{ scale: 1.05, filter: 'brightness(1.1)'}}
-                whileTap={{ scale: 0.95 }}
-                className="primary-btn"
-              >
-                Join Us {/* Removed Icon */}
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05, filter: 'brightness(1.1)' }}
-                whileTap={{ scale: 0.95 }}
-                className="secondary-btn"
-              >
-                Request Demo
-              </motion.button>
+              <div className="hero-video-frame">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="hero-video"
+                >
+                  <source src={vid} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <div className="hero-video-overlay" />
+                <div className="hero-video-label">
+                  <p>Live product walkthrough</p>
+                  <span>See how BudgetBuddy handles real expenses and budgets.</span>
+                </div>
+              </div>
             </motion.div>
           </div>
-
-          {/* Video Section - Kept as requested */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, duration: 0.7 }}
-            className="video-container" // Style this container
-          >
-             {/* Video element remains */}
-             <video autoPlay loop muted playsInline className="demo-video"> {/* added playsInline */}
-               <source src={vid} type="video/mp4" />
-               Your browser does not support the video tag.
-             </video>
-          </motion.div>
         </section>
 
-        {/* Features Section - Updated with Icons */}
-        <section className="features-section">
-          <h2 className="section-title">Feature Highlights</h2>
+        {/* FEATURES */}
+        <section className="features">
+          <div className="features-header">
+            <h2>Built for clear, shared finances</h2>
+            <p>
+              From solo tracking to family budgeting and AI-powered suggestions, BudgetBuddy
+              becomes your default place to understand money.
+            </p>
+          </div>
 
           <div className="features-grid">
             {features.map((feature, index) => (
-              <motion.div
-                key={index}
+              <motion.article
+                key={feature.title}
                 className="feature-card"
-                whileHover={{ y: -5 }}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }} // Triggers when card scrolls into view
-                viewport={{ once: true }} // Animation runs only once
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -6 }}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
               >
-                {/* Icon Container */}
-                <div className="feature-icon-container">
+                <div className="feature-icon-wrap">
                   <feature.icon className="feature-icon" />
                 </div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
-              </motion.div>
+                <h3 className="feature-title">{feature.title}</h3>
+                <p className="feature-text">{feature.description}</p>
+              </motion.article>
             ))}
           </div>
         </section>
-      </div>
-      <Footer /> {/* Assuming Footer handles its own styling */}
+      </main>
+      <Footer />
     </>
   );
 };
 
-// Feature data - Updated with Icon Components
-const features = [
-  {
-    icon: FaUsers, // Icon for Collaboration
-    title: "Real-time Collaboration",
-    description: "Work together in real-time on a shared budget, making financial planning a breeze."
-  },
-   {
-    icon: FaChartBar, // Icon for Insights
-    title: "Detailed Insights",
-    description: "Get in-depth analysis of your spending habits and identify areas for improvement."
-  },
-   {
-    icon: FaLightbulb, // Icon for Suggestions
-    title: "Smart Suggestions",
-    description: "Receive personalized budgeting advice tailored to your financial circumstances."
-  },
-  {
-    icon: FaHistory, // Icon for History
-    title: "View Editing History",
-    description: "Never lose track of changes. Our platform offers a complete history of all budget edits."
-  },
-  {
-    icon: FaFileExport, // Icon for Export
-    title: "Export Your Data",
-    description: "Take your financial data with you. Export budgets in various formats for your convenience."
-  },
-  {
-    icon: FaLock, // Icon for Protection
-    title: "Data Protection",
-    description: "Your data is encrypted and secure, ensuring that your financial information is protected."
-  }
-];
-
-export default landingpage;
+export default LandingPage;

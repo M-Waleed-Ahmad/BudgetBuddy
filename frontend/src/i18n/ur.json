@@ -1,0 +1,12 @@
+{
+  "nav": {
+    "home": "ہوم",
+    "dashboard": "ڈیش بورڈ",
+    "pricing": "قیمت",
+    "blog": "بلاگ"
+  },
+  "actions": {
+    "login": "لاگ اِن",
+    "logout": "لاگ آؤٹ"
+  }
+}

@@ -1285,3 +1285,30 @@ export const subscribeToNewsletter = async (email) => {
     throw error;
   }
 };
+
+export const getSmartRecommendations = async (period = 'this-month') => {
+  const endpoint = `${BASE_URL}/insights/recommendations?period=${period}`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok || data?.success === false) throw new Error(data.message || 'Failed to fetch insights');
+      return data.data || data;
+  } catch (error) { console.error('Error getSmartRecommendations:', error); throw error; }
+};
+
+
+export const getCashflowReport = async ({ from, to, account } = {}) => {
+  const params = new URLSearchParams();
+  if (from) params.append('from', from);
+  if (to) params.append('to', to);
+  if (account) params.append('account', account);
+  const endpoint = `${BASE_URL}/reports/cashflow${params.toString() ? `?${params.toString()}` : ''}`;
+  console.log(`API Call: GET ${endpoint}`);
+  try {
+      const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
+      const data = await response.json();
+      if (!response.ok || data?.success === false) throw new Error(data.message || 'Failed to fetch cashflow');
+      return data.data || data;
+  } catch (error) { console.error('Error getCashflowReport:', error); throw error; }
+};

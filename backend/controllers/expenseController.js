@@ -69,7 +69,7 @@ const  getExpensesForCurrentMonthPlan = async (req, res) => {
 const addExpense = async (req, res) => {
     try {
       const userId = req.user.userId;
-      const { category_id, amount, description, expense_date, notes } = req.body;
+      const { category_id, amount, description, expense_date, notes, type, account } = req.body;
   
       if (!userId) {
         return res.status(401).json({ message: 'User not authenticated' });
@@ -88,6 +88,8 @@ const addExpense = async (req, res) => {
         description,
         expense_date: new Date(expense_date),
         notes: notes || '',
+        type: type === 'credit' ? 'credit' : 'debit',
+        account: account || undefined,
       });
   
       const savedExpense = await newExpense.save();
@@ -119,7 +121,7 @@ const updateExpense = async (req, res) => {
     try {
       const userId = req.user.userId;
       const expenseId = req.params.id;
-      const { category_id, amount, description, expense_date, notes } = req.body;
+      const { category_id, amount, description, expense_date, notes, type, account } = req.body;
   
       if (!userId) return res.status(401).json({ message: 'User not authenticated' });
       if (!mongoose.Types.ObjectId.isValid(expenseId)) {
@@ -138,6 +140,8 @@ const updateExpense = async (req, res) => {
       if (description !== undefined) expense.description = description;
       if (notes !== undefined) expense.notes = notes;
       if (expense_date !== undefined) expense.expense_date = new Date(expense_date);
+      if (type !== undefined && (type === 'debit' || type === 'credit')) expense.type = type;
+      if (account !== undefined) expense.account = account;
   
       const updatedExpense = await expense.save();
       await updatedExpense.populate('category_id', 'name');

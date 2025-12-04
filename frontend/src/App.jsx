@@ -10,6 +10,11 @@ import ExpenseManagementPage from './pages/users/expenseManagement';
 import SettingsPage from './pages/users/profile';
 import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
 import NotificationsPage from './pages/users/NotificationsPage';
+import CashFlowPage from './pages/users/CashFlowPage';
+import PricingPage from './pages/PricingPage';
+import BlogList from './pages/BlogList';
+import BlogDetail from './pages/BlogDetail';
+import AdminBlogs from './pages/admin/AdminBlogs';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
@@ -26,6 +31,19 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/contact-us" element={<ContactUsPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/billing/success" element={<PricingPage />} />
+          <Route path="/billing/cancel" element={<PricingPage />} />
+          <Route path="/blog" element={<BlogList />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
+          <Route
+            path="/admin/blogs"
+            element={
+              <ProtectedRoute>
+                <AdminBlogs />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected Routes */}
           <Route
@@ -57,6 +75,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ExpenseManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cashflow"
+            element={
+              <ProtectedRoute>
+                <CashFlowPage />
               </ProtectedRoute>
             }
           />

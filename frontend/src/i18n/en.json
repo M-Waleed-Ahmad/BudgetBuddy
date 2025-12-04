@@ -1,0 +1,12 @@
+{
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "pricing": "Pricing",
+    "blog": "Blog"
+  },
+  "actions": {
+    "login": "Login",
+    "logout": "Logout"
+  }
+}
