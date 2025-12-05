@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import Navbar from '../../components/Navbar';      
 import Footer from '../../components/Footer';       
 import Modal from '../../components/Modal';          
 import {
-    logoutUser,
     getUserProfile,
     updateUserProfile, 
     uploadToCloudinary,
@@ -17,6 +17,7 @@ import {
     updateUI,
     getPendingInvitations, acceptInvitation, rejectInvitation
 } from '../../api/api.js';                     
+import { logout } from '../../features/auth/authSlice.js';
 import '../../styles/profile.css'; 
 import { toast } from 'react-hot-toast'; // Import toast for notifications
 
@@ -33,6 +34,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'Testing'; // MOVE TO .env
 
 const SettingsPage = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // --- State ---
     const [profileData, setProfileData] = useState({ fullName: '', email: '', recovery_email: '', profileImage: '', password: '' });
@@ -244,7 +246,11 @@ const SettingsPage = () => {
         }
     };
 
-    const handleLogout = async () => { try { await logoutUser(); } catch (error) { console.error('Backend logout failed:', error); } finally { localStorage.removeItem('token');  toast.success("Logged out successfully!"); navigate('/login', { replace: true }); } };
+    const handleLogout = async () => {
+        try { await dispatch(logout()).unwrap(); }
+        catch (error) { console.error('Backend logout failed:', error); }
+        finally { toast.success("Logged out successfully!"); navigate('/login', { replace: true }); }
+    };
     // --- Effects ---
      useEffect(() => { if (editingCategory && modalState.isCategoryModalOpen) { setCategoryFormData({ name: editingCategory.name }); } else if (!editingCategory && modalState.isCategoryModalOpen) { setCategoryFormData({ name: '' }); } }, [editingCategory, modalState.isCategoryModalOpen]);
 

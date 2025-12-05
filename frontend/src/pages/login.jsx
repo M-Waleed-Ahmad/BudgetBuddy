@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import '../styles/login.css';
-import { loginUser, forgetPassword } from '../api/api'; // ← make sure this includes forgetPassword
+import { login, loadCurrentUser } from '../features/auth/authSlice.js';
+import { forgetPassword } from '../api/api';
 import { toast } from 'react-hot-toast';
-import Modal from '../components/Modal'; // ← your existing Modal component
+import Modal from '../components/Modal';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -14,37 +16,36 @@ const Login = () => {
   });
   const [isForgetModalOpen, setIsForgetModalOpen] = useState(false);
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from?.pathname || '/dashboard';
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      console.log("Already logged in, redirecting to:", from);
+    if (isAuthenticated) {
       navigate(from || '/dashboard', { replace: true });
     }
-  }, [navigate, from]);
+  }, [isAuthenticated, navigate, from]);
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleForgetChange = (e) => {
-    setForgetFormData({...forgetFormData, [e.target.name]: e.target.value });
+    setForgetFormData({ ...forgetFormData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await loginUser(formData);
-      console.log('✅ Login successful:', data);
-      localStorage.setItem('token', data.token);
+      await dispatch(login(formData)).unwrap();
       toast.success('Login successful!');
+      dispatch(loadCurrentUser());
       navigate(from, { replace: true });
     } catch (error) {
-      console.error('❌ Login error:', error);
-      toast.error(error.message || 'Login failed. Please check your credentials.');
+      console.error('Login error:', error);
+      toast.error(error || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -96,10 +97,12 @@ const Login = () => {
           </div>
 
           <div className="forgot-password">
-           <a className='forget' onClick={() => setIsForgetModalOpen(true)}>Forgot Password?</a>
+            <a className="forget" onClick={() => setIsForgetModalOpen(true)}>Forgot Password?</a>
           </div>
 
-          <button type="submit" className="primary-btn">Log in</button>
+          <button type="submit" className="primary-btn" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log in'}
+          </button>
 
           <div className="or-divider">or</div>
 

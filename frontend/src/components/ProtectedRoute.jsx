@@ -1,17 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { loadCurrentUser } from '../features/auth/authSlice.js';
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  const location = useLocation(); // Get current location
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const { isAuthenticated, token, loading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (token && !isAuthenticated && !loading) {
+      dispatch(loadCurrentUser());
+    }
+  }, [dispatch, token, isAuthenticated, loading]);
 
   if (!token) {
-    // User not logged in, redirect them to the login page
-    // Pass the current location state so we can redirect back after login (optional)
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // User is logged in, render the component they requested
   return children;
 };
 

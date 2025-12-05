@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { useDispatch, useSelector } from 'react-redux';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { getCashflowReport } from '../../api/api';
 import { usePdfExport } from '../../hooks/usePdfExport';
 import CashFlowPdf from '../../features/pdf/CashFlowPdf.jsx';
 import ShareButtons from '../../features/pdf/ShareButtons';
 import '../../styles/pricing.css';
+import { fetchCashFlowReport } from '../../features/reports/reportsSlice.js';
 
 const CashFlowPage = () => {
+  const dispatch = useDispatch();
+  const { cashFlowSummary: data, cashflowStatus, error } = useSelector((state) => state.reports);
   const [filters, setFilters] = useState(() => {
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -16,22 +19,13 @@ const CashFlowPage = () => {
     const dd = String(now.getDate()).padStart(2, '0');
     return { from: `${yyyy}-${mm}-01`, to: `${yyyy}-${mm}-${dd}`, account: '' };
   });
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const pdfRef = useRef(null);
   const { exportPdf } = usePdfExport();
 
-  const fetchReport = async () => {
-    setLoading(true); setError(null);
-    try {
-      const response = await getCashflowReport(filters);
-      setData(response);
-    } catch (err) {
-      setError(err.message || 'Failed to load cash flow');
-    } finally {
-      setLoading(false);
-    }
+  const loading = cashflowStatus === 'loading';
+
+  const fetchReport = () => {
+    dispatch(fetchCashFlowReport(filters));
   };
 
   useEffect(() => { fetchReport(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -121,7 +115,7 @@ const CashFlowPage = () => {
           </div>
         </div>
 
-        {data?.byCategory?.length ? (
+        {data?.runningBalance?.length ? (
           <section className="budget-section-dash">
             <div className="table-actions">
               <div>
@@ -159,7 +153,6 @@ const CashFlowPage = () => {
           ref={pdfRef}
           summary={{ inflow: data?.inflow, outflow: data?.outflow, net: data?.net }}
           runningBalance={data?.runningBalance || []}
-          byCategory={data?.byCategory || []}
         />
       </div>
       <Footer />

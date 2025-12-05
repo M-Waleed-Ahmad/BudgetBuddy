@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import ReactECharts from 'echarts-for-react';
 import Navbar from '../../components/Navbar';
@@ -6,19 +7,8 @@ import Footer from '../../components/Footer';
 import Modal from '../../components/Modal';
 import '../../styles/ExpenseManagementPage.css'; // Ensure this path is correct
 import { toast } from 'react-hot-toast';
-import {
-    // Expense API
-    fetchExpensesForCurrentMonth,
-    addExpense,
-    updateExpense,
-    deleteExpense,
-    // Categories API
-    getCategories,
-    // Monthly Budget API (for overall target)
-    getCurrentMonthBudget,
-    // Category Limit API (Budget collection)
-    getBudgetsForMonth, // Fetches category limits for a specific month
-} from '../../api/api'; // Adjust path if needed
+import { fetchExpenses, createExpense, editExpense, removeExpense } from '../../features/expenses/expensesSlice.js';
+import { fetchBudgetCategories, fetchMonthlyBudget, fetchBudgetItems } from '../../features/budgets/budgetsSlice.js';
 
 // --- Icons ---
 const EditIcon = ({ size = 16 }) => <span style={{ fontSize: `${size}px`, cursor: 'pointer' }} title="Edit">✏️</span>;
@@ -65,6 +55,10 @@ const initialMonthlyBudgetState = { _id: null, total_budget_amount: 0, start_dat
 // Expense Management Page Component
 // ==========================================================================
 const ExpenseManagementPage = () => {
+    const dispatch = useDispatch();
+    const expensesState = useSelector((state) => state.expenses);
+    const budgetsState = useSelector((state) => state.budgets);
+
     // --- State ---
     const [expenses, setExpenses] = useState([]);
     const [totalSpent, setTotalSpent] = useState(0);
@@ -105,83 +99,12 @@ const ExpenseManagementPage = () => {
 
     // --- Data Fetching Logic ---
     const fetchPageData = useCallback(async () => {
-        // Reset errors and set combined loading states
         setExpensesError(null); setCategoriesError(null); setMonthlyBudgetError(null); setBudgetItemsError(null);
-        setIsLoadingExpenses(true); setIsLoadingCategories(true); setIsLoadingMonthlyBudget(true); setIsLoadingBudgetItems(true);
-
-        let fetchedCategoriesData = null;
-        let fetchedMonthlyBudgetData = null;
-        let fetchedBudgetItemsData = [];
-        let fetchedExpensesData = [];
-        let calculatedTotalSpent = 0;
-
-        try {
-            // Fetch categories and monthly budget first as they might be needed for others
-            const [categoryRes, monthlyBudgetRes] = await Promise.allSettled([
-                getCategories(),
-                getCurrentMonthBudget()
-            ]);
-
-            // Process Categories
-            if (categoryRes.status === 'fulfilled' && categoryRes.value) {
-                fetchedCategoriesData = categoryRes.value || [];
-                setAvailableCategories(fetchedCategoriesData);
-                const catMap = fetchedCategoriesData.reduce((acc, cat) => { acc[cat._id] = cat.name; return acc; }, {});
-                setCategoryMap(catMap);
-                // Set default in form state *only if* form state hasn't been set yet
-                setExpenseFormData(prev => ({
-                    ...prev,
-                    category_id: prev.category_id || (fetchedCategoriesData.length > 0 ? fetchedCategoriesData[0]._id : '')
-                 }));
-            } else { throw categoryRes.reason || new Error("Failed to load categories."); }
-            setIsLoadingCategories(false);
-
-            // Process Monthly Budget Target
-            if (monthlyBudgetRes.status === 'fulfilled' && monthlyBudgetRes.value?._id) {
-                fetchedMonthlyBudgetData = monthlyBudgetRes.value;
-                setMonthlyBudgetData({
-                    _id: fetchedMonthlyBudgetData._id,
-                    total_budget_amount: fetchedMonthlyBudgetData.total_budget_amount || 0,
-                    start_date: formatDate(fetchedMonthlyBudgetData.start_date, true),
-                    end_date: formatDate(fetchedMonthlyBudgetData.end_date, true),
-                    month_year: fetchedMonthlyBudgetData.month_year || selectedMonthYear,
-                });
-            } else { setMonthlyBudgetData(initialMonthlyBudgetState); } // Reset if no budget found
-            setIsLoadingMonthlyBudget(false);
-
-            // Now fetch expenses and budget items (category limits)
-             const [expenseRes, categoryLimitsRes] = await Promise.allSettled([
-                fetchExpensesForCurrentMonth(),
-                getBudgetsForMonth(selectedMonthYear)
-            ]);
-
-             // Process Expenses
-             if (expenseRes.status === 'fulfilled' && expenseRes.value) {
-                 fetchedExpensesData = expenseRes.value.expenses || [];
-                 calculatedTotalSpent = expenseRes.value.totalSpent || 0;
-                 setExpenses(fetchedExpensesData);
-                 setTotalSpent(calculatedTotalSpent);
-             } else { throw expenseRes.reason || new Error("Failed to load expenses."); }
-             setIsLoadingExpenses(false);
-
-             // Process Category Limits (Budget Items)
-             if (categoryLimitsRes.status === 'fulfilled' && categoryLimitsRes.value) {
-                 fetchedBudgetItemsData = categoryLimitsRes.value || [];
-                 setBudgetItems(fetchedBudgetItemsData);
-             } else { throw categoryLimitsRes.reason || new Error("Failed to load category limits."); }
-             setIsLoadingBudgetItems(false);
-
-        } catch (error) {
-            console.error("Error fetching page data:", error);
-            // Set specific error states based on which promises failed (check status above)
-            if (error.message.includes("categor")) setCategoriesError(error.message);
-            else if (error.message.includes("budget target")) setMonthlyBudgetError(error.message);
-            else if (error.message.includes("limit")) setBudgetItemsError(error.message);
-            else setExpensesError(error.message || "An error occurred loading page data."); // General/Expense error
-            // Ensure loading spinners stop if an early fetch fails
-            setIsLoadingExpenses(false); setIsLoadingCategories(false); setIsLoadingMonthlyBudget(false); setIsLoadingBudgetItems(false);
-        }
-    }, [selectedMonthYear]); // Removed categoryMap dependency, calculated in useEffect below
+        dispatch(fetchBudgetCategories());
+        dispatch(fetchMonthlyBudget());
+        dispatch(fetchBudgetItems(selectedMonthYear));
+        dispatch(fetchExpenses());
+    }, [dispatch, selectedMonthYear]);
 
 
     // Effect to recalculate budgeted category map when dependencies change
@@ -221,6 +144,53 @@ const ExpenseManagementPage = () => {
     useEffect(() => {
         fetchPageData();
     }, [fetchPageData]);
+
+    // Sync expenses slice into local view state
+    useEffect(() => {
+        setExpenses(expensesState.items || []);
+        setTotalSpent(expensesState.totalSpent || 0);
+        setIsLoadingExpenses(expensesState.status === 'loading');
+        setExpensesError(expensesState.error || null);
+    }, [expensesState]);
+
+    // Sync categories from budgets slice
+    useEffect(() => {
+        const cats = budgetsState.categories || [];
+        setAvailableCategories(cats);
+        const catMap = cats.reduce((acc, cat) => { acc[cat._id] = cat.name; return acc; }, {});
+        setCategoryMap(catMap);
+        setIsLoadingCategories(budgetsState.status === 'loading' && cats.length === 0);
+        setCategoriesError(budgetsState.error || null);
+        setExpenseFormData(prev => ({
+            ...prev,
+            category_id: prev.category_id || (cats.length > 0 ? cats[0]._id : '')
+        }));
+    }, [budgetsState.categories, budgetsState.status, budgetsState.error]);
+
+    // Sync monthly budget
+    useEffect(() => {
+        const data = budgetsState.monthly?.data;
+        if (data?._id) {
+            setMonthlyBudgetData({
+                _id: data._id,
+                total_budget_amount: data.total_budget_amount || 0,
+                start_date: formatDate(data.start_date, true),
+                end_date: formatDate(data.end_date, true),
+                month_year: data.month_year || selectedMonthYear,
+            });
+        } else {
+            setMonthlyBudgetData(initialMonthlyBudgetState);
+        }
+        setIsLoadingMonthlyBudget(budgetsState.monthly?.status === 'loading');
+        setMonthlyBudgetError(budgetsState.monthly?.error || null);
+    }, [budgetsState.monthly, selectedMonthYear]);
+
+    // Sync budget items
+    useEffect(() => {
+        setBudgetItems(budgetsState.items || []);
+        setIsLoadingBudgetItems(budgetsState.status === 'loading');
+        setBudgetItemsError(budgetsState.error || null);
+    }, [budgetsState.items, budgetsState.status, budgetsState.error]);
 
 
     // --- Derived State & Calculations ---
@@ -315,10 +285,10 @@ const ExpenseManagementPage = () => {
         isLoadingSetter(true);
         try {
             if (editingExpense && editingExpense._id) {
-                await updateExpense(editingExpense._id, payload);
+                await dispatch(editExpense({ id: editingExpense._id, data: payload })).unwrap();
                 toast.success('Expense updated successfully!');
             } else {
-                await addExpense(payload);
+                await dispatch(createExpense(payload)).unwrap();
                 toast.success('Expense added successfully!');
             }
             await fetchPageData();
@@ -336,7 +306,7 @@ const ExpenseManagementPage = () => {
         setExpensesError(null);
         setIsLoadingExpenses(true);
         try {
-            await deleteExpense(deletingExpenseId);
+            await dispatch(removeExpense(deletingExpenseId)).unwrap();
             toast.success('Expense deleted successfully!');
             await fetchPageData();
             closeModal();

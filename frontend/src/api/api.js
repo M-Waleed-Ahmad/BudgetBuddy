@@ -464,8 +464,8 @@ export const fetchExpensesForCurrentMonth = async () => {
           method: 'GET',
           headers: getAuthHeaders(),
       });
-
       const data = await response.json(); // Always try to parse JSON
+      console.log('Response received from fetchExpensesForCurrentMonth:', data); // Debug log
 
       if (!response.ok) {
           console.error(`API Error (${response.status}) from ${endpoint}:`, data);

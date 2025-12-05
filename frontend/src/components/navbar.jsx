@@ -1,8 +1,9 @@
 // src/components/Navbar.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import useTheme from '../hooks/useTheme';
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveMenuItem, setSidebarOpen, setTheme } from '../features/ui/uiSlice.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/navbar.css';
 import logo from '../assets/logo.png';
@@ -58,15 +59,25 @@ const CloseIcon = () => (
 
 const Navbar = () => {
   const location = useLocation();
-  const [activeLink, setActiveLink] = useState(location.pathname);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useDispatch();
   const { i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { activeMenuItem, isSidebarOpen, theme } = useSelector((state) => state.ui);
 
   useEffect(() => {
-    setActiveLink(location.pathname);
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+    dispatch(setActiveMenuItem(location.pathname));
+    dispatch(setSidebarOpen(false));
+  }, [location.pathname, dispatch]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effective = theme === 'system' ? (systemPrefersDark ? 'dark' : 'light') : theme;
+    if (effective === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -103,12 +114,12 @@ const Navbar = () => {
 
   const cycleTheme = () => {
     const next = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
-    setTheme(next);
+    dispatch(setTheme(next));
   };
 
   const handleLinkClick = (path) => {
-    setActiveLink(path);
-    setIsMobileMenuOpen(false);
+    dispatch(setActiveMenuItem(path));
+    dispatch(setSidebarOpen(false));
   };
 
   return (
@@ -130,10 +141,10 @@ const Navbar = () => {
               <Link
                 to={link.path}
                 onClick={() => handleLinkClick(link.path)}
-                className={`nav-link ${activeLink === link.path ? 'active' : ''}`}
+                className={`nav-link ${activeMenuItem === link.path ? 'active' : ''}`}
               >
                 {link.name}
-                {activeLink === link.path && (
+                {activeMenuItem === link.path && (
                   <motion.div
                     className="active-underline"
                     layoutId="active-underline"
@@ -164,9 +175,9 @@ const Navbar = () => {
             className="icon-button pill-button"
             onClick={cycleTheme}
           >
-            {theme === 'light' && '☀'}
+            {theme === 'light' && '🌞'}
             {theme === 'dark' && '🌙'}
-            {theme === 'system' && '◆'}
+            {theme === 'system' && '🖥️'}
           </button>
         </div>
 
@@ -195,17 +206,17 @@ const Navbar = () => {
         <button
           type="button"
           className="mobile-menu-button icon-button"
-          onClick={() => setIsMobileMenuOpen((open) => !open)}
-          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMobileMenuOpen}
+          onClick={() => dispatch(setSidebarOpen(!isSidebarOpen))}
+          aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={isSidebarOpen}
         >
-          {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
         </button>
       </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {isSidebarOpen && (
           <motion.div
             className="mobile-menu-container"
             initial="closed"
@@ -220,7 +231,7 @@ const Navbar = () => {
                     to={link.path}
                     onClick={() => handleLinkClick(link.path)}
                     className={`nav-link mobile-nav-link ${
-                      activeLink === link.path ? 'active' : ''
+                      activeMenuItem === link.path ? 'active' : ''
                     }`}
                   >
                     {link.name}
