@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/footer1.css';
 import { FaTwitter, FaFacebookF, FaLinkedinIn, FaYoutube } from 'react-icons/fa';
 import { FiMail } from 'react-icons/fi';
@@ -16,7 +17,6 @@ const Footer1 = () => {
       return;
     }
 
-    // Very basic email sanity check
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
       toast.error('Please enter a valid email address');
       return;
@@ -49,7 +49,6 @@ const Footer1 = () => {
 
   return (
     <footer className="footer-root" aria-label="Site footer">
-      {/* Newsletter strip */}
       <section className="footer-newsletter" aria-label="Newsletter subscription">
         <h3 className="footer-newsletter-title">Stay ahead of your finances</h3>
         <p className="footer-newsletter-subtitle">
@@ -73,12 +72,11 @@ const Footer1 = () => {
             onClick={handleSubscribe}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Subscribing…' : 'Subscribe'}
+            {isSubmitting ? 'Subscribing.' : 'Subscribe'}
           </button>
         </div>
       </section>
 
-      {/* Main footer content */}
       <div className="footer-main">
         <div className="footer-brand-block">
           <div className="footer-brand">
@@ -95,26 +93,25 @@ const Footer1 = () => {
         <nav className="footer-links-block" aria-label="Footer navigation">
           <div className="footer-links-column">
             <span className="footer-links-heading">Product</span>
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faqs">FAQs</a>
+            <Link to="/features">Features</Link>
+            <Link to="/pricing">Pricing</Link>
+            <Link to="/faqs">FAQs</Link>
           </div>
           <div className="footer-links-column">
             <span className="footer-links-heading">Company</span>
-            <a href="#about">About us</a>
-            <a href="#careers">Careers</a>
-            <a href="#contact">Contact us</a>
+            <Link to="/about">About us</Link>
+            <Link to="/careers">Careers</Link>
+            <Link to="/contact-us">Contact us</Link>
           </div>
           <div className="footer-links-column">
             <span className="footer-links-heading">Support</span>
-            <a href="#help">Help Center</a>
-            <a href="#privacy">Privacy</a>
-            <a href="#terms">Terms</a>
+            <Link to="/help">Help Center</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
           </div>
         </nav>
       </div>
 
-      {/* Bottom row */}
       <div className="footer-bottom">
         <div className="footer-language">
           <select aria-label="Select language">
@@ -124,14 +121,14 @@ const Footer1 = () => {
         </div>
 
         <p className="footer-meta-text">
-          © {new Date().getFullYear()} BudgetBuddy. All rights reserved.
+          c {new Date().getFullYear()} BudgetBuddy. All rights reserved.
         </p>
 
         <div className="footer-social">
           <a
             href="https://twitter.com"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label="Visit our Twitter"
           >
             <FaTwitter />
@@ -139,7 +136,7 @@ const Footer1 = () => {
           <a
             href="https://facebook.com"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label="Visit our Facebook"
           >
             <FaFacebookF />
@@ -147,7 +144,7 @@ const Footer1 = () => {
           <a
             href="https://linkedin.com"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label="Visit our LinkedIn"
           >
             <FaLinkedinIn />
@@ -155,7 +152,7 @@ const Footer1 = () => {
           <a
             href="https://youtube.com"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label="Visit our YouTube"
           >
             <FaYoutube />

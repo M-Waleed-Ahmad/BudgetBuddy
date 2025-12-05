@@ -12,6 +12,14 @@ import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
 import NotificationsPage from './pages/users/NotificationsPage';
 import CashFlowPage from './pages/users/CashFlowPage';
 import PricingPage from './pages/PricingPage';
+import FeaturesPage from './pages/FeaturesPage';
+import FaqsPage from './pages/FaqsPage';
+import AboutPage from './pages/AboutPage';
+import CareersPage from './pages/CareersPage';
+import ContactPage from './pages/ContactPage';
+import HelpCenterPage from './pages/HelpCenterPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
 import BlogList from './pages/BlogList';
 import BlogDetail from './pages/BlogDetail';
 import UserBlogs from './pages/users/UserBlogs';
@@ -33,6 +41,14 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/contact-us" element={<ContactUsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/faqs" element={<FaqsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/help" element={<HelpCenterPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="/billing/success" element={<BillingSuccess />} />
           <Route path="/billing/cancel" element={<PricingPage />} />
           <Route path="/blog" element={<BlogList />} />
