@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import Navbar1 from '../components/Navbar1';
 import Footer from '../components/Footer';
 import { listBlogs } from '../api/blogs';
-import '../styles/dashboard.css';
+import '../styles/bloglist.css';
 
 const BlogList = () => {
   const [blogs, setBlogs] = useState([]);
@@ -24,7 +24,7 @@ const BlogList = () => {
 
   return (
     <div className="page-container">
-      <Navbar />
+      <Navbar1 />
       <main className="dashboard-content">
         <div className="filters-row">
           <input className="form-control input" placeholder="Search" value={query} onChange={(e) => setQuery(e.target.value)} />

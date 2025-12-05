@@ -1,31 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import ReactMarkdown from 'react-markdown';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { listMyBlogs, createBlog, updateBlog, deleteBlog } from '../../api/blogs';
-import { useSelector } from 'react-redux';
-import '../../styles/dashboard.css';
+import { listBlogs, listMyBlogs, createBlog, updateBlog, deleteBlog } from '../../api/blogs';
+import '../../styles/userblog.css';
 
 const emptyForm = { title: '', excerpt: '', tags: '', coverUrl: '', contentMD: '', status: 'draft' };
 
-const AdminBlogs = () => {
+const UserBlogs = () => {
   const { user } = useSelector((state) => state.auth);
-  const [blogs, setBlogs] = useState([]);
+  const [publishedBlogs, setPublishedBlogs] = useState([]);
+  const [myBlogs, setMyBlogs] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [tag, setTag] = useState('');
 
-  const fetchBlogs = async () => {
+  const isOwner = (blog) => user && blog?.authorId?.toString?.() === user.userId;
+
+  const fetchPublished = async () => {
     try {
-      const res = await listMyBlogs({ page: 1, limit: 50 });
-      setBlogs(res.items || []);
+      const res = await listBlogs({ q: search, tag, limit: 50 });
+      setPublishedBlogs(res.items || []);
     } catch (err) {
       setError(err.message || 'Failed to load blogs');
     }
   };
 
-  useEffect(() => { fetchBlogs(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const fetchMine = async () => {
+    try {
+      const res = await listMyBlogs({ page: 1, limit: 50 });
+      setMyBlogs(res.items || []);
+    } catch (err) {
+      setError(err.message || 'Failed to load my blogs');
+    }
+  };
+
+  useEffect(() => {
+    fetchPublished();
+    fetchMine();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,7 +52,8 @@ const AdminBlogs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const payload = { ...form, tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean) };
       if (editingId) {
@@ -44,7 +63,7 @@ const AdminBlogs = () => {
       }
       setForm(emptyForm);
       setEditingId(null);
-      await fetchBlogs();
+      await Promise.all([fetchPublished(), fetchMine()]);
     } catch (err) {
       setError(err.message || 'Failed to save blog');
     } finally {
@@ -68,23 +87,43 @@ const AdminBlogs = () => {
     if (!window.confirm('Delete this blog?')) return;
     try {
       await deleteBlog(id);
-      fetchBlogs();
+      await Promise.all([fetchPublished(), fetchMine()]);
     } catch (err) {
       setError(err.message || 'Failed to delete blog');
     }
   };
 
+  const filteredPublished = useMemo(() => publishedBlogs, [publishedBlogs]);
+
   return (
     <div className="page-container">
       <Navbar />
       <main className="dashboard-content">
-        <h1>My Blogs</h1>
-        {user && <p className="muted-text">Signed in as {user.name || user.email}</p>}
-        <p className="muted-text">
-          Create new posts and manage only your own articles. Public readers (even unauthenticated)
-          can browse everything at <a href="/blog">/blog</a>.
-        </p>
+        <header className="page-header">
+          <div>
+            <h1>Blogs</h1>
+            <p className="muted-text">Write your own posts and read everyone’s published articles.</p>
+            {user && <p className="muted-text">Signed in as {user.name || user.email}</p>}
+          </div>
+          <div className="filters-row">
+            <input
+              className="form-control input"
+              placeholder="Search title or tag"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <input
+              className="form-control input"
+              placeholder="Tag"
+              value={tag}
+              onChange={(e) => setTag(e.target.value)}
+            />
+            <button className="link-button" onClick={fetchPublished}>Search</button>
+          </div>
+        </header>
+
         {error && <p className="error-message">{error}</p>}
+
         <div className="dashboard-grid">
           <div className="recent-expenses-column">
             <h3>{editingId ? 'Edit Blog' : 'New Blog'}</h3>
@@ -97,7 +136,7 @@ const AdminBlogs = () => {
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
               </select>
-              <textarea name="contentMD" rows="10" placeholder="Markdown content" value={form.contentMD} onChange={handleChange} />
+              <textarea name="contentMD" rows="8" placeholder="Markdown content" value={form.contentMD} onChange={handleChange} />
               <button className="link-button" type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save'}</button>
               {editingId && <button className="link-button" type="button" onClick={() => { setEditingId(null); setForm(emptyForm); }}>Reset</button>}
             </form>
@@ -111,12 +150,12 @@ const AdminBlogs = () => {
         </div>
 
         <section className="budget-section-dash">
-          <h3>Existing Blogs</h3>
-          {!blogs.length && <p className="muted-text">You have not published any blogs yet.</p>}
+          <h3>My Blogs</h3>
+          {!myBlogs.length && <p className="muted-text">You have not created any blogs yet.</p>}
           <table className="cashflow-table">
             <thead><tr><th>Title</th><th>Status</th><th>Tags</th><th>Actions</th></tr></thead>
             <tbody>
-              {blogs.map((b) => (
+              {myBlogs.map((b) => (
                 <tr key={b._id}>
                   <td>{b.title}</td>
                   <td>{b.status}</td>
@@ -130,10 +169,32 @@ const AdminBlogs = () => {
             </tbody>
           </table>
         </section>
+
+        <section className="budget-section-dash">
+          <h3>All Published Blogs</h3>
+          <div className="blog-grid">
+            {filteredPublished.map((blog) => (
+              <article key={blog._id} className="blog-card">
+                <h4>{blog.title}</h4>
+                <p>{blog.excerpt}</p>
+                <div className="tags">{(blog.tags || []).map((t) => <span key={t} className="tag-pill">{t}</span>)}</div>
+                <div className="blog-actions-inline">
+                  <a className="link-button" href={`/blog/${blog.slug}`}>Read</a>
+                  {isOwner(blog) && (
+                    <>
+                      <button className="link-button" onClick={() => startEdit(blog)}>Edit</button>
+                      <button className="link-button" onClick={() => handleDelete(blog._id)}>Delete</button>
+                    </>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
       </main>
       <Footer />
     </div>
   );
 };
 
-export default AdminBlogs;
+export default UserBlogs;

@@ -12,6 +12,16 @@ export const listBlogs = async ({ q, tag, page = 1, limit = 10 } = {}) => {
   return data.data;
 };
 
+export const listMyBlogs = async ({ page = 1, limit = 20 } = {}) => {
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('limit', limit);
+  const res = await fetch(`${BASE_URL}/blogs/mine?${params.toString()}`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  if (!res.ok || data?.success === false) throw new Error(data.message || 'Failed to fetch my blogs');
+  return data.data;
+};
+
 export const getBlog = async (slug) => {
   const res = await fetch(`${BASE_URL}/blogs/${slug}`);
   const data = await res.json();

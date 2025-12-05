@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMail, FiLogIn } from 'react-icons/fi';
+import { FiGrid } from 'react-icons/fi';
 import '../styles/navbar1.css';
 import logo from '../assets/logo.png';
 
@@ -46,21 +47,43 @@ const Navbar1 = () => {
   const location = useLocation();
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 960 : false);
 
   useEffect(() => {
     setActiveLink(location.pathname);
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    setIsAuthenticated(!!token);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 960;
+      setIsMobile(mobile);
+      if (!mobile && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobileMenuOpen]);
+
   const navLinks = [
     { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blog' },
     { name: 'Contact Us', path: '/contact-us' },
   ];
 
-  const actionLinks = [
-    { name: 'Signup', path: '/signup', icon: FiMail, className: 'signup-btn' },
-    { name: 'Login', path: '/login', icon: FiLogIn, className: 'login-btn' },
-  ];
+  const actionLinks = isAuthenticated
+    ? [{ name: 'Go to Dashboard', path: '/dashboard', icon: FiGrid, className: 'dashboard-btn' }]
+    : [
+      { name: 'Signup', path: '/signup', icon: FiMail, className: 'signup-btn' },
+      { name: 'Login', path: '/login', icon: FiLogIn, className: 'login-btn' },
+    ];
 
   const underlineSpring = {
     type: 'spring',
@@ -134,20 +157,22 @@ const Navbar1 = () => {
         </div>
 
         {/* Mobile menu toggle */}
-        <button
-          type="button"
-          className="mobile-menu-button icon-button"
-          onClick={() => setIsMobileMenuOpen((open) => !open)}
-          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isMobileMenuOpen}
-        >
-          {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
-        </button>
+        {isMobile && (
+          <button
+            type="button"
+            className="mobile-menu-button icon-button"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        )}
       </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {isMobile && isMobileMenuOpen && (
           <motion.div
             className="mobile-menu-container"
             initial="closed"

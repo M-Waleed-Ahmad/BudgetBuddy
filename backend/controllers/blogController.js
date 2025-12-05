@@ -20,6 +20,27 @@ const listBlogs = async (req, res) => {
   }
 };
 
+// GET /api/blogs/mine (auth)
+const listMyBlogs = async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ success: false, data: null, message: 'Auth required' });
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const [items, total] = await Promise.all([
+      Blog.find({ authorId: userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Blog.countDocuments({ authorId: userId }),
+    ]);
+    return res.status(200).json({ success: true, data: { items, total }, message: 'My blogs fetched' });
+  } catch (err) {
+    console.error('Error listing my blogs', err);
+    return res.status(500).json({ success: false, data: null, message: 'Server error listing my blogs' });
+  }
+};
+
 // GET /api/blogs/:slug
 const getBlog = async (req, res) => {
   try {
@@ -59,11 +80,18 @@ const createBlog = async (req, res) => {
 // PUT /api/blogs/:id (admin)
 const updateBlog = async (req, res) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ success: false, data: null, message: 'Auth required' });
+
     const { title, excerpt, contentMD, tags, coverUrl, status } = req.body;
     const updates = { title, excerpt, contentMD, tags, coverUrl, status };
     if (title) updates.slug = slugify(title, { lower: true, strict: true });
-    const blog = await Blog.findByIdAndUpdate(req.params.id, updates, { new: true });
-    if (!blog) return res.status(404).json({ success: false, data: null, message: 'Blog not found' });
+    const blog = await Blog.findOneAndUpdate(
+      { _id: req.params.id, authorId: userId },
+      updates,
+      { new: true }
+    );
+    if (!blog) return res.status(404).json({ success: false, data: null, message: 'Blog not found or not owned by user' });
     return res.status(200).json({ success: true, data: blog, message: 'Blog updated' });
   } catch (err) {
     console.error('Error updating blog', err);
@@ -74,8 +102,10 @@ const updateBlog = async (req, res) => {
 // DELETE /api/blogs/:id (admin)
 const deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
-    if (!blog) return res.status(404).json({ success: false, data: null, message: 'Blog not found' });
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ success: false, data: null, message: 'Auth required' });
+    const blog = await Blog.findOneAndDelete({ _id: req.params.id, authorId: userId });
+    if (!blog) return res.status(404).json({ success: false, data: null, message: 'Blog not found or not owned by user' });
     return res.status(200).json({ success: true, data: null, message: 'Blog deleted' });
   } catch (err) {
     console.error('Error deleting blog', err);
@@ -83,4 +113,4 @@ const deleteBlog = async (req, res) => {
   }
 };
 
-module.exports = { listBlogs, getBlog, createBlog, updateBlog, deleteBlog };
+module.exports = { listBlogs, listMyBlogs, getBlog, createBlog, updateBlog, deleteBlog };

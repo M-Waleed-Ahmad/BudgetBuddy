@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -62,11 +62,25 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const { i18n } = useTranslation();
   const { activeMenuItem, isSidebarOpen, theme } = useSelector((state) => state.ui);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 960 : false);
 
   useEffect(() => {
     dispatch(setActiveMenuItem(location.pathname));
     dispatch(setSidebarOpen(false));
   }, [location.pathname, dispatch]);
+
+  // Close mobile menu when switching to desktop viewport
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 960;
+      setIsMobile(mobile);
+      if (!mobile && isSidebarOpen) {
+        dispatch(setSidebarOpen(false));
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [dispatch, isSidebarOpen]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -84,7 +98,7 @@ const Navbar = () => {
     { name: 'Budget Management', path: '/budget-management' },
     { name: 'Expense Management', path: '/expense-management' },
     { name: 'Shared Budgeting', path: '/shared-budgeting' },
-    { name: 'Blog', path: '/blog' },
+    { name: 'My Blogs', path: '/my-blogs' },
   ];
 
   const underlineSpring = {
@@ -203,20 +217,22 @@ const Navbar = () => {
         </Link>
 
         {/* Mobile menu toggle */}
-        <button
-          type="button"
-          className="mobile-menu-button icon-button"
-          onClick={() => dispatch(setSidebarOpen(!isSidebarOpen))}
-          aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isSidebarOpen}
-        >
-          {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
-        </button>
+        {isMobile && (
+          <button
+            type="button"
+            className="mobile-menu-button icon-button"
+            onClick={() => dispatch(setSidebarOpen(!isSidebarOpen))}
+            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isSidebarOpen}
+          >
+            {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        )}
       </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
-        {isSidebarOpen && (
+        {isMobile && isSidebarOpen && (
           <motion.div
             className="mobile-menu-container"
             initial="closed"

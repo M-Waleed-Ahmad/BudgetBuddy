@@ -100,6 +100,9 @@ const ExpenseManagementPage = () => {
     const [insightsLoading, setInsightsLoading] = useState(false);
     const [insightsError, setInsightsError] = useState(null);
     const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+    const [filterSearch, setFilterSearch] = useState('');
+    const [filterCategory, setFilterCategory] = useState('');
+    const [filterSort, setFilterSort] = useState('date_desc');
 
     const selectedMonthYear = useMemo(() => getCurrentYearMonth(), []); // Fixed to current month
 
@@ -364,6 +367,28 @@ const ExpenseManagementPage = () => {
     // --- Combined Loading State ---
     const isLoading = isLoadingExpenses || isLoadingCategories || isLoadingMonthlyBudget || isLoadingBudgetItems;
 
+    const filteredExpenses = useMemo(() => {
+        const search = filterSearch.trim().toLowerCase();
+        let list = expenses.slice();
+        if (search) {
+            list = list.filter((item) => (item.description || '').toLowerCase().includes(search));
+        }
+        if (filterCategory) {
+            list = list.filter((item) => {
+                const catId = item.category_id?._id || item.category_id;
+                return catId === filterCategory;
+            });
+        }
+        list.sort((a, b) => {
+            if (filterSort === 'amount_desc') return (b.amount || 0) - (a.amount || 0);
+            if (filterSort === 'amount_asc') return (a.amount || 0) - (b.amount || 0);
+            const dateA = new Date(a.expense_date || a.date || 0).getTime();
+            const dateB = new Date(b.expense_date || b.date || 0).getTime();
+            return filterSort === 'date_asc' ? dateA - dateB : dateB - dateA;
+        });
+        return list;
+    }, [expenses, filterSearch, filterCategory, filterSort]);
+
     // --- Render ---
     return (
       <>
@@ -439,9 +464,38 @@ const ExpenseManagementPage = () => {
                 {/* Filter and Export Bar */}
                 <motion.div className="filter-export-bar" variants={itemVariants}>
                     <div className="filter-controls">
-                        <input type="text" placeholder="Search..." className="filter-input" />
-                        <div className="filter-group"><label>Category:</label><select className="filter-select" disabled={isLoadingCategories}>{isLoadingCategories ? <option>...</option> : <option value="">All</option>}{availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}</select></div>
-                        <div className="filter-group"><label>Sort:</label><select className="filter-select"><option value="date_desc">Date (Newest)</option><option value="amount_desc">Amount (High)</option></select></div>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            className="filter-input"
+                            value={filterSearch}
+                            onChange={(e) => setFilterSearch(e.target.value)}
+                        />
+                        <div className="filter-group">
+                            <label>Category:</label>
+                            <select
+                                className="filter-select"
+                                disabled={isLoadingCategories}
+                                value={filterCategory}
+                                onChange={(e) => setFilterCategory(e.target.value)}
+                            >
+                                <option value="">All</option>
+                                {availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label>Sort:</label>
+                            <select
+                                className="filter-select"
+                                value={filterSort}
+                                onChange={(e) => setFilterSort(e.target.value)}
+                            >
+                                <option value="date_desc">Date (Newest)</option>
+                                <option value="date_asc">Date (Oldest)</option>
+                                <option value="amount_desc">Amount (High → Low)</option>
+                                <option value="amount_asc">Amount (Low → High)</option>
+                            </select>
+                        </div>
                         <button className="refresh-button icon-text-button" onClick={handleRefresh} title="Refresh Data" disabled={isLoading}><RefreshIcon /></button>
                     </div>
                     <div className="export-actions">
@@ -457,8 +511,8 @@ const ExpenseManagementPage = () => {
                         <table className="expense-table data-table" aria-label="Expenses List">
                             <thead><tr><th scope="col">Date</th><th scope="col">Category</th><th scope="col">Description</th><th scope="col">Amount</th><th scope="col" className="notes-column">Notes</th><th scope="col">Action</th></tr></thead>
                             <tbody>
-                                {expenses.length > 0 ? (
-                                    expenses.map((item) => {
+                                {filteredExpenses.length > 0 ? (
+                                    filteredExpenses.map((item) => {
                                         const notesInfo = truncateNotes(item.notes);
                                         return (
                                             <tr key={item._id}>

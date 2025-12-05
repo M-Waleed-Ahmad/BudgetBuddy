@@ -101,6 +101,9 @@ const FamilyBudgetingPage = () => {
     const [insightsLoading, setInsightsLoading] = useState(false);
     const [insightsError, setInsightsError] = useState(null);
     const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+    const [filterSearch, setFilterSearch] = useState('');
+    const [filterCategory, setFilterCategory] = useState('');
+    const [filterSort, setFilterSort] = useState('date_desc');
 
     // --- Derived State ---
     const currentUserRoleForSelectedPlan = useMemo(() => {
@@ -937,6 +940,30 @@ const FamilyBudgetingPage = () => {
         }
     }, []);
 
+    const itemDate = (item) => item.expense_date || item.date || item.created_at || '';
+
+    const filteredFamilyExpenses = useMemo(() => {
+        const search = filterSearch.trim().toLowerCase();
+        let list = familyExpenses.slice();
+        if (search) {
+            list = list.filter((item) => (item.description || '').toLowerCase().includes(search));
+        }
+        if (filterCategory) {
+            list = list.filter((item) => {
+                const catId = item.category_id?._id || item.category_id;
+                return catId === filterCategory;
+            });
+        }
+        list.sort((a, b) => {
+            if (filterSort === 'amount_desc') return (b.amount || 0) - (a.amount || 0);
+            if (filterSort === 'amount_asc') return (a.amount || 0) - (b.amount || 0);
+            const dateA = new Date(itemDate(a)).getTime();
+            const dateB = new Date(itemDate(b)).getTime();
+            return filterSort === 'date_asc' ? dateA - dateB : dateB - dateA;
+        });
+        return list;
+    }, [familyExpenses, filterSearch, filterCategory, filterSort]);
+
     // --- Initial Data Load Effects ---
     useEffect(() => {
         fetchUserPlans();
@@ -1126,12 +1153,32 @@ const FamilyBudgetingPage = () => {
                     <div className="filter-export-bar compact-bar">
                             <div className="filter-controls">
                                 {/* TODO: Implement filtering logic */}
-                                <input type="text" placeholder="Search Description..." className="filter-input small-input" />
-                                <select className="filter-select small-select" disabled={isLoadingCategories}>
+                                <input
+                                    type="text"
+                                    placeholder="Search Description..."
+                                    className="filter-input small-input"
+                                    value={filterSearch}
+                                    onChange={(e) => setFilterSearch(e.target.value)}
+                                />
+                                <select
+                                    className="filter-select small-select"
+                                    disabled={isLoadingCategories}
+                                    value={filterCategory}
+                                    onChange={(e) => setFilterCategory(e.target.value)}
+                                >
                                     <option value="">All Categories</option>
                                     {availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}
                                 </select>
-                                <select className="filter-select small-select"><option value="date_desc">Date (Newest)</option></select>
+                                <select
+                                    className="filter-select small-select"
+                                    value={filterSort}
+                                    onChange={(e) => setFilterSort(e.target.value)}
+                                >
+                                    <option value="date_desc">Date (Newest)</option>
+                                    <option value="date_asc">Date (Oldest)</option>
+                                    <option value="amount_desc">Amount (High → Low)</option>
+                                    <option value="amount_asc">Amount (Low → High)</option>
+                                </select>
                                 <button onClick={() => fetchFamilyExpenses(selectedPlanId)} className="refresh-button icon-text-button small-button" disabled={isLoadingExpenses || isSubmitting || !selectedPlanId}>
                                     Refresh <RefreshIcon size={14}/>
                                 </button>
@@ -1161,8 +1208,8 @@ const FamilyBudgetingPage = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {familyExpenses.length > 0 ? (
-                                                familyExpenses.map((item) => (
+                                            {filteredFamilyExpenses.length > 0 ? (
+                                                filteredFamilyExpenses.map((item) => (
                                                     <tr key={item._id}>
                                                         {/* <td>{item._id.slice(-6)}</td> */}
                                                         <td>{formatDate(item.expense_date)}</td>

@@ -14,7 +14,7 @@ import CashFlowPage from './pages/users/CashFlowPage';
 import PricingPage from './pages/PricingPage';
 import BlogList from './pages/BlogList';
 import BlogDetail from './pages/BlogDetail';
-import AdminBlogs from './pages/admin/AdminBlogs';
+import UserBlogs from './pages/users/UserBlogs';
 import BillingSuccess from './pages/BillingSuccess.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
@@ -37,14 +37,6 @@ function App() {
           <Route path="/billing/cancel" element={<PricingPage />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
-          <Route
-            path="/admin/blogs"
-            element={
-              <ProtectedRoute>
-                <AdminBlogs />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Protected Routes */}
           <Route
@@ -84,6 +76,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CashFlowPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-blogs"
+            element={
+              <ProtectedRoute>
+                <UserBlogs />
               </ProtectedRoute>
             }
           />

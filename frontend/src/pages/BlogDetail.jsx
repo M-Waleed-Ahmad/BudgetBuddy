@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import Navbar1 from '../components/Navbar1';
 import Footer from '../components/Footer';
 import { getBlog } from '../api/blogs';
 import ShareButtons from '../features/pdf/ShareButtons';
-import '../styles/dashboard.css';
+import '../styles/blogDetail.css';
 
 const BlogDetail = () => {
   const { slug } = useParams();
@@ -25,7 +25,7 @@ const BlogDetail = () => {
 
   return (
     <div className="page-container">
-      <Navbar />
+      <Navbar1 />
       <main className="dashboard-content">
         {error && <p className="error-message">{error}</p>}
         {blog && (
