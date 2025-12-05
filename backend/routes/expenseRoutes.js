@@ -18,6 +18,13 @@ router.get(
     expenseController.getCategoryWiseSpendingForCurrentMonth
 );
 
+// GET /api/expenses/export - Export all expenses for the user (JSON only)
+router.get(
+    '/export',
+    verifyToken,
+    expenseController.exportAllExpenses
+);
+
 // POST /api/expenses - Add a new expense
 router.post('/', verifyToken  , expenseController.addExpense);
 

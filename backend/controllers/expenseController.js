@@ -309,6 +309,36 @@ const getPersonalExpenses = async (req, res) => { // Can reuse/extend existing G
     }
 };
 
+// --- Export All Expenses (JSON for client-side export) ---
+const exportAllExpenses = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) return res.status(401).json({ message: 'Auth required.' });
+
+        const { startDate, endDate, category } = req.query;
+        const query = { user_id: userId };
+
+        if (startDate || endDate) {
+            query.expense_date = {};
+            if (startDate) query.expense_date.$gte = new Date(startDate);
+            if (endDate) query.expense_date.$lte = new Date(endDate);
+        }
+        if (category) {
+            query.category_id = category;
+        }
+
+        const expenses = await Expense.find(query)
+            .sort({ expense_date: -1 })
+            .populate('category_id', 'name')
+            .lean();
+
+        res.status(200).json(expenses || []);
+    } catch (error) {
+        console.error("Error exporting expenses:", error);
+        res.status(500).json({ message: "Server error exporting expenses.", error: error.message });
+    }
+};
+
 // --- Get Current Month's Total Personal Spending ---
 // GET /api/expenses/current-month-total
 const getCurrentMonthSpendingTotal = async (req, res) => {
@@ -479,5 +509,6 @@ module.exports = {
     getPersonalExpenses,
     getCurrentMonthSpendingTotal,
     getSpendingTrends,
-    getRecentExpenses
+    getRecentExpenses,
+    exportAllExpenses
 };

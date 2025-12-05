@@ -9,6 +9,7 @@ import '../../styles/ExpenseManagementPage.css'; // Ensure this path is correct
 import { toast } from 'react-hot-toast';
 import { fetchExpenses, createExpense, editExpense, removeExpense } from '../../features/expenses/expensesSlice.js';
 import { fetchBudgetCategories, fetchMonthlyBudget, fetchBudgetItems } from '../../features/budgets/budgetsSlice.js';
+import { exportExpensesToCSV, exportExpensesToPDF } from '../../utils/export/index.js';
 
 // --- Icons ---
 const EditIcon = ({ size = 16 }) => <span style={{ fontSize: `${size}px`, cursor: 'pointer' }} title="Edit">✏️</span>;
@@ -87,7 +88,6 @@ const ExpenseManagementPage = () => {
     const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isAnalyzeModalOpen, setIsAnalyzeModalOpen] = useState(false);
-    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
     const [editingExpense, setEditingExpense] = useState(null);
     const [deletingExpenseId, setDeletingExpenseId] = useState(null);
@@ -235,11 +235,10 @@ const ExpenseManagementPage = () => {
     };
     const openDeleteExpenseModal = (id) => { setExpensesError(null); setDeletingExpenseId(id); setIsDeleteModalOpen(true); };
     const openAnalyzeModal = (e) => { e.preventDefault(); setIsAnalyzeModalOpen(true); };
-    const openExportModal = () => { setIsExportModalOpen(true); };
     const openViewNotesModal = (notesText) => { setViewingNotes(notesText); setIsNotesModalOpen(true); };
     const closeModal = () => {
         setIsAddEditModalOpen(false); setIsDeleteModalOpen(false); setIsAnalyzeModalOpen(false);
-        setIsExportModalOpen(false); setIsNotesModalOpen(false);
+        setIsNotesModalOpen(false);
         setExpensesError(null); setMonthlyBudgetError(null); setBudgetItemsError(null); setCategoriesError(null);
         setTimeout(() => { setEditingExpense(null); setDeletingExpenseId(null); setViewingNotes(''); }, 300);
     };
@@ -318,7 +317,23 @@ const ExpenseManagementPage = () => {
         }
     };
 
-    const handleExportSubmit = (e) => { e.preventDefault(); toast.success("Export functionality not implemented."); closeModal(); };
+    const handleExportCSV = () => {
+        if (!expenses || expenses.length === 0) {
+            toast.error('No expenses to export.');
+            return;
+        }
+        exportExpensesToCSV(expenses);
+        toast.success('CSV export started.');
+    };
+
+    const handleExportPDF = async () => {
+        if (!expenses || expenses.length === 0) {
+            toast.error('No expenses to export.');
+            return;
+        }
+        await exportExpensesToPDF(expenses);
+        toast.success('PDF export generated.');
+    };
     const handleRefresh = () => { fetchPageData();toast.success("Data Refreshed"); };
     const truncateNotes = (text, maxLength = 30) => {
          if (!text || text.length <= maxLength) return { truncated: text, needsTruncating: false };
@@ -390,7 +405,10 @@ const ExpenseManagementPage = () => {
                         <div className="filter-group"><label>Sort:</label><select className="filter-select"><option value="date_desc">Date (Newest)</option><option value="amount_desc">Amount (High)</option></select></div>
                         <button className="refresh-button icon-text-button" onClick={handleRefresh} title="Refresh Data" disabled={isLoading}><RefreshIcon /></button>
                     </div>
-                    <motion.button className="export-button secondary-button" onClick={openExportModal}>Export</motion.button>
+                    <div className="export-actions">
+                        <motion.button className="export-button secondary-button" onClick={handleExportCSV} disabled={isLoadingExpenses}>Export CSV</motion.button>
+                        <motion.button className="export-button secondary-button" onClick={handleExportPDF} disabled={isLoadingExpenses}>Export PDF</motion.button>
+                    </div>
                 </motion.div>
 
                  {/* Expense Table */}
@@ -463,7 +481,6 @@ const ExpenseManagementPage = () => {
             </Modal>
 
             <Modal isOpen={isAnalyzeModalOpen} onClose={closeModal} title="Budget Analysis"><div className="modal-body"><p>Analysis features coming soon!</p></div><div className="form-actions"><motion.button type="button" className="primary-button" onClick={closeModal}>Close</motion.button></div></Modal>
-            <Modal isOpen={isExportModalOpen} onClose={closeModal} title="Export Expenses"><form onSubmit={handleExportSubmit} className="modal-form"><div className="form-group"><label htmlFor="dateRange">Date Range:</label><select id="dateRange" name="dateRange" className="select-field" required><option value="current_month">Current Month</option>{/* TODO: Add other options */}</select></div><div className="form-group"><label htmlFor="format">Format:</label><select id="format" name="format" className="select-field" required><option value="csv">CSV</option><option value="pdf">PDF</option></select></div><div className="form-actions"><motion.button type="button" className="secondary-button" onClick={closeModal}>Cancel</motion.button><motion.button type="submit" className="primary-button">Export Data</motion.button></div></form></Modal>
             <Modal isOpen={isNotesModalOpen} onClose={closeModal} title="Expense Notes"><div className="modal-body view-notes-body"><p>{viewingNotes || "No notes."}</p></div><div className="form-actions"><motion.button type="button" className="primary-button" onClick={closeModal}>Close</motion.button></div></Modal>
 
             <Footer />
