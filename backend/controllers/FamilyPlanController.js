@@ -6,6 +6,11 @@ const FamilyBudget = require('../models/FamilyBudget'); // Needed for delete cle
 const FamilyExpense = require('../models/FamilyExpense'); // Needed for delete cleanup
 const Invite = require('../models/Invites'); // Needed for delete cleanup
 
+const getCurrentYearMonth = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+};
+
 // --- Helper Function for Role Check ---
 // (You might move this to a dedicated authorization middleware later)
 async function checkPlanAdmin(userId, planId) {
@@ -128,19 +133,20 @@ const   updatePlan = async (req, res) => {
 
         // If categories are provided, update the budget for each category
         if (categories && Array.isArray(categories)) {
+            const monthYear = getCurrentYearMonth();
             for (const category of categories) {
-            const { category_id, budget } = category;
+                const { category_id, budget } = category;
 
-            if (!category_id || budget === undefined) {
-                return res.status(400).json({ message: 'Each category must have a name and budget amount.' });
-            }
+                if (!category_id || budget === undefined) {
+                    return res.status(400).json({ message: 'Each category must have a name and budget amount.' });
+                }
 
-            // Upsert (update or insert) the budget for the category
-            await FamilyBudget.findOneAndUpdate(
-                { plan_id: planId, category_id },
-                { $set: { limit_amount:budget } },
-                { upsert: true, new: true, runValidators: true }
-            );
+                // Upsert (update or insert) the budget for the category for the current month
+                await FamilyBudget.findOneAndUpdate(
+                    { plan_id: planId, category_id, month_year: monthYear },
+                    { $set: { limit_amount: budget, month_year: monthYear } },
+                    { upsert: true, new: true, runValidators: true }
+                );
             }
         }
 

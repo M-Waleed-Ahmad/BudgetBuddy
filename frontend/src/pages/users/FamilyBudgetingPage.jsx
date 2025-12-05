@@ -25,7 +25,9 @@ import {
     getExpenseById, createFamilyExpense,
     updateFamilyExpense, deleteFamilyExpense,
     approveFamilyExpense, rejectFamilyExpense,
+    addCategory,
 } from '../../api/api'; // Adjust path if needed
+import { exportExpensesToCSV, exportExpensesToPDF } from '../../utils/export';
 
 
 // --- Icons --- (Assuming these are simple span wrappers for emojis/icons)
@@ -83,6 +85,8 @@ const FamilyBudgetingPage = () => {
     const [addMemberFormData, setAddMemberFormData] = useState({ email: '', role: 'viewer' });
     const [expenseFormData, setExpenseFormData] = useState({ date: new Date().toISOString().split('T')[0], category_id: '', description: '', amount: '', notes: '' }); // Use category_id
     const [exportFormData, setExportFormData] = useState({ format: 'csv', dateRange: 'current_month' });
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [newCategoryBudget, setNewCategoryBudget] = useState('');
 
     // --- Data States ---
     const [familyMembers, setFamilyMembers] = useState([]);
@@ -320,6 +324,14 @@ const FamilyBudgetingPage = () => {
                 amount: '',
                 notes: ''
             });
+        } else if (modalName === 'isAddFamilyExpenseOpen') {
+            setExpenseFormData({
+                date: new Date().toISOString().split('T')[0],
+                category_id: availableCategories[0]?._id || '',
+                description: '',
+                amount: '',
+                notes: ''
+            });
         } else if (modalName === 'isEditPersonalExpenseOpen' && item) {
             setExpenseFormData({
                 date: item.date ? item.date.split('T')[0] : '',
@@ -347,8 +359,6 @@ const FamilyBudgetingPage = () => {
             setDeletingItemId(null);
             setDeletingItemType('');
         }, 300);
-        window.location.reload();  // Reload the page from cache
-
     };
 
     // --- Form Input Handlers ---
@@ -527,6 +537,70 @@ const FamilyBudgetingPage = () => {
         }
     };
 
+    const handleAddCategoryToPlan = async () => {
+        setSubmitError(null);
+        if (currentUserRoleForSelectedPlan !== 'admin') {
+            toast.error("Only admins can add categories.");
+            return;
+        }
+        if (!selectedPlanId) {
+            setSubmitError("Select a plan first.");
+            return;
+        }
+        const name = newCategoryName.trim();
+        const budgetVal = parseFloat(newCategoryBudget || '0');
+        if (!name) {
+            setSubmitError("Category name is required.");
+            return;
+        }
+        if (isNaN(budgetVal) || budgetVal < 0) {
+            setSubmitError("Budget must be 0 or greater.");
+            return;
+        }
+        if (!settingsFormData.plan_name || !settingsFormData.start_date || !settingsFormData.end_date) {
+            setSubmitError("Fill plan name and dates before adding categories.");
+            return;
+        }
+        try {
+            setIsSubmitting(true);
+            const createdCategory = await addCategory({ name });
+
+            const updatedCategories = [...availableCategories, createdCategory];
+            setAvailableCategories(updatedCategories);
+
+            const updatedSettingsCategories = [
+                ...settingsFormData.categories.filter(c => c.category_id !== createdCategory._id),
+                { category_id: createdCategory._id, budget: budgetVal },
+            ];
+
+            setSettingsFormData(prev => ({
+                ...prev,
+                categories: updatedSettingsCategories,
+                [`category_${createdCategory._id}`]: budgetVal,
+            }));
+
+            setTotalAllocatedBudget(updatedSettingsCategories.reduce((sum, c) => sum + (parseFloat(c.budget) || 0), 0));
+
+            const payload = {
+                plan_name: settingsFormData.plan_name,
+                total_budget_amount: parseFloat(settingsFormData.total_budget_amount || 0),
+                start_date: settingsFormData.start_date,
+                end_date: settingsFormData.end_date,
+                categories: updatedSettingsCategories,
+            };
+
+            await updatePlanSettings(selectedPlanId, payload);
+            toast.success("Category added to plan.");
+            setNewCategoryName('');
+            setNewCategoryBudget('');
+        } catch (err) {
+            console.error("Add category to plan failed:", err);
+            setSubmitError(err.message || "Failed to add category.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     const handleSettingsSubmit = async (e) => {
         e.preventDefault();
@@ -556,8 +630,8 @@ const FamilyBudgetingPage = () => {
             start_date: settingsFormData.start_date,
             end_date: settingsFormData.end_date,
             categories: availableCategories.map(category => ({
-            category_id: category._id,
-            budget: parseFloat(settingsFormData[`category_${category._id}`]) || 0,
+                category_id: category._id,
+                budget: parseFloat(settingsFormData.categories.find(c => c.category_id === category._id)?.budget || 0) || 0,
             })),
         };
         console.log("Settings Payload:", payload); // Log the data being sent
@@ -623,7 +697,33 @@ const FamilyBudgetingPage = () => {
             setIsSubmitting(false);
         }
     };
-    const handleExportSubmit = (e) => { e.preventDefault(); console.log("Exporting:", exportFormData);  toast.success("Exporting Data (Simulated - API Call TODO)"); /* TODO: Call exportPlanData API */ closeModal(); };
+    const handleExportSubmit = async (e) => {
+        e.preventDefault();
+        if (!familyExpenses || familyExpenses.length === 0) {
+            toast.error("No expenses to export.");
+            return;
+        }
+        const rows = familyExpenses.map(exp => ({
+            expense_date: exp.expense_date || exp.date,
+            category: exp.category_id?.name || categoryMap[exp.category_id] || 'N/A',
+            description: exp.description || '',
+            amount: exp.amount || 0,
+        }));
+        try {
+            if (exportFormData.format === 'csv') {
+                exportExpensesToCSV(rows);
+                toast.success("CSV exported.");
+            } else {
+                await exportExpensesToPDF(rows);
+                toast.success("PDF exported.");
+            }
+        } catch (err) {
+            console.error("Export failed:", err);
+            toast.error(err.message || "Failed to export expenses.");
+        } finally {
+            closeModal();
+        }
+    };
  
     const handleAddEditExpenseSubmit = async (e, type) => {
         e.preventDefault();
@@ -1194,6 +1294,35 @@ const FamilyBudgetingPage = () => {
                     />
                     </div>
 
+                    {/* Add Category (Admin only) */}
+                    {currentUserRoleForSelectedPlan === 'admin' && (
+                        <div className="form-group">
+                            <label>Add Category to Plan (Admin)</label>
+                            <div className="inline-field-group">
+                                <input
+                                    type="text"
+                                    placeholder="Category name"
+                                    className="input-field"
+                                    value={newCategoryName}
+                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="any"
+                                    placeholder="Budget"
+                                    className="input-field"
+                                    value={newCategoryBudget}
+                                    onChange={(e) => setNewCategoryBudget(e.target.value)}
+                                />
+                                <button type="button" className="secondary-button" onClick={handleAddCategoryToPlan} disabled={isSubmitting}>
+                                    {isSubmitting ? 'Adding...' : 'Add Category'}
+                                </button>
+                            </div>
+                            <p className="info-message small">Creates a new category for this plan and assigns the budget for the current month.</p>
+                        </div>
+                    )}
+
                     {/* Category-wise Budget Allocation */}
                     <div className="form-group">
                     <label>Category-wise Budget Allocation</label>
@@ -1317,7 +1446,32 @@ const FamilyBudgetingPage = () => {
              </Modal>
 
              {/* Edit Family Expense Modal */}
-             <Modal isOpen={modalState.isEditFamilyExpenseOpen} onClose={closeModal} title="Edit Family Expense">
+            {/* Add Family Expense Modal */}
+            <Modal isOpen={modalState.isAddFamilyExpenseOpen} onClose={closeModal} title="Add Family Expense">
+                 <form onSubmit={(e) => handleAddEditExpenseSubmit(e, 'family')} className="modal-form">
+                    {submitError && <p className="error-message modal-error">{submitError}</p>}
+                     <div className="form-group"><label htmlFor="fexp-date_form_add">Date</label><input type="date" id="fexp-date_form_add" name="date" required className="input-field" value={expenseFormData.date} onChange={(e) => handleFormChange(e, setExpenseFormData)}/></div>
+                     <div className="form-group">
+                        <label htmlFor="fexp-category_id_form_add">Category</label>
+                        <select id="fexp-category_id_form_add" name="category_id" required className="select-field" value={expenseFormData.category_id} onChange={(e) => handleFormChange(e, setExpenseFormData)} disabled={isLoadingCategories || availableCategories.length === 0}>
+                            <option value="" disabled>-- Select --</option>
+                           {isLoadingCategories && <option disabled>Loading...</option>}
+                            {availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}
+                             {!isLoadingCategories && availableCategories.length === 0 && <option disabled>No categories available</option>}
+                        </select>
+                     </div>
+                     <div className="form-group"><label htmlFor="fexp-description_form_add">Description</label><input type="text" id="fexp-description_form_add" name="description" required className="input-field" value={expenseFormData.description} onChange={(e) => handleFormChange(e, setExpenseFormData)}/></div>
+                     <div className="form-group"><label htmlFor="fexp-amount_form_add">Amount (Rs)</label><input type="number" id="fexp-amount_form_add" name="amount" required min="0.01" step="any" className="input-field" value={expenseFormData.amount} onChange={(e) => handleFormChange(e, setExpenseFormData)}/></div>
+                     <div className="form-group"><label htmlFor="fexp-notes_form_add">Notes (Optional)</label><textarea id="fexp-notes_form_add" name="notes" className="textarea-field" value={expenseFormData.notes} onChange={(e) => handleFormChange(e, setExpenseFormData)}></textarea></div>
+                     <div className="form-actions">
+                        <button type="button" className="secondary-button" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
+                        <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Add Expense'}</button>
+                     </div>
+                 </form>
+             </Modal>
+
+            {/* Edit Family Expense Modal */}
+            <Modal isOpen={modalState.isEditFamilyExpenseOpen} onClose={closeModal} title="Edit Family Expense">
                  <form onSubmit={(e) => handleAddEditExpenseSubmit(e, 'family')} className="modal-form">
                     {submitError && <p className="error-message modal-error">{submitError}</p>}
                      {editingItem && (<div className="form-group"><label>Expense ID</label><input type="text" value={editingItem._id} className="input-field read-only" readOnly disabled/></div>)}
@@ -1335,7 +1489,6 @@ const FamilyBudgetingPage = () => {
                      <div className="form-group"><label htmlFor="fexp-description_form">Description</label><input type="text" id="fexp-description_form" name="description" required className="input-field" value={expenseFormData.description} onChange={(e) => handleFormChange(e, setExpenseFormData)}/></div>
                      <div className="form-group"><label htmlFor="fexp-amount_form">Amount (Rs)</label><input type="number" id="fexp-amount_form" name="amount" required min="0.01" step="any" className="input-field" value={expenseFormData.amount} onChange={(e) => handleFormChange(e, setExpenseFormData)}/></div>
                      <div className="form-group"><label htmlFor="fexp-notes_form">Notes (Optional)</label><textarea id="fexp-notes_form" name="notes" className="textarea-field" value={expenseFormData.notes} onChange={(e) => handleFormChange(e, setExpenseFormData)}></textarea></div>
-                     <p className="info-message small">Note: Editing family expenses is currently simulated. API integration needed.</p>
                      <div className="form-actions">
                         <button type="button" className="secondary-button" onClick={closeModal} disabled={isSubmitting}>Cancel</button>
                         <button type="submit" className="primary-button" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Changes'}</button>
