@@ -14,18 +14,19 @@ const initialState = {
   status: 'idle',
   cashflowStatus: 'idle',
   error: null,
+  params: { period: 'this-month', planId: null },
 };
 
-export const fetchSummaryReport = createAsyncThunk('reports/fetchSummaryReport', async (_, thunkAPI) => {
+export const fetchSummaryReport = createAsyncThunk('reports/fetchSummaryReport', async ({ period = 'this-month', planId = null } = {}, thunkAPI) => {
   try {
     const [spending, budget, trends, insights, recentExpenses] = await Promise.all([
       getCurrentMonthSpendingTotal(),
       getCurrentMonthBudget(),
       getSpendingTrends(9),
-      getSmartRecommendations('this-month'),
+      getSmartRecommendations({ period, planId }),
       getRecentExpenses(5),
     ]);
-    return { spending, budget, trends, insights, recentExpenses };
+    return { spending, budget, trends, insights, recentExpenses, params: { period, planId } };
   } catch (err) {
     return thunkAPI.rejectWithValue(err.message || 'Failed to load summary report');
   }
@@ -54,6 +55,7 @@ const reportsSlice = createSlice({
         state.chartsData.spendingTotal = action.payload.spending || 0;
         state.chartsData.budget = action.payload.budget || null;
         state.chartsData.recentExpenses = action.payload.recentExpenses || [];
+        state.params = action.payload.params || state.params;
       })
       .addCase(fetchSummaryReport.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; })
       .addCase(fetchCashFlowReport.pending, (state) => { state.cashflowStatus = 'loading'; })

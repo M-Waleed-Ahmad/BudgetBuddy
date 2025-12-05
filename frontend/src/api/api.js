@@ -1286,14 +1286,20 @@ export const subscribeToNewsletter = async (email) => {
   }
 };
 
-export const getSmartRecommendations = async (period = 'this-month') => {
-  const endpoint = `${BASE_URL}/insights/recommendations?period=${period}`;
+export const getSmartRecommendations = async ({ period = 'this-month', planId } = {}) => {
+  const params = new URLSearchParams();
+  if (period) params.append('period', period);
+  if (planId) params.append('planId', planId);
+  const endpoint = `${BASE_URL}/insights/recommendations${params.toString() ? `?${params.toString()}` : ''}`;
   console.log(`API Call: GET ${endpoint}`);
   try {
       const response = await fetch(endpoint, { method: 'GET', headers: getAuthHeaders() });
       const data = await response.json();
-      if (!response.ok || data?.success === false) throw new Error(data.message || 'Failed to fetch insights');
-      return data.data || data;
+      if (!response.ok || data?.success === false) {
+        const code = data?.code || 'INSIGHTS_ERROR';
+        throw new Error(data?.message ? `${data.message} (code: ${code})` : 'Failed to fetch insights');
+      }
+      return data;
   } catch (error) { console.error('Error getSmartRecommendations:', error); throw error; }
 };
 

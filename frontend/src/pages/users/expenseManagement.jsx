@@ -10,6 +10,9 @@ import { toast } from 'react-hot-toast';
 import { fetchExpenses, createExpense, editExpense, removeExpense } from '../../features/expenses/expensesSlice.js';
 import { fetchBudgetCategories, fetchMonthlyBudget, fetchBudgetItems } from '../../features/budgets/budgetsSlice.js';
 import { exportExpensesToCSV, exportExpensesToPDF } from '../../utils/export/index.js';
+import { getSmartRecommendations } from '../../api/api.js';
+import SmartInsightsCard from '../../features/insights/SmartInsightsCard';
+import SmartInsightsDrawer from '../../features/insights/SmartInsightsDrawer';
 
 // --- Icons ---
 const EditIcon = ({ size = 16 }) => <span style={{ fontSize: `${size}px`, cursor: 'pointer' }} title="Edit">✏️</span>;
@@ -93,6 +96,10 @@ const ExpenseManagementPage = () => {
     const [deletingExpenseId, setDeletingExpenseId] = useState(null);
     const [viewingNotes, setViewingNotes] = useState('');
     const [expenseFormData, setExpenseFormData] = useState(initialExpenseFormState);
+    const [insightsData, setInsightsData] = useState(null);
+    const [insightsLoading, setInsightsLoading] = useState(false);
+    const [insightsError, setInsightsError] = useState(null);
+    const [isInsightsOpen, setIsInsightsOpen] = useState(false);
 
     const selectedMonthYear = useMemo(() => getCurrentYearMonth(), []); // Fixed to current month
 
@@ -105,6 +112,19 @@ const ExpenseManagementPage = () => {
         dispatch(fetchBudgetItems(selectedMonthYear));
         dispatch(fetchExpenses());
     }, [dispatch, selectedMonthYear]);
+
+    const fetchInsights = useCallback(async () => {
+        setInsightsLoading(true);
+        setInsightsError(null);
+        try {
+            const data = await getSmartRecommendations({ period: 'this-month' });
+            setInsightsData(data);
+        } catch (err) {
+            setInsightsError(err.message || 'Unable to load insights');
+        } finally {
+            setInsightsLoading(false);
+        }
+    }, []);
 
 
     // Effect to recalculate budgeted category map when dependencies change
@@ -143,7 +163,8 @@ const ExpenseManagementPage = () => {
     // --- Initial Data Load Effect ---
     useEffect(() => {
         fetchPageData();
-    }, [fetchPageData]);
+        fetchInsights();
+    }, [fetchPageData, fetchInsights]);
 
     // Sync expenses slice into local view state
     useEffect(() => {
@@ -350,6 +371,24 @@ const ExpenseManagementPage = () => {
         <div className="page-container">
             <motion.main className="expense-page-content" variants={pageVariants} initial="hidden" animate="visible">
 
+                {/* Insights */}
+                <motion.section className="expense-summary-section" variants={itemVariants}>
+                    <div className="summary-card">
+                        <SmartInsightsCard
+                            insights={insightsData?.data || insightsData}
+                            data={insightsData?.data || insightsData}
+                            isLoading={insightsLoading}
+                            error={insightsError}
+                            onOpen={() => setIsInsightsOpen(true)}
+                        />
+                        <div className="insights-actions">
+                            <button className="secondary-button" onClick={fetchInsights} disabled={insightsLoading}>
+                                {insightsLoading ? 'Refreshing...' : 'Refresh insights'}
+                            </button>
+                        </div>
+                    </div>
+                </motion.section>
+
                 {/* Top Summary Section */}
                 <motion.section className="expense-summary-section" variants={itemVariants}>
                     <div className="summary-card budget-summary-card">
@@ -482,6 +521,12 @@ const ExpenseManagementPage = () => {
 
             <Modal isOpen={isAnalyzeModalOpen} onClose={closeModal} title="Budget Analysis"><div className="modal-body"><p>Analysis features coming soon!</p></div><div className="form-actions"><motion.button type="button" className="primary-button" onClick={closeModal}>Close</motion.button></div></Modal>
             <Modal isOpen={isNotesModalOpen} onClose={closeModal} title="Expense Notes"><div className="modal-body view-notes-body"><p>{viewingNotes || "No notes."}</p></div><div className="form-actions"><motion.button type="button" className="primary-button" onClick={closeModal}>Close</motion.button></div></Modal>
+
+            <SmartInsightsDrawer
+                isOpen={isInsightsOpen}
+                onClose={() => setIsInsightsOpen(false)}
+                data={insightsData?.data || insightsData}
+            />
 
             <Footer />
         </div>

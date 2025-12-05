@@ -9,6 +9,8 @@ import '../../styles/FamilyBudgetingPage.css';   // Adjust path if needed
 import userAvatarPlaceholder from '../../assets/avatar.png'; // Adjust path if needed
 import { toast } from 'react-hot-toast'; // Import toast for notifications
 import useEntitlement from '../../hooks/useEntitlement';
+import SmartInsightsCard from '../../features/insights/SmartInsightsCard';
+import SmartInsightsDrawer from '../../features/insights/SmartInsightsDrawer';
 
 // API Imports
 import {
@@ -27,6 +29,7 @@ import {
     approveFamilyExpense, rejectFamilyExpense,
     addCategory,
 } from '../../api/api'; // Adjust path if needed
+import { getSmartRecommendations } from '../../api/api';
 import { exportExpensesToCSV, exportExpensesToPDF } from '../../utils/export';
 
 
@@ -94,6 +97,10 @@ const FamilyBudgetingPage = () => {
     const [personalExpenses, setPersonalExpenses] = useState([]);
     const navigate = useNavigate();
     const { allowed, loading: entitlementLoading, error: entitlementError } = useEntitlement('family_budgeting');
+    const [insightsData, setInsightsData] = useState(null);
+    const [insightsLoading, setInsightsLoading] = useState(false);
+    const [insightsError, setInsightsError] = useState(null);
+    const [isInsightsOpen, setIsInsightsOpen] = useState(false);
 
     // --- Derived State ---
     const currentUserRoleForSelectedPlan = useMemo(() => {
@@ -916,10 +923,23 @@ const FamilyBudgetingPage = () => {
         }
     }, [entitlementLoading, allowed, entitlementError, navigate]);
 
-       // --- Initial Data Load Effects ---
-       useEffect(() => {
+    const fetchPlanInsights = useCallback(async (planId) => {
+        if (!planId) return;
+        setInsightsLoading(true);
+        setInsightsError(null);
+        try {
+            const data = await getSmartRecommendations({ period: 'this-month', planId });
+            setInsightsData(data);
+        } catch (err) {
+            setInsightsError(err.message || 'Unable to load insights');
+        } finally {
+            setInsightsLoading(false);
+        }
+    }, []);
+
+    // --- Initial Data Load Effects ---
+    useEffect(() => {
         fetchUserPlans();
-        console.log("Fetched Categories", availableCategories); // Debug log  
     }, [fetchUserPlans, fetchCategoriesOnce]);
 
     useEffect(() => {
@@ -928,6 +948,7 @@ const FamilyBudgetingPage = () => {
                 fetchFamilyExpenses(selectedPlanId);
                 fetchPersonalExpenses(selectedPlanId);
                 fetchCategoriesOnce(selectedPlanId);
+                fetchPlanInsights(selectedPlanId);
 
             });
         } else {
@@ -939,7 +960,7 @@ const FamilyBudgetingPage = () => {
             setMembersError(null);
             setExpensesError(null);
         }
-    }, [selectedPlanId, fetchPlanData, fetchFamilyExpenses , fetchPersonalExpenses ]);
+    }, [selectedPlanId, fetchPlanData, fetchFamilyExpenses , fetchPersonalExpenses, fetchCategoriesOnce, fetchPlanInsights ]);
       // --- Render ---
     return (
         <div className="page-container">
@@ -1023,7 +1044,12 @@ const FamilyBudgetingPage = () => {
                                 <h4>Budget vs. Expense by Category (Example)</h4>
                                 <ReactECharts option={mainBarChartOptions} style={{ height: '300px', width: '100%' }} notMerge={true} lazyUpdate={true} />
                             </div>
-                        </motion.section>
+        </motion.section>
+        <SmartInsightsDrawer
+            isOpen={isInsightsOpen}
+            onClose={() => setIsInsightsOpen(false)}
+            data={insightsData?.data || insightsData}
+        />
 
                         {/* --- Family Members (Admin Only View) --- */}
                             {/* Family Members (Admin Only) */}
@@ -1066,35 +1092,57 @@ const FamilyBudgetingPage = () => {
                         </motion.section>
                         )}
                         {/* --- Family Expense Record --- */}
-                        <motion.section className="content-section" variants={itemVariants}>
-                            <div className="section-header space-between">
-                                <h2>Family Expense Record</h2>
-                                {(currentUserRoleForSelectedPlan === 'admin' || currentUserRoleForSelectedPlan === 'editor') && (
-                                    <button onClick={() => openModal('isAddFamilyExpenseOpen')} className="primary-button small-button" disabled={isLoadingCategories || isSubmitting}>
-                                        <AddIcon size={14}/> Add Family Expense
-                                    </button>
-                                )}
-                            </div>
-                            <div className="filter-export-bar compact-bar">
-                                <div className="filter-controls">
-                                    {/* TODO: Implement filtering logic */}
-                                    <input type="text" placeholder="Search Description..." className="filter-input small-input" />
-                                    <select className="filter-select small-select" disabled={isLoadingCategories}>
-                                        <option value="">All Categories</option>
-                                        {availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}
-                                    </select>
-                                    <select className="filter-select small-select"><option value="date_desc">Date (Newest)</option></select>
-                                    <button onClick={() => fetchFamilyExpenses(selectedPlanId)} className="refresh-button icon-text-button small-button" disabled={isLoadingExpenses || isSubmitting || !selectedPlanId}>
-                                        Refresh <RefreshIcon size={14}/>
-                                    </button>
-                                </div>
-                                <button onClick={() => openModal('isExportOpen')} title="Export Expenses" className="secondary-button export-button small-button" disabled={isLoadingExpenses || familyExpenses.length === 0}>
-                                    <ExportIcon size={14}/> Export
+                <motion.section className="content-section" variants={itemVariants}>
+                    <div className="section-header space-between">
+                        <div>
+                            <h2>Family Expense Record</h2>
+                            <p className="section-subtitle">Shared spending, approvals, and exports</p>
+                        </div>
+                        <div className="header-actions" style={{ gap: '10px', flexWrap: 'wrap' }}>
+                            <button className="secondary-button small-button" onClick={() => fetchPlanInsights(selectedPlanId)} disabled={insightsLoading || !selectedPlanId}>
+                                {insightsLoading ? 'Refreshing...' : 'Refresh insights'}
+                            </button>
+                            {(currentUserRoleForSelectedPlan === 'admin' || currentUserRoleForSelectedPlan === 'editor') && (
+                                <button onClick={() => openModal('isAddFamilyExpenseOpen')} className="primary-button small-button" disabled={isLoadingCategories || isSubmitting}>
+                                    <AddIcon size={14}/> Add Family Expense
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="insights-row">
+                        <SmartInsightsCard
+                            insights={insightsData?.data || insightsData}
+                            data={insightsData?.data || insightsData}
+                            isLoading={insightsLoading}
+                            error={insightsError}
+                            onOpen={() => setIsInsightsOpen(true)}
+                        />
+                        <div className="insights-supporting">
+                            <p className="info-message small">Insights reflect activity for this plan.</p>
+                        </div>
+                    </div>
+
+                    <div className="filter-export-bar compact-bar">
+                            <div className="filter-controls">
+                                {/* TODO: Implement filtering logic */}
+                                <input type="text" placeholder="Search Description..." className="filter-input small-input" />
+                                <select className="filter-select small-select" disabled={isLoadingCategories}>
+                                    <option value="">All Categories</option>
+                                    {availableCategories.map(c=><option key={c._id} value={c._id}>{c.name}</option>)}
+                                </select>
+                                <select className="filter-select small-select"><option value="date_desc">Date (Newest)</option></select>
+                                <button onClick={() => fetchFamilyExpenses(selectedPlanId)} className="refresh-button icon-text-button small-button" disabled={isLoadingExpenses || isSubmitting || !selectedPlanId}>
+                                    Refresh <RefreshIcon size={14}/>
                                 </button>
                             </div>
-                            {/* Display Loading / Error State */}
-                            {isLoadingExpenses && <p className='loading-text small'>Loading family expenses...</p>}
-                            {expensesError && <p className="error-message small">{expensesError}</p>}
+                            <button onClick={() => openModal('isExportOpen')} title="Export Expenses" className="secondary-button export-button small-button" disabled={isLoadingExpenses || familyExpenses.length === 0}>
+                                <ExportIcon size={14}/> Export
+                            </button>
+                    </div>
+                    {/* Display Loading / Error State */}
+                    {isLoadingExpenses && <p className='loading-text small'>Loading family expenses...</p>}
+                    {expensesError && <p className="error-message small">{expensesError}</p>}
 
                             {!isLoadingExpenses && !expensesError && (
                                 <div className="data-table-container">

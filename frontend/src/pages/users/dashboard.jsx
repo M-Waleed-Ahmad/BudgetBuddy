@@ -27,11 +27,12 @@ const Dashboard = () => {
 
   const [seriesVisibility, setSeriesVisibility] = useState({});
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+  const [period, setPeriod] = useState('this-month');
 
   useEffect(() => {
     dispatch(loadCurrentUser());
-    dispatch(fetchSummaryReport());
-  }, [dispatch]);
+    dispatch(fetchSummaryReport({ period }));
+  }, [dispatch, period]);
 
   useEffect(() => {
     if (chartsData?.trends?.categories) {
@@ -81,6 +82,16 @@ const Dashboard = () => {
           <div>
             <p className="welcome-text">Welcome back,</p>
             <h1 className="user-name">{userName}</h1>
+          </div>
+          <div className="dashboard-actions">
+            <select value={period} onChange={(e) => setPeriod(e.target.value)} className="select-field period-select">
+              <option value="this-month">This month</option>
+              <option value="last-month">Last month</option>
+              <option value="last-3-months">Last 3 months</option>
+            </select>
+            <button className="secondary-button" onClick={() => dispatch(fetchSummaryReport({ period }))} disabled={isLoading}>
+              {isLoading ? 'Refreshing...' : 'Refresh insights'}
+            </button>
           </div>
           {isLoading && <span className="loading-text">Loading...</span>}
           {error && <span className="error-message">{error}</span>}
@@ -153,13 +164,7 @@ const Dashboard = () => {
             <h2>Smart Insights</h2>
             <button className="link-button" onClick={() => setIsInsightsOpen(true)}>Open Drawer</button>
           </div>
-          {insightsData ? (
-            <div className="insights-grid">
-              <SmartInsightsCard insights={insightsData} onOpenDrawer={() => setIsInsightsOpen(true)} />
-            </div>
-          ) : (
-            <p className="empty-state">No insights available yet.</p>
-          )}
+        
         </section>
       </main>
 
