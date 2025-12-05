@@ -1,5 +1,6 @@
 // controllers/userController.js
 const User = require('../models/User');
+const Entitlement = require('../models/Entitlement');
 const bcrypt = require('bcryptjs'); // Use bcryptjs if you installed that
 
 // @desc    Get user profile
@@ -133,8 +134,10 @@ const getMyProfile = async (req, res) => {
             // Should ideally not happen if token is valid and user exists
             return res.status(404).json({ message: 'User not found.' });
         }
+        // Fetch entitlements (e.g., family_budgeting premium) separately
+        const entitlements = await Entitlement.find({ user_id: userId }).select('-__v');
         console.log("User profile fetched successfully:", user);
-        res.status(200).json(user);
+        res.status(200).json({ ...user.toObject(), entitlements });
 
     } catch (error) {
         console.error("Error fetching user profile:", error);

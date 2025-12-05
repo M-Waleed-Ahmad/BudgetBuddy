@@ -89,7 +89,7 @@ const FamilyBudgetingPage = () => {
     const [familyExpenses, setFamilyExpenses] = useState([]);
     const [personalExpenses, setPersonalExpenses] = useState([]);
     const navigate = useNavigate();
-    const { allowed, loading: entitlementLoading } = useEntitlement('family_budgeting');
+    const { allowed, loading: entitlementLoading, error: entitlementError } = useEntitlement('family_budgeting');
 
     // --- Derived State ---
     const currentUserRoleForSelectedPlan = useMemo(() => {
@@ -807,10 +807,14 @@ const FamilyBudgetingPage = () => {
 
     // --- Effects ---
     useEffect(() => {
+        if (entitlementError) {
+            console.error('Entitlement error:', entitlementError);
+            return;
+        }
         if (!entitlementLoading && !allowed) {
             navigate('/pricing');
         }
-    }, [entitlementLoading, allowed, navigate]);
+    }, [entitlementLoading, allowed, entitlementError, navigate]);
 
        // --- Initial Data Load Effects ---
        useEffect(() => {

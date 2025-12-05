@@ -15,6 +15,7 @@ import PricingPage from './pages/PricingPage';
 import BlogList from './pages/BlogList';
 import BlogDetail from './pages/BlogDetail';
 import AdminBlogs from './pages/admin/AdminBlogs';
+import BillingSuccess from './pages/BillingSuccess.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
@@ -32,7 +33,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/contact-us" element={<ContactUsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/billing/success" element={<PricingPage />} />
+          <Route path="/billing/success" element={<BillingSuccess />} />
           <Route path="/billing/cancel" element={<PricingPage />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />

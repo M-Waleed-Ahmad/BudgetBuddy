@@ -28,7 +28,7 @@ const PricingPage = () => {
   const handleUpgrade = async () => {
     setLoading(true); setError(null);
     try {
-      const { url } = await createCheckoutSession();
+      const { url } = await createCheckoutSession('family');
       window.location.href = url;
     } catch (err) {
       setError(err.message || 'Failed to start checkout');
