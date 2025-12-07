@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { setActiveMenuItem, setSidebarOpen, setTheme } from '../features/ui/uiSlice.js';
+import { setActiveMenuItem, setSidebarOpen } from '../features/ui/uiSlice.js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext.jsx';
 import '../styles/navbar.css';
 import logo from '../assets/logo.png';
 import userAvatar from '../assets/avatar.png';
@@ -61,7 +62,8 @@ const Navbar = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { i18n } = useTranslation();
-  const { activeMenuItem, isSidebarOpen, theme } = useSelector((state) => state.ui);
+  const { activeMenuItem, isSidebarOpen } = useSelector((state) => state.ui);
+  const { theme, toggleTheme } = useTheme();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 960 : false);
 
   useEffect(() => {
@@ -81,17 +83,6 @@ const Navbar = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [dispatch, isSidebarOpen]);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const effective = theme === 'system' ? (systemPrefersDark ? 'dark' : 'light') : theme;
-    if (effective === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [theme]);
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -124,11 +115,6 @@ const Navbar = () => {
     const next = i18n.language === 'en' ? 'ur' : 'en';
     i18n.changeLanguage(next);
     localStorage.setItem('lang', next);
-  };
-
-  const cycleTheme = () => {
-    const next = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
-    dispatch(setTheme(next));
   };
 
   const handleLinkClick = (path) => {
@@ -187,11 +173,10 @@ const Navbar = () => {
           <button
             type="button"
             className="icon-button pill-button"
-            onClick={cycleTheme}
+            aria-label="Toggle theme"
+            onClick={toggleTheme}
           >
-            {theme === 'light' && '🌞'}
-            {theme === 'dark' && '🌙'}
-            {theme === 'system' && '🖥️'}
+            {theme === 'dark' ? '??' : '??'}
           </button>
         </div>
 
@@ -267,9 +252,10 @@ const Navbar = () => {
               <button
                 type="button"
                 className="icon-button pill-button"
-                onClick={cycleTheme}
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
               >
-                Theme: {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System'}
+                Theme: {theme === 'dark' ? 'Dark' : 'Light'}
               </button>
             </div>
           </motion.div>

@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMail, FiLogIn } from 'react-icons/fi';
 import { FiGrid } from 'react-icons/fi';
+import { useTheme } from '../context/ThemeContext.jsx';
 import '../styles/navbar1.css';
 import logo from '../assets/logo.png';
 
@@ -45,6 +46,7 @@ const CloseIcon = () => (
 
 const Navbar1 = () => {
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -154,6 +156,14 @@ const Navbar1 = () => {
               {link.name}
             </Link>
           ))}
+          <button
+            type="button"
+            className="login-btn"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </div>
 
         {/* Mobile menu toggle */}
@@ -209,6 +219,15 @@ const Navbar1 = () => {
                     {link.name}
                   </Link>
                 ))}
+                <button
+                  type="button"
+                  className="login-btn"
+                  onClick={() => { toggleTheme(); setIsMobileMenuOpen(false); }}
+                  aria-label="Toggle theme"
+                  style={{ width: '100%', marginTop: '8px' }}
+                >
+                  {theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+                </button>
               </li>
             </ul>
           </motion.div>

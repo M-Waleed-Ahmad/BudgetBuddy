@@ -1,19 +1,4 @@
 :root {
-  --bg-main: #050608;
-  --bg-elevated: #10121a;
-  --bg-soft: #151823;
-  --bg-gradient: radial-gradient(circle at 20% 20%, #0f172a 0%, #050608 50%, #02030a 100%);
-
-  --accent: #4f46e5;
-  --accent-soft: rgba(79, 70, 229, 0.12);
-  --accent-strong: #6366f1;
-
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-
-  --border-subtle: rgba(148, 163, 184, 0.35);
-  --border-strong: rgba(148, 163, 184, 0.55);
-
   --radius-md: 14px;
   --radius-lg: 18px;
   --radius-xl: 24px;
@@ -26,4 +11,56 @@
 
   --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-display: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Fallback defaults (dark) before theme attribute applies */
+  --bg-main: #050608;
+  --bg-elevated: #10121a;
+  --bg-soft: #151823;
+  --bg-gradient: radial-gradient(circle at 20% 20%, #0f172a 0%, #050608 50%, #02030a 100%);
+
+  --accent: #6366f1;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #4f46e5;
+
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+
+  --border-subtle: rgba(148, 163, 184, 0.35);
+  --border-strong: rgba(148, 163, 184, 0.55);
+}
+
+/* Light mode */
+html[data-theme='light'] {
+  --bg-main: #fafafa;
+  --bg-elevated: #ffffff;
+  --bg-soft: #f3f4f6;
+  --bg-gradient: linear-gradient(135deg, #f7f8fb 0%, #eef1f6 60%, #e6e9f1 100%);
+
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #3730a3;
+
+  --text-main: #111111;
+  --text-muted: #555555;
+
+  --border-subtle: rgba(0, 0, 0, 0.15);
+  --border-strong: rgba(0, 0, 0, 0.25);
+}
+
+/* Dark mode (default) */
+html[data-theme='dark'] {
+  --bg-main: #050608;
+  --bg-elevated: #10121a;
+  --bg-soft: #151823;
+  --bg-gradient: radial-gradient(circle at 20% 20%, #0f172a 0%, #050608 50%, #02030a 100%);
+
+  --accent: #6366f1;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-strong: #4f46e5;
+
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+
+  --border-subtle: rgba(148, 163, 184, 0.35);
+  --border-strong: rgba(148, 163, 184, 0.55);
 }
