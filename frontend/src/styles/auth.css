@@ -1,0 +1,130 @@
+/* Shared styles for the login, signup and reset-password pages. */
+.auth-page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 16px;
+  background: #1f2937 url('../assets/background.webp') no-repeat center / cover;
+  font-family: var(--font-sans);
+}
+
+.auth-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+}
+
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 32px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-card__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: var(--color-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.auth-card h1 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-heading);
+}
+
+.auth-card__subtitle {
+  margin: 0 0 24px;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.auth-form .form-group {
+  margin-bottom: 16px;
+}
+
+.auth-form .input-field,
+.auth-form .select-field {
+  padding: 11px 14px;
+  border-radius: 10px;
+  background-color: #f9fafb;
+  font-size: 0.95rem;
+}
+
+.auth-form .input-field:focus,
+.auth-form .select-field:focus {
+  background-color: #fff;
+}
+
+.auth-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.auth-form__inline {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 18px;
+}
+
+.auth-form__inline .link-button {
+  font-size: 0.88rem;
+}
+
+.auth-form__submit {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.auth-card__footer {
+  margin: 20px 0 0;
+  color: #444;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.auth-card__footer a {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-card__footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-dev-link {
+  margin-top: 16px;
+  word-break: break-all;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 18px;
+    border-radius: 12px;
+  }
+
+  .auth-form__row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

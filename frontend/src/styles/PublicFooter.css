@@ -1,0 +1,162 @@
+/* Footer for the public marketing pages (components/footer1.jsx). */
+.landing-footer {
+  padding: 40px 24px 24px;
+  background-color: #111827;
+  color: #fff;
+  font-family: var(--font-sans);
+}
+
+.landing-footer__newsletter {
+  max-width: 520px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+
+.landing-footer__newsletter h2 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.landing-footer__input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  background-color: #fff;
+}
+
+.landing-footer__input.has-error {
+  border-color: #f87171;
+}
+
+.landing-footer__input:focus-within {
+  box-shadow: var(--focus-ring);
+}
+
+.landing-footer__mail-icon {
+  flex-shrink: 0;
+  margin-left: 14px;
+  color: #6b7280;
+}
+
+.landing-footer__input input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+.landing-footer__input button {
+  flex-shrink: 0;
+  padding: 11px 20px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.landing-footer__input button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.landing-footer__input button:disabled {
+  opacity: 0.7;
+}
+
+.landing-footer__error {
+  margin: 8px 0 0;
+  color: #fca5a5;
+  font-size: 0.85rem;
+}
+
+.landing-footer__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 20px 0;
+  border-top: 1px solid #374151;
+  border-bottom: 1px solid #374151;
+}
+
+.landing-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.landing-footer__logo {
+  border: 3px solid var(--color-primary);
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.landing-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-footer__links a {
+  color: #d1d5db;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.landing-footer__links a:hover,
+.landing-footer__links a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.landing-footer__copyright {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .landing-footer {
+    padding: 32px 16px 20px;
+  }
+
+  .landing-footer__input {
+    flex-wrap: wrap;
+    border-radius: var(--radius-lg);
+  }
+
+  .landing-footer__input input {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .landing-footer__input button {
+    width: 100%;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  }
+
+  .landing-footer__main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

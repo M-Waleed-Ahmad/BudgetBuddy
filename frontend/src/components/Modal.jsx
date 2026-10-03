@@ -1,85 +1,96 @@
-import React, { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import '../styles/Modal.css'; // We'll create this CSS file
+import { FiX } from 'react-icons/fi';
+import '../styles/Modal.css';
 
-// Basic Close Icon (replace with SVG if preferred)
-const CloseIcon = ({ size = 20 }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-);
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 
+const modalVariants = {
+  hidden: { opacity: 0, y: -24, scale: 0.97 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', damping: 25, stiffness: 220 } },
+  exit: { opacity: 0, y: 24, scale: 0.97, transition: { duration: 0.15 } },
+};
 
-const Modal = ({ isOpen, onClose, children, title }) => {
+/**
+ * Accessible dialog. Closes on Escape and backdrop click, moves focus into the
+ * dialog when it opens and restores it to the previously focused element on close.
+ */
+const Modal = ({ isOpen, onClose, title, children }) => {
+  const titleId = useId();
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
 
-    // Handle Escape key press
-    useEffect(() => {
-        const handleEsc = (event) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-        if (isOpen) {
-            window.addEventListener('keydown', handleEsc);
-        }
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
-        // Cleanup function
-        return () => {
-            window.removeEventListener('keydown', handleEsc);
-        };
-    }, [isOpen, onClose]); // Rerun effect if isOpen or onClose changes
+  useEffect(() => {
+    if (!isOpen) return undefined;
 
-
-    const backdropVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 },
-        exit: { opacity: 0 }
+    const previouslyFocused = document.activeElement;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onCloseRef.current?.();
     };
+    window.addEventListener('keydown', handleKeyDown);
 
-    const modalVariants = {
-        hidden: { opacity: 0, y: -30, scale: 0.95 },
-        visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', damping: 25, stiffness: 200 } },
-        exit: { opacity: 0, y: 30, scale: 0.95 }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const focusTimer = window.setTimeout(() => {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const firstField = dialog.querySelector('input, select, textarea, [data-autofocus]');
+      (firstField || dialog).focus();
+    }, 50);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
+      if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
     };
+  }, [isOpen]);
 
-
-    return (
-        <AnimatePresence mode="wait"> {/* 'wait' ensures exit anim completes before enter */}
-            {isOpen && (
-                <motion.div
-                    className="modal-backdrop"
-                    variants={backdropVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    onClick={onClose} // Close when clicking backdrop
-                >
-                    <motion.div
-                        className="modal-content"
-                        variants={modalVariants}
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby={title ? "modal-title" : undefined} // Add aria-labelledby if title exists
-                    >
-                        {title && (
-                            <div className="modal-header">
-                                <h3 id="modal-title">{title}</h3>
-                                <button onClick={onClose} className="modal-close-button" aria-label="Close modal">
-                                    <CloseIcon />
-                                </button>
-                            </div>
-                        )}
-                        <div className="modal-body">
-                            {children}
-                        </div>
-                    </motion.div>
-                </motion.div>
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="modal-backdrop"
+          variants={backdropVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) onClose();
+          }}
+        >
+          <motion.div
+            ref={dialogRef}
+            className="modal-content"
+            variants={modalVariants}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            tabIndex={-1}
+          >
+            {title && (
+              <div className="modal-header">
+                <h3 id={titleId}>{title}</h3>
+                <button type="button" onClick={onClose} className="modal-close-button" aria-label="Close dialog">
+                  <FiX size={20} aria-hidden="true" />
+                </button>
+              </div>
             )}
-        </AnimatePresence>
-        
-    );
+            <div className="modal-body">{children}</div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 };
 
 export default Modal;

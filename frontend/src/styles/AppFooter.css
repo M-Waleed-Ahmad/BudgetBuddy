@@ -1,0 +1,70 @@
+/* Footer for authenticated pages (components/Footer.jsx). */
+.app-footer {
+  margin-top: auto;
+  padding: 20px 32px;
+  background-color: #1a1b1e;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.app-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.app-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-footer__brand img {
+  border-radius: 6px;
+  background-color: #fff;
+  padding: 2px;
+}
+
+.app-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-footer__links a {
+  color: #c4c7cc;
+  text-decoration: none;
+}
+
+.app-footer__links a:hover,
+.app-footer__links a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.app-footer__copyright {
+  margin: 0;
+  color: #9ca3af;
+}
+
+@media (max-width: 640px) {
+  .app-footer {
+    padding: 20px 16px;
+  }
+
+  .app-footer__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
