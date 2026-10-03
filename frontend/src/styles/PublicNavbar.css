@@ -1,0 +1,208 @@
+/* Navbar for the public marketing pages (components/navbar1.jsx). */
+.landing-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+  padding: 0 24px;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+  font-family: var(--font-sans);
+}
+
+.landing-navbar__left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.landing-navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--color-heading);
+}
+
+.landing-navbar__logo {
+  width: 40px;
+  height: 40px;
+  padding: 4px;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+.landing-navbar__brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.landing-navbar__links {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-navbar__link {
+  position: relative;
+  display: inline-block;
+  padding: 6px 0;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.landing-navbar__link:hover,
+.landing-navbar__link.is-active {
+  color: var(--color-accent);
+}
+
+.landing-navbar__underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--color-accent);
+}
+
+.landing-navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-navbar__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.landing-navbar__cta,
+.landing-navbar__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.landing-navbar__secondary {
+  background-color: #eef4ff;
+  color: var(--color-accent);
+}
+
+.landing-navbar__secondary:hover {
+  background-color: #dbeafe;
+}
+
+.landing-navbar__cta {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.landing-navbar__cta:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.landing-navbar__menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: #333;
+  cursor: pointer;
+}
+
+.landing-navbar__menu-toggle:hover {
+  background-color: var(--color-surface-muted);
+}
+
+.landing-navbar__mobile {
+  position: absolute;
+  top: 64px;
+  left: 0;
+  right: 0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.landing-navbar__mobile ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-navbar__mobile-link {
+  display: block;
+  padding: 12px 24px;
+  color: #333;
+  text-decoration: none;
+}
+
+.landing-navbar__mobile-link:hover {
+  background-color: var(--color-bg);
+}
+
+.landing-navbar__mobile-link.is-active {
+  color: var(--color-accent);
+  font-weight: 600;
+  background-color: #eef4ff;
+}
+
+.landing-navbar__mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 14px 24px 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.landing-navbar__mobile-actions a {
+  width: 100%;
+  padding: 10px 14px;
+}
+
+@media (max-width: 768px) {
+  .landing-navbar__links,
+  .landing-navbar__actions {
+    display: none;
+  }
+
+  .landing-navbar__menu-toggle {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-navbar {
+    padding: 0 12px;
+  }
+
+  .landing-navbar__brand-name {
+    font-size: 1.1rem;
+  }
+}

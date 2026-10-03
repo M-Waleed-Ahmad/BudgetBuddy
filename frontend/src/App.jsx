@@ -1,98 +1,73 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './pages/login';
-import Signup from './pages/signup';
-import LandingPage from './pages/LandingPage';
-import ContactUsPage from './pages/contactUs';
-import Dashboard from './pages/users/dashboard';
-import BudgetManagementPage from './pages/users/budgetManagement';
-import ExpenseManagementPage from './pages/users/expenseManagement';
-import SettingsPage from './pages/users/profile';
-import FamilyBudgetingPage from './pages/users/FamilyBudgetingPage';
-import NotificationsPage from './pages/users/NotificationsPage';
-import ProtectedRoute from './components/ProtectedRoute';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import './App.css';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import PublicOnlyRoute from './components/PublicOnlyRoute';
+
+// Pages are code-split so visitors of the landing page don't download the
+// charting libraries used by the dashboard.
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const DashboardPage = lazy(() => import('./pages/users/DashboardPage'));
+const BudgetManagementPage = lazy(() => import('./pages/users/BudgetManagementPage'));
+const ExpenseManagementPage = lazy(() => import('./pages/users/ExpenseManagementPage'));
+const SettingsPage = lazy(() => import('./pages/users/SettingsPage'));
+const FamilyBudgetingPage = lazy(() => import('./pages/users/FamilyBudgetingPage'));
+const NotificationsPage = lazy(() => import('./pages/users/NotificationsPage'));
+
+const PageLoader = () => (
+  <div className="page-loader" role="status" aria-label="Loading page">
+    <span className="spinner" aria-hidden="true" />
+  </div>
+);
+
+const protectedRoutes = [
+  { path: '/dashboard', element: <DashboardPage /> },
+  { path: '/budget-management', element: <BudgetManagementPage /> },
+  { path: '/expense-management', element: <ExpenseManagementPage /> },
+  { path: '/shared-budgeting', element: <FamilyBudgetingPage /> },
+  { path: '/notifications', element: <NotificationsPage /> },
+  { path: '/settings', element: <SettingsPage /> },
+];
+
+const publicOnlyRoutes = [
+  { path: '/login', element: <LoginPage /> },
+  { path: '/signup', element: <SignupPage /> },
+];
 
 function App() {
   return (
-    <>
-      <Router>
-        <Toaster position="top-center" reverseOrder={false} />
-        <Routes>
+    <Router>
+      <AuthProvider>
+        <Toaster position="top-center" />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/contact-us" element={<ContactPage />} />
+            {/* Reachable while signed in too, since reset links arrive by email. */}
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/contact-us" element={<ContactUsPage />} />
+            {publicOnlyRoutes.map(({ path, element }) => (
+              <Route key={path} path={path} element={<PublicOnlyRoute>{element}</PublicOnlyRoute>} />
+            ))}
 
-          {/* Protected Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/budget-management"
-            element={
-              <ProtectedRoute>
-                <BudgetManagementPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/expense-management"
-            element={
-              <ProtectedRoute>
-                <ExpenseManagementPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/shared-budgeting"
-            element={
-              <ProtectedRoute>
-                <FamilyBudgetingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <NotificationsPage />
-              </ProtectedRoute>
-            }
-          />
+            {protectedRoutes.map(({ path, element }) => (
+              <Route key={path} path={path} element={<ProtectedRoute>{element}</ProtectedRoute>} />
+            ))}
 
-          {/* Default Route: Redirect based on login */}
-          <Route
-            path="/home"
-            element={
-              localStorage.getItem('token')
-                ? <Navigate to="/dashboard" replace />
-                : <Navigate to="/login" replace />
-            }
-          />
+            {/* Legacy paths */}
+            <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/profile" element={<Navigate to="/settings" replace />} />
 
-          {/* Catch-all for unmatched routes */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-
-        </Routes>
-      </Router>
-    </>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
+    </Router>
   );
 }
 
